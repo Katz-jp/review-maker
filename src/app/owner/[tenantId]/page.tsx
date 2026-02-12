@@ -95,6 +95,7 @@ export default function OwnerPage() {
   const [customOptionsLoading, setCustomOptionsLoading] = useState(true);
   const [customOptionsSaving, setCustomOptionsSaving] = useState(false);
   const [customOptionsSaved, setCustomOptionsSaved] = useState(false);
+  const [customerUrl, setCustomerUrl] = useState(`/${tenantId}`);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -102,6 +103,12 @@ export default function OwnerPage() {
     setSuccess(sp.get("success") === "true");
     setCanceled(sp.get("canceled") === "true");
   }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCustomerUrl(`${window.location.origin}/${tenantId}`);
+    }
+  }, [tenantId]);
 
   useEffect(() => {
     if (!tenantId) return;
@@ -169,7 +176,7 @@ export default function OwnerPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "エラー");
-      if (data.url) window.location.href = data.url;
+      if (data.url)       window.location.href = data.url;
     } catch (e) {
       alert(e instanceof Error ? e.message : "チェックアウトに失敗しました");
     } finally {
@@ -177,13 +184,10 @@ export default function OwnerPage() {
     }
   };
 
-  const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
-  const customerUrl = `${baseUrl}/${tenantId}`;
-
   return (
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
       <header className="text-center mb-8">
-        <h1 className="text-xl font-bold text-gray-800">店主向け管理</h1>
+        <h1 className="text-xl font-bold text-gray-800">口コミ作成AIアプリ 店舗管理画面</h1>
         <p className="text-sm text-gray-500 mt-1">テナントID: {tenantId}</p>
       </header>
 

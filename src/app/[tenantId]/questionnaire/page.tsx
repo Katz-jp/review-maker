@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { questionnaireData } from "@/lib/questionnaire-data";
@@ -30,13 +30,33 @@ export default function TenantQuestionnairePage() {
   const [freeText, setFreeText] = useState("");
   const [customOptions, setCustomOptions] = useState<CustomOptionsByQuestion>({});
 
-  useEffect(() => {
+  const fetchCustomOptions = useCallback(() => {
     if (!tenantId) return;
-    fetch(`/api/tenant/${tenantId}/custom-options`)
+    fetch(`/api/tenant/${tenantId}/custom-options`, {
+      cache: "no-store",
+    })
       .then((res) => res.json())
       .then((data) => setCustomOptions(data.customOptions ?? {}))
       .catch(() => setCustomOptions({}));
   }, [tenantId]);
+
+  useEffect(() => {
+    fetchCustomOptions();
+
+    // ページがフォーカスされた時に再取得
+    const handleFocus = () => {
+      fetchCustomOptions();
+    };
+    window.addEventListener("focus", handleFocus);
+
+    // 定期的に再取得（30秒ごと）
+    const interval = setInterval(fetchCustomOptions, 30000);
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+      clearInterval(interval);
+    };
+  }, [tenantId, fetchCustomOptions]);
 
   const questions = useMemo(() => {
     return questionnaireData.questions.map((q) => ({

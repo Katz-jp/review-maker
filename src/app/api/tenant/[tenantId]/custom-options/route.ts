@@ -37,7 +37,12 @@ export async function GET(
     const data = snap.data();
     const customOptions: CustomOptionsByQuestion = data?.customOptions ?? {};
 
-    return NextResponse.json({ customOptions });
+    const response = NextResponse.json({ customOptions });
+    // キャッシュを無効化して常に最新データを返す
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    response.headers.set("Pragma", "no-cache");
+    response.headers.set("Expires", "0");
+    return response;
   } catch (err) {
     console.error("[custom-options GET]", err);
     return NextResponse.json(
