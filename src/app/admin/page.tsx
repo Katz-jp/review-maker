@@ -12,7 +12,8 @@ import {
   ChevronLeft,
 } from "lucide-react";
 
-const ADMIN_SECRET_KEY = "adminSecret";
+/** sessionStorage に保存する際のキー（認証済みパスワードを保持） */
+const ADMIN_SESSION_KEY = "adminAuth";
 
 type TenantListItem = {
   tenantId: string;
@@ -24,7 +25,7 @@ type TenantListItem = {
 
 function getAuthHeaders(): HeadersInit {
   if (typeof window === "undefined") return {};
-  const secret = sessionStorage.getItem(ADMIN_SECRET_KEY);
+  const secret = sessionStorage.getItem(ADMIN_SESSION_KEY);
   return secret ? { "x-admin-secret": secret } : {};
 }
 
@@ -63,7 +64,7 @@ export default function AdminPage() {
   const fetchTenants = useCallback(async () => {
     const res = await fetch("/api/admin/tenants", { headers: getAuthHeaders() });
     if (res.status === 401) {
-      sessionStorage.removeItem(ADMIN_SECRET_KEY);
+      sessionStorage.removeItem(ADMIN_SESSION_KEY);
       setIsAuthenticated(false);
       setTenants([]);
       return;
@@ -80,13 +81,13 @@ export default function AdminPage() {
 
   useEffect(() => {
     if (configured === false) return;
-    const stored = typeof window !== "undefined" ? sessionStorage.getItem(ADMIN_SECRET_KEY) : null;
+    const stored = typeof window !== "undefined" ? sessionStorage.getItem(ADMIN_SESSION_KEY) : null;
     if (stored) {
       setLoading(true);
       fetch("/api/admin/tenants", { headers: { "x-admin-secret": stored } })
         .then((res) => {
           if (res.status === 401) {
-            sessionStorage.removeItem(ADMIN_SECRET_KEY);
+            sessionStorage.removeItem(ADMIN_SESSION_KEY);
             setIsAuthenticated(false);
           } else if (res.ok) {
             return res.json();
@@ -104,7 +105,7 @@ export default function AdminPage() {
     }
   }, [configured]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError("");
     if (!secret.trim()) {
@@ -112,26 +113,39 @@ export default function AdminPage() {
       return;
     }
     setLoading(true);
-    fetch("/api/admin/tenants", { headers: { "x-admin-secret": secret.trim() } })
-      .then((res) => {
-        if (res.status === 401) {
-          setLoginError("パスワードが正しくありません");
-          return;
+    try {
+      const res = await fetch("/api/admin/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: secret.trim() }),
+      });
+      const data = await res.json();
+      if (res.status === 500) {
+        setLoginError(data.error ?? "サーバー設定エラーです");
+        return;
+      }
+      if (res.status === 401) {
+        setLoginError("パスワードが正しくありません");
+        return;
+      }
+      if (res.ok && data.success) {
+        sessionStorage.setItem(ADMIN_SESSION_KEY, secret.trim());
+        setIsAuthenticated(true);
+        const tenantsRes = await fetch("/api/admin/tenants", {
+          headers: { "x-admin-secret": secret.trim() },
+        });
+        if (tenantsRes.ok) {
+          const tenantsData = await tenantsRes.json();
+          if (tenantsData?.tenants) setTenants(tenantsData.tenants);
         }
-        if (res.ok) {
-          sessionStorage.setItem(ADMIN_SECRET_KEY, secret.trim());
-          setIsAuthenticated(true);
-          return res.json();
-        }
-      })
-      .then((data) => {
-        if (data?.tenants) setTenants(data.tenants);
-      })
-      .finally(() => setLoading(false));
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleLogout = () => {
-    sessionStorage.removeItem(ADMIN_SECRET_KEY);
+    sessionStorage.removeItem(ADMIN_SESSION_KEY);
     setIsAuthenticated(false);
     setTenants([]);
     setSecret("");
