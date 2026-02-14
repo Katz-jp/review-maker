@@ -34,7 +34,9 @@ export async function POST(req: NextRequest) {
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;
         const status = mapStripeStatus(sub.status);
-        await updateTenantSubscription(tenantId || sub.metadata?.tenantId, status);
+        const tid = tenantId || sub.metadata?.tenantId;
+        const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+        await updateTenantSubscription(tid, status, customerId);
         break;
       }
       case "customer.subscription.deleted": {
@@ -75,7 +77,8 @@ function mapStripeStatus(s: string): "active" | "canceled" | "past_due" | "trial
 
 async function updateTenantSubscription(
   tenantId: string | undefined,
-  status: "active" | "canceled" | "past_due" | "trialing" | "inactive"
+  status: "active" | "canceled" | "past_due" | "trialing" | "inactive",
+  stripeCustomerId?: string
 ) {
   if (!tenantId) return;
 
@@ -85,8 +88,13 @@ async function updateTenantSubscription(
     return;
   }
 
-  await adminDb.collection("tenants").doc(tenantId).set(
-    { subscriptionStatus: status, updatedAt: new Date().toISOString() },
-    { merge: true }
-  );
+  const updates: Record<string, string> = {
+    subscriptionStatus: status,
+    updatedAt: new Date().toISOString(),
+  };
+  if (stripeCustomerId) {
+    updates.stripeCustomerId = stripeCustomerId;
+  }
+
+  await adminDb.collection("tenants").doc(tenantId).set(updates, { merge: true });
 }

@@ -188,9 +188,27 @@ export default function OwnerPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "エラー");
-      if (data.url)       window.location.href = data.url;
+      if (data.url) window.location.href = data.url;
     } catch (e) {
       alert(e instanceof Error ? e.message : "チェックアウトに失敗しました");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePortal = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "エラー");
+      if (data.url) window.location.href = data.url;
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "プラン管理ページを開けませんでした");
     } finally {
       setLoading(false);
     }
@@ -255,31 +273,70 @@ export default function OwnerPage() {
         )}
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-          <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-primary" />
-            サブスクリプション
+            💰 サブスクリプション
           </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            月額プランに加入して、お客様アンケート機能を利用できます。
-          </p>
-          <button
-            type="button"
-            onClick={handleCheckout}
-            disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                処理中…
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-5 h-5" />
-                月額プランに加入する
-              </>
-            )}
-          </button>
+          {canUsePaidFeatures ? (
+            <>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p className="text-green-700 font-semibold">✅ 月額プラン利用中</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  ご利用ありがとうございます。
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handlePortal}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    処理中…
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    プランを管理
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-blue-800 font-semibold">🎉 先行特別キャンペーン実施中！</p>
+                <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                  <li>✨ 初月完全無料</li>
+                  <li>💰 2〜3ヶ月目は半額の2,490円</li>
+                  <li>🚀 4ヶ月目から通常価格4,980円</li>
+                </ul>
+                <p className="mt-2 text-xs text-gray-600">
+                  今なら3ヶ月で4,980円（通常14,940円の66%OFF）！
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    処理中…
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    月額プランに加入する
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">

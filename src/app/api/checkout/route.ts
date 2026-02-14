@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
 
     const stripe = getStripe();
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    const couponId = process.env.STRIPE_COUPON_ID;
+
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
@@ -43,10 +45,12 @@ export async function POST(req: NextRequest) {
         tenantId,
       },
       subscription_data: {
+        trial_period_days: 30,
         metadata: {
           tenantId,
         },
       },
+      ...(couponId ? { discounts: [{ coupon: couponId }] } : {}),
     });
 
     return NextResponse.json({ url: session.url });
