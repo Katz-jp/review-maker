@@ -17,6 +17,7 @@ export default function TenantGeneratePage() {
   const params = useParams();
   const tenantId = (params.tenantId as string) || "demo";
   const tenant = useTenant();
+  const canUsePaidFeatures = tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
 
   const [generatedText, setGeneratedText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -24,6 +25,11 @@ export default function TenantGeneratePage() {
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
+    if (!canUsePaidFeatures) {
+      setError("この店舗は現在ご利用いただけません。");
+      setLoading(false);
+      return;
+    }
     const raw = sessionStorage.getItem("questionnaireAnswers");
     if (!raw) {
       setError("回答データが見つかりません。最初からやり直してください。");
@@ -56,7 +62,7 @@ export default function TenantGeneratePage() {
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [canUsePaidFeatures]);
 
   const handleCopy = async () => {
     if (!generatedText) return;

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { CreditCard, QrCode, ExternalLink, Loader2, Plus, Trash2, Settings2 } from "lucide-react";
+import { CreditCard, QrCode, ExternalLink, Loader2, Plus, Trash2, Settings2, MessageSquare } from "lucide-react";
 import { questionnaireData } from "@/lib/questionnaire-data";
 
 type CustomOptionsByQuestion = Record<string, string[]>;
@@ -91,11 +91,15 @@ export default function OwnerPage() {
   const [success, setSuccess] = useState(false);
   const [canceled, setCanceled] = useState(false);
 
+  const [tenantStatus, setTenantStatus] = useState<"active" | "trialing" | "inactive" | "canceled" | "past_due" | null>(null);
   const [customOptions, setCustomOptions] = useState<CustomOptionsByQuestion>({});
   const [customOptionsLoading, setCustomOptionsLoading] = useState(true);
   const [customOptionsSaving, setCustomOptionsSaving] = useState(false);
   const [customOptionsSaved, setCustomOptionsSaved] = useState(false);
   const [customerUrl, setCustomerUrl] = useState(`/${tenantId}`);
+
+  const canUsePaidFeatures = tenantStatus === "active" || tenantStatus === "trialing";
+  const isRestricted = tenantStatus === "canceled" || tenantStatus === "past_due";
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -108,6 +112,14 @@ export default function OwnerPage() {
     if (typeof window !== "undefined") {
       setCustomerUrl(`${window.location.origin}/${tenantId}`);
     }
+  }, [tenantId]);
+
+  useEffect(() => {
+    if (!tenantId) return;
+    fetch(`/api/tenant/${tenantId}`)
+      .then((res) => res.json())
+      .then((data) => setTenantStatus(data.subscriptionStatus ?? "inactive"))
+      .catch(() => setTenantStatus("inactive"));
   }, [tenantId]);
 
   useEffect(() => {
@@ -176,9 +188,27 @@ export default function OwnerPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "エラー");
-      if (data.url)       window.location.href = data.url;
+      if (data.url) window.location.href = data.url;
     } catch (e) {
       alert(e instanceof Error ? e.message : "チェックアウトに失敗しました");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePortal = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/portal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tenantId }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "エラー");
+      if (data.url) window.location.href = data.url;
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "プラン管理ページを開けませんでした");
     } finally {
       setLoading(false);
     }
@@ -202,33 +232,111 @@ export default function OwnerPage() {
         </div>
       )}
 
+      {isRestricted && (
+        <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm font-medium">
+          {tenantStatus === "canceled"
+            ? "ご契約は解約済みです。以下の機能はご利用いただけません。再開するには「月額プランに加入する」からお手続きください。"
+            : "お支払いが遅延しています。以下の機能を利用するにはお支払いを完了してください。"}
+        </div>
+      )}
+
       <section className="flex-1 space-y-6">
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-          <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-primary" />
-            サブスクリプション
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            月額プランに加入して、お客様アンケート機能を利用できます。
-          </p>
-          <button
-            type="button"
-            onClick={handleCheckout}
-            disabled={loading}
-            className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+        {canUsePaidFeatures ? (
+          <Link
+            href={`/${tenantId}/reply-helper`}
+            className="block bg-white rounded-2xl p-5 shadow-sm border border-green-100 hover:border-primary/50 transition-colors"
           >
-            {loading ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                処理中…
-              </>
-            ) : (
-              <>
-                <CreditCard className="w-5 h-5" />
-                月額プランに加入する
-              </>
-            )}
-          </button>
+            <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-primary" />
+              クチコミ返信ヘルプAI
+            </h2>
+            <p className="text-sm text-gray-600">
+              お客様の口コミに合わせた返信文をAIで生成できます。
+            </p>
+            <span className="mt-2 inline-block text-sm text-primary font-medium">
+              使ってみる →
+            </span>
+          </Link>
+        ) : (
+          <div className="block bg-white rounded-2xl p-5 shadow-sm border border-gray-200 bg-gray-50/50 opacity-90">
+            <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+              <MessageSquare className="w-5 h-5 text-gray-400" />
+              クチコミ返信ヘルプAI
+            </h2>
+            <p className="text-sm text-gray-600">
+              お客様の口コミに合わせた返信文をAIで生成できます。
+            </p>
+            <p className="mt-2 text-sm text-gray-500">
+              ご利用には有効な月額プランが必要です。
+            </p>
+          </div>
+        )}
+
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
+          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-primary" />
+            💰 サブスクリプション
+          </h2>
+          {canUsePaidFeatures ? (
+            <>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p className="text-green-700 font-semibold">✅ 月額プラン利用中</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  ご利用ありがとうございます。
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handlePortal}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    処理中…
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    プランを管理
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-blue-800 font-semibold">🎉 先行特別キャンペーン実施中！</p>
+                <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                  <li>✨ 初月完全無料</li>
+                  <li>💰 2〜3ヶ月目は半額の2,490円</li>
+                  <li>🚀 4ヶ月目から通常価格4,980円</li>
+                </ul>
+                <p className="mt-2 text-xs text-gray-600">
+                  今なら3ヶ月で4,980円（通常14,940円の66%OFF）！
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    処理中…
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    月額プランに加入する
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
@@ -260,7 +368,7 @@ export default function OwnerPage() {
               <button
                 type="button"
                 onClick={handleSaveCustomOptions}
-                disabled={customOptionsSaving}
+                disabled={customOptionsSaving || !canUsePaidFeatures}
                 className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {customOptionsSaving ? (
@@ -270,6 +378,8 @@ export default function OwnerPage() {
                   </>
                 ) : customOptionsSaved ? (
                   "✓ 保存しました"
+                ) : !canUsePaidFeatures ? (
+                  "契約が有効な場合のみ保存できます"
                 ) : (
                   "選択肢を保存する"
                 )}

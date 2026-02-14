@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { questionnaireData } from "@/lib/questionnaire-data";
+import { useTenant } from "@/components/TenantProvider";
 
 type Answers = Record<string, string[]>;
 type OtherInputs = Record<string, string>;
@@ -23,6 +25,8 @@ export default function TenantQuestionnairePage() {
   const router = useRouter();
   const params = useParams();
   const tenantId = (params.tenantId as string) || "demo";
+  const tenant = useTenant();
+  const canUseQuestionnaire = tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
 
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
@@ -115,6 +119,26 @@ export default function TenantQuestionnairePage() {
       router.push(`/${tenantId}`);
     }
   };
+
+  if (!canUseQuestionnaire) {
+    return (
+      <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
+        <div className="flex-1 flex flex-col items-center justify-center text-center">
+          <AlertCircle className="w-12 h-12 text-amber-500 mb-4" />
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">この店舗は現在ご利用いただけません</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            お客様アンケートは、店舗の契約が有効な場合のみご利用いただけます。
+          </p>
+          <Link
+            href={`/${tenantId}`}
+            className="py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold"
+          >
+            トップへ戻る
+          </Link>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
