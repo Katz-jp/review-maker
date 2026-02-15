@@ -55,7 +55,7 @@ export default function FaqSection() {
   return (
     <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
       <div className="max-w-3xl mx-auto">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-8 sm:mb-10">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8 sm:mb-10 pb-3 border-b-2 border-primary/50">
           よくある質問
         </h2>
         <div className="space-y-2 sm:space-y-3">

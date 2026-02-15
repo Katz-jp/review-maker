@@ -78,7 +78,9 @@ export default function LandingPage() {
             お客様の実体験を、自然な口コミ文に整える
           </h1>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            口コミ投稿数2.5倍、作成時間わずか30秒。忙しいオーナーのためのMEO対策AIツール
+            口コミ投稿数2.5倍、作成時間わずか30秒。
+            <br />
+            <span className="font-bold">忙しいオーナーのためのMEO対策AIツール</span>
           </p>
           <p className="mt-4 text-sm text-gray-500 max-w-2xl mx-auto">
             当アプリは、インセンティブなし・実体験ベースの口コミづくりを前提にしています。
@@ -87,24 +89,38 @@ export default function LandingPage() {
             onClick={scrollToContact}
             className="mt-8 sm:mt-10 px-8 py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            無料トライアルを相談する
+            無料トライアルに申し込む
           </button>
         </section>
 
         {/* 特徴セクション（3カラム） */}
         <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
           <div className="max-w-5xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-8">
-              口コミ作成から返信まで、全部まとめてAIで時短
-            </h2>
+            <div className="text-center mb-8 pb-3 border-b-2 border-primary/50">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                口コミ投稿サポートAIを
+                <br />
+                導入する理由
+              </h2>
+              <p className="mt-2 text-base sm:text-lg font-semibold text-primary">
+                簡単・時短・続けられる！
+              </p>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              {features.map((f) => (
+              {features.map((f, index) => (
                 <div
                   key={f.title}
                   className="bg-green-50/80 rounded-2xl p-6 sm:p-8 border border-green-100 shadow-sm hover:border-primary/30 transition-colors"
                 >
-                  <div className="text-3xl sm:text-4xl mb-4">{f.icon}</div>
-                  <h3 className="font-semibold text-gray-800 text-lg mb-2">{f.title}</h3>
+                  <div className="flex items-start gap-3 sm:gap-4 mb-3">
+                    <span className="text-3xl sm:text-4xl shrink-0">{f.icon}</span>
+                    <h3 className="font-semibold text-gray-800 text-lg pt-0.5">
+                      {index === 0 && <span className="text-primary">簡単！</span>}
+                      {index === 1 && <span className="text-primary">時短！</span>}
+                      {index === 2 && <span className="text-primary">続けやすい！</span>}
+                      {f.title}
+                    </h3>
+                  </div>
                   <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{f.description}</p>
                 </div>
               ))}
@@ -112,11 +128,15 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* なぜ口コミが必要か・ベネフィット・向いている業種・安心設計 */}
+        {/* 口コミ投稿サポートAIを使う理由 */}
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto space-y-12 sm:space-y-16">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-2 pb-3 border-b-2 border-primary/50">
+            口コミ投稿サポートAIを使う理由
+          </h2>
           {/* セクション1 なぜ口コミが必要か */}
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
+              <span aria-hidden>✅ </span>
               口コミが増えると、選ばれやすくなる
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
@@ -128,6 +148,7 @@ export default function LandingPage() {
           {/* セクション2 このアプリのベネフィット */}
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
+              <span aria-hidden>✅ </span>
               口コミ運用の手間を、まとめて減らす
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
@@ -140,6 +161,7 @@ export default function LandingPage() {
           {/* セクション3 向いている業種 */}
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
+              <span aria-hidden>✅ </span>
               店舗型ビジネスに向いています
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
@@ -157,7 +179,7 @@ export default function LandingPage() {
 
         {/* お問い合わせセクション */}
         <section id="contact" className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto scroll-mt-16">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-3">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3 pb-3 border-b-2 border-primary/50">
             １ヶ月無料でお試しいただけます！
           </h2>
           <p className="text-center text-sm sm:text-base text-gray-600 mb-8 max-w-xl mx-auto">

@@ -53,7 +53,7 @@ export default function PricingSection() {
       className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100 scroll-mt-16"
     >
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-3">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3 pb-3 border-b-2 border-primary/50">
           今だけ！先行特別キャンペーン実施中🎉
         </h2>
         <p className="text-center text-base text-gray-700 font-medium mb-2">
