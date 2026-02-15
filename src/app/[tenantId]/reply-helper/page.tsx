@@ -7,11 +7,9 @@ import {
   Loader2,
   Copy,
   RotateCcw,
-  Save,
   Trash2,
   Plus,
   MessageSquare,
-  History,
   ChevronLeft,
   AlertCircle,
 } from "lucide-react";
@@ -26,35 +24,13 @@ type CustomPhrase = {
   createdAt?: { seconds: number; nanoseconds: number };
 };
 
-type HistoryItem = {
-  id: string;
-  originalReview: string;
-  generatedReply: string;
-  tone: string;
-  usedPhrases: string[];
-  characterCount: number;
-  wasEdited: boolean;
-  createdAt: { seconds: number; nanoseconds: number };
-};
-
 const TONE_OPTIONS: { value: Tone; label: string }[] = [
   { value: "friendly", label: "フレンドリー" },
   { value: "polite", label: "丁寧" },
   { value: "professional", label: "プロフェッショナル" },
 ];
 
-const MAX_PHRASES = 3;
-
-function formatHistoryDate(seconds: number): string {
-  const d = new Date(seconds * 1000);
-  return d.toLocaleString("ja-JP", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
+const MAX_PHRASES = 5;
 
 export default function ReplyHelperPage() {
   const params = useParams();
@@ -71,16 +47,13 @@ export default function ReplyHelperPage() {
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState("");
   const [copyNotice, setCopyNotice] = useState(false);
-  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [phrasesSaving, setPhrasesSaving] = useState(false);
 
-  const [historyTab, setHistoryTab] = useState(false);
-  const [historyItems, setHistoryItems] = useState<HistoryItem[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
-
-  const enabledPhrases = customPhrases.filter((p) => p.enabled).map((p) => p.text);
+  // 返信で使うフレーズは1つだけ（店舗が選んだもの）
+  const selectedPhraseForReply = customPhrases.find((p) => p.enabled && p.text.trim() !== "");
+  const phraseForReply = selectedPhraseForReply ? [selectedPhraseForReply.text.trim()] : [];
 
   const loadSettings = useCallback(async () => {
     if (!tenantId) return;
@@ -90,7 +63,15 @@ export default function ReplyHelperPage() {
       const data = await res.json();
       if (res.ok) {
         if (data.defaultTone) setTone(data.defaultTone);
-        if (Array.isArray(data.customPhrases)) setCustomPhrases(data.customPhrases.slice(0, MAX_PHRASES));
+        if (Array.isArray(data.customPhrases)) {
+          const raw = data.customPhrases.slice(0, MAX_PHRASES);
+          const firstEnabledIndex = raw.findIndex((p: { enabled?: boolean }) => p.enabled);
+          const normalized = raw.map((p: { id: string; text: string; enabled?: boolean; createdAt?: { seconds: number; nanoseconds: number } }, i: number) => ({
+            ...p,
+            enabled: firstEnabledIndex >= 0 ? i === firstEnabledIndex : false,
+          }));
+          setCustomPhrases(normalized);
+        }
       }
     } catch {
       // ignore
@@ -99,27 +80,9 @@ export default function ReplyHelperPage() {
     }
   }, [tenantId]);
 
-  const loadHistory = useCallback(async () => {
-    if (!tenantId) return;
-    setHistoryLoading(true);
-    try {
-      const res = await fetch(`/api/tenant/${tenantId}/reply-history`);
-      const data = await res.json();
-      if (res.ok && Array.isArray(data.items)) setHistoryItems(data.items);
-    } catch {
-      setHistoryItems([]);
-    } finally {
-      setHistoryLoading(false);
-    }
-  }, [tenantId]);
-
   useEffect(() => {
     loadSettings();
   }, [loadSettings]);
-
-  useEffect(() => {
-    if (historyTab) loadHistory();
-  }, [historyTab, loadHistory]);
 
   const savePhrasesToServer = useCallback(async () => {
     if (!tenantId) return;
@@ -166,7 +129,7 @@ export default function ReplyHelperPage() {
         body: JSON.stringify({
           review: trimmed,
           tone,
-          customPhrases: enabledPhrases,
+          customPhrases: phraseForReply,
         }),
       });
       const data = await res.json();
@@ -198,32 +161,6 @@ export default function ReplyHelperPage() {
     }
   };
 
-  const handleSaveHistory = async () => {
-    const text = generatedReply.trim();
-    if (!text || !tenantId) return;
-    setSaveSuccess(false);
-    try {
-      const res = await fetch(`/api/tenant/${tenantId}/reply-history`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          originalReview: review.trim(),
-          generatedReply: text,
-          tone,
-          usedPhrases: customPhrases.filter((p) => p.enabled).map((p) => p.id),
-          characterCount: text.length,
-          wasEdited: replyEdited,
-        }),
-      });
-      if (!res.ok) throw new Error("保存に失敗しました");
-      setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-      if (historyTab) loadHistory();
-    } catch {
-      alert("履歴の保存に失敗しました");
-    }
-  };
-
   const addPhrase = () => {
     if (customPhrases.length >= MAX_PHRASES) return;
     setCustomPhrases((prev) => [
@@ -231,9 +168,17 @@ export default function ReplyHelperPage() {
       {
         id: `phrase_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
         text: "",
-        enabled: true,
+        enabled: false,
       },
     ]);
+  };
+
+  const selectPhraseForReply = (id: string) => {
+    setCustomPhrases((prev) => {
+      const current = prev.find((p) => p.id === id);
+      const isDeselect = current?.enabled;
+      return prev.map((p) => ({ ...p, enabled: !isDeselect && p.id === id }));
+    });
   };
 
   const updatePhrase = (id: string, updates: Partial<CustomPhrase>) => {
@@ -244,13 +189,6 @@ export default function ReplyHelperPage() {
 
   const removePhrase = (id: string) => {
     setCustomPhrases((prev) => prev.filter((p) => p.id !== id));
-  };
-
-  const useHistoryReply = (item: HistoryItem) => {
-    setGeneratedReply(item.generatedReply);
-    setReview(item.originalReview);
-    setReplyEdited(false);
-    setHistoryTab(false);
   };
 
   const ownerHref = `/owner/${tenantId}`;
@@ -280,7 +218,7 @@ export default function ReplyHelperPage() {
           <div>
             <p className="font-semibold">契約が有効ではありません</p>
             <p className="mt-1 text-red-700">
-              返信の生成・保存をご利用いただくには、店舗管理画面から月額プランにご加入ください。
+              返信の生成をご利用いただくには、店舗管理画面から月額プランにご加入ください。
             </p>
             <Link
               href={ownerHref}
@@ -292,34 +230,7 @@ export default function ReplyHelperPage() {
         </div>
       )}
 
-      <div className="flex gap-2 mb-4 border-b border-gray-200">
-        <button
-          type="button"
-          onClick={() => setHistoryTab(false)}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
-            !historyTab
-              ? "bg-white border border-b-0 border-gray-200 text-gray-800 -mb-px"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          返信を生成
-        </button>
-        <button
-          type="button"
-          onClick={() => setHistoryTab(true)}
-          className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors flex items-center gap-1 ${
-            historyTab
-              ? "bg-white border border-b-0 border-gray-200 text-gray-800 -mb-px"
-              : "text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          <History className="w-4 h-4" />
-          履歴を見る
-        </button>
-      </div>
-
-      {!historyTab ? (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
           <section className="space-y-5">
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
               <h2 className="font-semibold text-gray-800 mb-2">口コミ入力</h2>
@@ -359,10 +270,11 @@ export default function ReplyHelperPage() {
                   ))}
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mb-4">150〜200文字を推奨</p>
+              <p className="text-xs text-gray-500 mb-4">（150〜200文字を推奨）</p>
 
               <div>
-                <p className="text-sm text-gray-600 mb-2">カスタムフレーズ（最大3つ）</p>
+                <p className="text-sm text-gray-600 mb-1">カスタムフレーズ（最大5つまで登録可能）</p>
+                <p className="text-xs text-gray-500 mb-2"><span className="text-amber-500 font-semibold">＊</span>返信で使いたいフレーズを1つ選んでください</p>
                 {settingsLoading ? (
                   <div className="flex items-center gap-2 text-gray-500 text-sm py-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -375,14 +287,16 @@ export default function ReplyHelperPage() {
                         key={p.id}
                         className="flex items-center gap-2 py-2 px-3 rounded-lg bg-gray-50 border border-gray-200"
                       >
-                        <input
-                          type="checkbox"
-                          checked={p.enabled}
-                          onChange={(e) =>
-                            updatePhrase(p.id, { enabled: e.target.checked })
-                          }
-                          className="rounded text-primary focus:ring-primary"
-                        />
+                        <label className="flex items-center gap-1.5 shrink-0 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={p.enabled}
+                            onChange={() => selectPhraseForReply(p.id)}
+                            className="rounded text-primary focus:ring-primary"
+                            aria-label="返信で使う"
+                          />
+                          <span className="text-xs text-gray-600 whitespace-nowrap">返信で使う</span>
+                        </label>
                         <input
                           type="text"
                           value={p.text}
@@ -483,63 +397,12 @@ export default function ReplyHelperPage() {
                       <Copy className="w-4 h-4" />
                       {copyNotice ? "コピーしました！" : "コピー"}
                     </button>
-                    <button
-                      type="button"
-                      onClick={handleSaveHistory}
-                      disabled={!canUsePaidFeatures}
-                      className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white text-sm font-medium flex items-center gap-1 disabled:opacity-50"
-                    >
-                      <Save className="w-4 h-4" />
-                      {saveSuccess ? "保存しました" : "保存"}
-                    </button>
                   </div>
                 </>
               )}
             </div>
           </section>
         </div>
-      ) : (
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-          <h2 className="font-semibold text-gray-800 mb-4">返信履歴</h2>
-          {historyLoading ? (
-            <div className="flex items-center justify-center py-12 gap-2 text-gray-500">
-              <Loader2 className="w-5 h-5 animate-spin" />
-              読み込み中…
-            </div>
-          ) : historyItems.length === 0 ? (
-            <p className="text-sm text-gray-500 py-8 text-center">
-              まだ履歴がありません。返信を生成して「保存」するとここに表示されます。
-            </p>
-          ) : (
-            <ul className="space-y-4">
-              {historyItems.map((item) => (
-                <li
-                  key={item.id}
-                  className="p-4 rounded-xl border border-gray-200 bg-gray-50/50"
-                >
-                  <p className="text-xs text-gray-500 mb-1">
-                    {formatHistoryDate(item.createdAt.seconds)}
-                  </p>
-                  <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                    {item.originalReview.slice(0, 50)}
-                    {item.originalReview.length > 50 ? "..." : ""}
-                  </p>
-                  <p className="text-sm text-gray-800 whitespace-pre-wrap mb-3">
-                    {item.generatedReply}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => useHistoryReply(item)}
-                    className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium"
-                  >
-                    この返信を使う
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
 
       <div className="mt-8 pt-4 border-t border-gray-200">
         <Link href={ownerHref} className="text-sm text-gray-500 hover:text-gray-700">

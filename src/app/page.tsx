@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import PricingSection from "@/components/PricingSection";
+import FaqSection from "@/components/FaqSection";
 
 const navItems = [
   { label: "ホーム", href: "#" },
@@ -11,18 +13,18 @@ const navItems = [
 const features = [
   {
     icon: "📝",
-    title: "簡単アンケート",
-    description: "5つの質問に答えるだけ。お客様の負担を最小限に。",
+    title: "お客様は短いアンケートに答えるだけ",
+    description: "「書くのが面倒」「何を書けばいいか分からない」を解消。回答内容をもとに、口コミ投稿用の文章を整えて下書きします。",
   },
   {
     icon: "🤖",
-    title: "AI自動生成",
-    description: "回答から自然な口コミ文章を自動生成。そのままGoogleマップへ投稿可能。",
+    title: "最新AIが口コミ文をその場で下書き",
+    description: "自然な日本語生成に特化した最新AIが自動生成した文章は、投稿前にお客様が確認・編集できます。",
   },
   {
     icon: "💬",
-    title: "返信もAIで",
-    description: "いただいた口コミへの返信もAIが作成。オーナーの手間を削減。",
+    title: "返信文もAIで作成できる",
+    description: "いただいた口コミへの返信もAIが作成。返信にかかる時間を8割削減し、キーワードを盛り込んだ戦略的な返信が10秒で完成！ネガティブな口コミにも適切な返信文を提案します。",
   },
 ];
 
@@ -43,7 +45,7 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-green-100 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
           <Link href="/" className="text-lg font-bold text-gray-800 hover:text-primary-dark transition-colors">
-            口コミ作成AIアプリ
+            口コミ投稿サポートAI
           </Link>
           <nav className="flex items-center gap-6 sm:gap-8">
             {navItems.map((item) =>
@@ -73,22 +75,28 @@ export default function LandingPage() {
         {/* ヒーローセクション */}
         <section className="px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto text-center">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight">
-            お客様の声を、AIが自然な口コミに
+            お客様の実体験を、自然な口コミ文に整える
           </h1>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            簡単5問のアンケートで、Googleマップへの口コミ投稿率を劇的に改善
+            口コミ投稿数2.5倍、作成時間わずか30秒。忙しいオーナーのためのMEO対策AIツール
+          </p>
+          <p className="mt-4 text-sm text-gray-500 max-w-2xl mx-auto">
+            当アプリは、インセンティブなし・実体験ベースの口コミづくりを前提にしています。
           </p>
           <button
             onClick={scrollToContact}
             className="mt-8 sm:mt-10 px-8 py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            無料で始める
+            無料トライアルを相談する
           </button>
         </section>
 
         {/* 特徴セクション（3カラム） */}
         <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
           <div className="max-w-5xl mx-auto">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-8">
+              口コミ作成から返信まで、全部まとめてAIで時短
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
               {features.map((f) => (
                 <div
@@ -104,46 +112,57 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 対象業種 */}
-        <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto">
-          <p className="text-center text-base sm:text-lg text-gray-600">
-            整骨院・美容室・飲食店など、口コミが重要な店舗向けサービスです
-          </p>
+        {/* なぜ口コミが必要か・ベネフィット・向いている業種・安心設計 */}
+        <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto space-y-12 sm:space-y-16">
+          {/* セクション1 なぜ口コミが必要か */}
+          <div>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
+              口コミが増えると、選ばれやすくなる
+            </h3>
+            <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+              Googleマップでお店を探す人は、口コミと写真で比較して来店を決めます。
+              口コミが増えるほど、見つけてもらいやすくなり、電話やルート検索・予約につながりやすくなります。
+            </p>
+          </div>
+
+          {/* セクション2 このアプリのベネフィット */}
+          <div>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
+              口コミ運用の手間を、まとめて減らす
+            </h3>
+            <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+              お客様は短いアンケートに答えるだけで、投稿用の文章が完成。
+              オーナーは返信文もすぐ作れて、運用が止まりません。
+              結果として、口コミの量と内容の具体性が増え、信頼が積み上がります。
+            </p>
+          </div>
+
+          {/* セクション3 向いている業種 */}
+          <div>
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
+              店舗型ビジネスに向いています
+            </h3>
+            <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
+              整骨院・整体・美容室・サロン・飲食店・クリニックなど、地域で選ばれるために口コミが重要な業種におすすめです。
+            </p>
+          </div>
+
         </section>
 
-        {/* 料金プラン */}
-        <section id="pricing" className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100 scroll-mt-16">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-8">
-              今だけ！先行特別キャンペーン実施中
-            </h2>
-            <div className="max-w-md mx-auto bg-green-50 rounded-2xl p-6 sm:p-8 border border-green-200 shadow-sm">
-              <ul className="space-y-4 text-gray-800">
-                <li className="flex items-start gap-3">
-                  <span className="text-xl">✨</span>
-                  <span>初月完全無料（30日間）</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-xl">💰</span>
-                  <span>2〜3ヶ月目: 月額2,490円（50%OFF）</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="text-xl">🚀</span>
-                  <span>4ヶ月目以降: 月額4,980円</span>
-                </li>
-              </ul>
-              <p className="mt-6 text-sm text-gray-600 text-center">
-                今なら3ヶ月で4,980円（通常14,940円の66%OFF）
-              </p>
-            </div>
-          </div>
-        </section>
+        {/* 料金プラン（先行導入・成長支援プラン） */}
+        <PricingSection />
+
+        {/* よくある質問 */}
+        <FaqSection />
 
         {/* お問い合わせセクション */}
         <section id="contact" className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto scroll-mt-16">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-8">
-            無料トライアルを始める
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-3">
+            １ヶ月無料でお試しいただけます！
           </h2>
+          <p className="text-center text-sm sm:text-base text-gray-600 mb-8 max-w-xl mx-auto">
+            無料トライアル中も口コミ作成・返信作成ツール、どちらも回数無制限で使えます。
+          </p>
           <div className="max-w-lg mx-auto">
             <Link
               href="/contact"
@@ -151,7 +170,7 @@ export default function LandingPage() {
             >
               <p className="text-gray-600 mb-4">無料トライアル・ご質問はお気軽にどうぞ。</p>
               <span className="inline-block px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold transition-colors">
-                お問い合わせフォームへ
+                お申し込み／お問い合わせ
               </span>
             </Link>
           </div>

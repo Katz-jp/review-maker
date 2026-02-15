@@ -116,12 +116,6 @@ export default function TenantGeneratePage() {
         <span className="text-sm text-gray-500">口コミ下書き</span>
       </header>
 
-      <div className="bg-amber-50/80 rounded-2xl p-4 mb-6 border border-amber-200/60">
-        <p className="text-sm font-semibold text-amber-900/90">
-          AI作成の文章です。内容を確認し、必要に応じて修正してください。
-        </p>
-      </div>
-
       <section className="flex-1">
         <label className="block font-semibold text-gray-800 mb-2">
           生成された口コミ
@@ -136,6 +130,11 @@ export default function TenantGeneratePage() {
       </section>
 
       <div className="mt-6 space-y-3">
+        <div className="bg-amber-50/80 rounded-2xl p-4 mb-4 border border-amber-200/60">
+          <p className="text-sm font-semibold text-amber-900/90">
+            いただいた回答からAIが作成した文章です。内容を確認し、必要なら修正して、納得してからクチコミを投稿してください。
+          </p>
+        </div>
         <button
           type="button"
           onClick={handleCopy}

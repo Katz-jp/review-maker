@@ -17,7 +17,7 @@ type CustomPhraseResponse = {
   createdAt?: { seconds: number; nanoseconds: number };
 };
 
-const MAX_PHRASES = 3;
+const MAX_PHRASES = 5;
 const SETTINGS_DOC_ID = "default";
 
 export async function GET(

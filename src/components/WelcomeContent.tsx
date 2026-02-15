@@ -30,14 +30,7 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
           </h2>
           <p className="text-base font-medium text-gray-700 leading-relaxed">
             施術の感想をお聞きして、AIが口コミの下書きを作成します。
-            あくまでサポートツールですので、ご自身の言葉として自由に調整して投稿してください。
-          </p>
-        </div>
-
-        <div className="bg-amber-50/80 rounded-2xl p-5 border border-amber-200/60">
-          <p className="text-base font-semibold text-amber-900/90 leading-relaxed">
-            <span className="font-bold">ご注意：</span>
-            AI作成の文章です。内容を確認し、必要に応じて修正してから投稿してください。
+            これはあくまでも文章作成のためのサポートツールですので、必ず内容の確認をし、ご自分の言葉として自由に調整してクチコミ投稿してください。
           </p>
         </div>
 
