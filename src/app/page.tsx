@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import PricingSection from "@/components/PricingSection";
 import FaqSection from "@/components/FaqSection";
@@ -34,26 +35,37 @@ const footerLinks = [
   { label: "利用規約", href: "/terms" },
 ];
 
-function scrollToContact() {
-  document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
-}
-
 export default function LandingPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const closeMenu = () => setMenuOpen(false);
+
+  const handleNavClick = (item: (typeof navItems)[0]) => {
+    closeMenu();
+    if (item.href.startsWith("#")) {
+      document.getElementById(item.href.slice(1))?.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
-      {/* ヘッダー */}
+      {/* ヘッダー（スマホ: ハンバーガー / PC: 横並びナビ） */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-green-100 shadow-sm">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link href="/" className="text-lg font-bold text-gray-800 hover:text-primary-dark transition-colors">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+          <Link
+            href="/"
+            className="text-base sm:text-lg font-bold text-gray-800 hover:text-primary-dark transition-colors shrink-0 min-w-0"
+          >
             口コミ投稿サポートAI
           </Link>
-          <nav className="flex items-center gap-6 sm:gap-8">
+          {/* 768px以上: 横並びナビ */}
+          <nav className="hidden md:flex items-center gap-6 shrink-0" aria-label="メインメニュー">
             {navItems.map((item) =>
               item.href.startsWith("#") ? (
                 <button
                   key={item.label}
-                  onClick={() => document.getElementById(item.href.slice(1))?.scrollIntoView({ behavior: "smooth" })}
-                  className="text-sm font-medium text-gray-600 hover:text-primary-dark transition-colors"
+                  onClick={() => handleNavClick(item)}
+                  className="text-sm font-medium text-gray-600 hover:text-primary-dark transition-colors whitespace-nowrap"
                 >
                   {item.label}
                 </button>
@@ -61,14 +73,62 @@ export default function LandingPage() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="text-sm font-medium text-gray-600 hover:text-primary-dark transition-colors"
+                  className="text-sm font-medium text-gray-600 hover:text-primary-dark transition-colors whitespace-nowrap"
                 >
                   {item.label}
                 </Link>
               )
             )}
           </nav>
+          {/* スマホ: ハンバーガーボタン */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen((o) => !o)}
+            className="md:hidden p-2 -mr-2 rounded-lg text-gray-600 hover:bg-green-50 aria-expanded:bg-green-50"
+            aria-expanded={menuOpen}
+            aria-label={menuOpen ? "メニューを閉じる" : "メニューを開く"}
+          >
+            <span className="sr-only">メニュー</span>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+              {menuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
+        {/* スマホ: 開いたメニュー */}
+        {menuOpen && (
+          <nav
+            className="md:hidden border-t border-green-100 bg-white py-2 px-4"
+            aria-label="メインメニュー"
+          >
+            <ul className="flex flex-col gap-0">
+              {navItems.map((item) => (
+                <li key={item.label}>
+                  {item.href.startsWith("#") ? (
+                    <button
+                      type="button"
+                      onClick={() => handleNavClick(item)}
+                      className="block w-full text-left py-3 px-2 text-sm font-medium text-gray-600 hover:text-primary-dark hover:bg-green-50 rounded-lg transition-colors"
+                    >
+                      {item.label}
+                    </button>
+                  ) : (
+                    <Link
+                      href={item.href}
+                      onClick={closeMenu}
+                      className="block py-3 px-2 text-sm font-medium text-gray-600 hover:text-primary-dark hover:bg-green-50 rounded-lg transition-colors"
+                    >
+                      {item.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </nav>
+        )}
       </header>
 
       <main className="flex-1">
@@ -85,12 +145,12 @@ export default function LandingPage() {
           <p className="mt-4 text-sm text-gray-500 max-w-2xl mx-auto">
             当アプリは、インセンティブなし・実体験ベースの口コミづくりを前提にしています。
           </p>
-          <button
-            onClick={scrollToContact}
-            className="mt-8 sm:mt-10 px-8 py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          <Link
+            href="/contact"
+            className="inline-block mt-8 sm:mt-10 px-8 py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             無料トライアルに申し込む
-          </button>
+          </Link>
         </section>
 
         {/* 特徴セクション（3カラム） */}
