@@ -90,6 +90,7 @@ export default function PricingSection() {
                   <span className="text-xs font-normal ml-1">（{phase.subLabel}）</span>
                 </p>
                 <p className={`mt-2 text-2xl sm:text-3xl font-bold ${phase.isUpcoming ? "text-gray-500" : "text-gray-800"}`}>
+                  {(phase.isCurrent || phase.id === "phase2" || phase.id === "phase3") && "初月無料、"}
                   月額{phase.price.toLocaleString()}円
                   <span className={`text-sm font-normal ml-1 ${phase.isUpcoming ? "text-gray-400" : "text-gray-600"}`}>
                     （{phase.priceNote}）
