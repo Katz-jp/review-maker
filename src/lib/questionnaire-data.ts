@@ -55,7 +55,7 @@ export const questionnaireData = {
       id: "recommend",
       label: "おすすめしたい人",
       options: [
-        "〇〇市で根本改善したい人",
+        "信頼できる先生を探している方",
         "産後の方",
         "デスクワークの方",
         "スポーツをしている人",

@@ -45,7 +45,7 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
           <ul className="text-base font-semibold text-gray-700 space-y-3">
             <li className="flex items-start gap-2">
               <span className="text-primary-dark font-bold">✓</span>
-              所要時間は約3分
+              所要時間は約30秒
             </li>
             <li className="flex items-start gap-2">
               <span className="text-primary-dark font-bold">✓</span>

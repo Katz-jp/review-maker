@@ -223,15 +223,15 @@ export default function TenantQuestionnairePage() {
         ) : (
           <div>
             <h3 className="font-semibold text-gray-800 mb-2 text-base">
-              自由記述（任意）
+              最後にひとこと（任意）
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              AIへの補足メッセージがあればご記入ください
+              1行でもOK。予約や待ち時間、初回の安心感、通いやすさなど、施術以外で感じたことを自由にどうぞ。
             </p>
             <textarea
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
-              placeholder="例：先生の対応が丁寧だった／説明がわかりやすかった／駐車場がちょっと狭くて車が停めにくい"
+              placeholder="LINEで予約できて楽／人気なので希望日時は早めに予約したほうが良さそう／初回の説明が丁寧で、不安がなくなった／少し寒く感じることがあった／家でできるストレッチや姿勢のコツも教えてもらえた／待ち時間が短くてスムーズ"
               rows={5}
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 text-sm resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
