@@ -135,7 +135,9 @@ export default function LandingPage() {
         {/* ヒーローセクション */}
         <section className="px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto text-center">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight">
-            お客様の実体験を、自然な口コミ文に整える
+            お客様の実体験を、
+            <br />
+            自然な口コミ文に整える
           </h1>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
             口コミ投稿数2.5倍、作成時間わずか30秒。
@@ -143,7 +145,9 @@ export default function LandingPage() {
             <span className="font-bold">忙しいオーナーのためのMEO対策AIツール</span>
           </p>
           <p className="mt-4 text-sm text-gray-500 max-w-2xl mx-auto">
-            当アプリは、インセンティブなし・実体験ベースの口コミづくりを前提にしています。
+            当アプリは、インセンティブなし・実体験ベースの
+            <br />
+            口コミづくりを前提にしています。
           </p>
           <Link
             href="/contact"
@@ -242,6 +246,9 @@ export default function LandingPage() {
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3 pb-3 border-b-2 border-primary/50">
             １ヶ月無料でお試しいただけます！
           </h2>
+          <p className="text-center text-base font-semibold text-gray-800 mb-2">
+            初月無料、２ヶ月目・３ヶ月目は50％OFFでご利用いただけます。
+          </p>
           <p className="text-center text-sm sm:text-base text-gray-600 mb-8 max-w-xl mx-auto">
             無料トライアル中も口コミ作成・返信作成ツール、どちらも回数無制限で使えます。
           </p>

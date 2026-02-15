@@ -57,11 +57,12 @@ export default function PricingSection() {
           今だけ！先行特別キャンペーン実施中🎉
         </h2>
         <p className="text-center text-base text-gray-700 font-medium mb-2">
-          【先着30社限定】第1期・先行導入パートナーを募集します
+          【先着30社限定】第1期・先行導入パートナーを募集します！
         </p>
         <p className="text-center text-sm text-gray-600 mb-6 max-w-2xl mx-auto">
           第1期にご契約いただいた方は、解約されない限り
-          <strong className="text-gray-800"> 永久に月額4,980円 </strong>
+          <br />
+          <strong className="text-gray-800">永久に月額4,980円</strong>
           でご利用いただけます。
         </p>
 
@@ -99,13 +100,18 @@ export default function PricingSection() {
                     正規価格 月額{REGULAR_PRICE.toLocaleString()}円
                   </p>
                 )}
+                {phase.isCurrent && (
+                  <p className="mt-3 text-center text-sm font-bold text-amber-700 border-l-4 border-amber-500 pl-3 py-1.5">
+                    🎊 初月無料＆2ヶ月目、3ヶ月目は50%OFF（2,490円）でご利用いただけます！
+                  </p>
+                )}
                 {!phase.isCurrent && (
                   <p className={`mt-1 text-xs ${phase.isUpcoming ? "text-gray-400" : "text-gray-500"}`}>{phase.description}</p>
                 )}
                 {phase.isCurrent && (
                   <Link
                     href="/contact"
-                    className="mt-4 inline-block w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-sm text-center transition-colors"
+                    className="mt-4 inline-block w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-sm text-center transition-colors shadow-md hover:shadow-lg"
                   >
                     第1期先行価格で申し込む
                   </Link>
