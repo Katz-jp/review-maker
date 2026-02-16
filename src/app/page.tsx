@@ -150,7 +150,9 @@ export default function LandingPage() {
             口コミづくりを前提にしています。
           </p>
           <Link
-            href="/contact"
+            href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
+            target="_blank"
+            rel="noopener noreferrer"
             className="inline-block mt-8 sm:mt-10 px-8 py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             無料トライアルに申し込む
@@ -253,15 +255,25 @@ export default function LandingPage() {
             無料トライアル中も口コミ作成・返信作成ツール、どちらも回数無制限で使えます。
           </p>
           <div className="max-w-lg mx-auto">
-            <Link
-              href="/contact"
-              className="block bg-white rounded-2xl p-6 sm:p-8 border border-green-100 shadow-sm hover:border-primary/30 transition-colors text-center"
-            >
-              <p className="text-gray-600 mb-4">無料トライアル・ご質問はお気軽にどうぞ。</p>
-              <span className="inline-block px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold transition-colors">
-                お申し込み／お問い合わせ
-              </span>
-            </Link>
+            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-green-100 shadow-sm">
+              <p className="text-gray-600 mb-4 text-center">無料トライアル・ご質問はお気軽にどうぞ。</p>
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+                <Link
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSfilsWAERsNkC6Z_761_i-XPR9wVUAbKE7uByouR5iNng4y_w/viewform?usp=header"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold transition-colors text-center"
+                >
+                  無料トライアルを始める
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-block px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold transition-colors text-center"
+                >
+                  お問い合わせ
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
       </main>

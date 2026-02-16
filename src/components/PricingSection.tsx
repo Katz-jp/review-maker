@@ -111,10 +111,12 @@ export default function PricingSection() {
                 )}
                 {phase.isCurrent && (
                   <Link
-                    href="/contact"
-                    className="mt-4 inline-block w-full sm:w-auto px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-sm text-center transition-colors shadow-md hover:shadow-lg"
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSfilsWAERsNkC6Z_761_i-XPR9wVUAbKE7uByouR5iNng4y_w/viewform?usp=header"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-block w-full px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-sm text-center transition-colors shadow-md hover:shadow-lg"
                   >
-                    第1期先行価格で申し込む
+                    無料トライアルを始める
                   </Link>
                 )}
               </div>
