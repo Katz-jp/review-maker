@@ -28,8 +28,33 @@ export async function POST(req: NextRequest) {
     }
 
     const tenantId = (event.data.object as { metadata?: { tenantId?: string } }).metadata?.tenantId;
+    const adminDb = getAdminDb();
 
     switch (event.type) {
+      case "checkout.session.completed": {
+        const session = event.data.object as Stripe.Checkout.Session;
+        const tid = session.metadata?.tenantId;
+        if (tid && adminDb) {
+          const tenantRef = adminDb.collection("tenants").doc(tid);
+          const tenantSnap = await tenantRef.get();
+          if (tenantSnap.exists) {
+            const tenantData = tenantSnap.data();
+            const updates: Record<string, string | boolean> = {
+              subscriptionStatus: "active",
+              stripeCustomerId: (session.customer as string) ?? "",
+              stripeSubscriptionId: (session.subscription as string) ?? "",
+              updatedAt: new Date().toISOString(),
+            };
+            if (!tenantData?.couponUsed) {
+              updates.couponUsed = true;
+              updates.firstSubscriptionDate = new Date().toISOString();
+            }
+            await tenantRef.set(updates, { merge: true });
+            console.log(`✅ テナント ${tid} を active に更新しました`);
+          }
+        }
+        break;
+      }
       case "customer.subscription.created":
       case "customer.subscription.updated": {
         const sub = event.data.object as Stripe.Subscription;

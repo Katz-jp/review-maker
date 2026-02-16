@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { getAdminDb } from "@/lib/firebase-admin";
 
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
@@ -26,6 +27,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Firestoreからテナント情報を取得し、クーポン使用済みかチェック
+    const adminDb = getAdminDb();
+    if (!adminDb) {
+      return NextResponse.json(
+        { error: "データベース接続が利用できません" },
+        { status: 500 }
+      );
+    }
+
+    const tenantSnap = await adminDb.collection("tenants").doc(tenantId).get();
+    if (!tenantSnap.exists) {
+      return NextResponse.json(
+        { error: "テナントが見つかりません" },
+        { status: 404 }
+      );
+    }
+
+    const tenantData = tenantSnap.data();
+    // クーポン使用済みかチェック（フィールドが存在しない場合はfalseとして扱う）
+    const shouldApplyCoupon = !tenantData?.couponUsed;
+
     const stripe = getStripe();
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const couponId = process.env.STRIPE_COUPON_ID;
@@ -50,7 +72,8 @@ export async function POST(req: NextRequest) {
           tenantId,
         },
       },
-      ...(couponId ? { discounts: [{ coupon: couponId }] } : {}),
+      // クーポンは初回のみ適用
+      ...(couponId && shouldApplyCoupon ? { discounts: [{ coupon: couponId }] } : {}),
     });
 
     return NextResponse.json({ url: session.url });
