@@ -226,12 +226,12 @@ export default function TenantQuestionnairePage() {
               最後にひとこと（任意）
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              1行でもOK。予約や待ち時間、初回の安心感、通いやすさなど、施術以外で感じたことを自由にどうぞ。
+              施術以外で印象に残ったことがあれば、自由にご記入ください。（1行でもOKです）
             </p>
             <textarea
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
-              placeholder="LINEで予約できて楽／人気なので希望日時は早めに予約したほうが良さそう／初回の説明が丁寧で、不安がなくなった／少し寒く感じることがあった／家でできるストレッチや姿勢のコツも教えてもらえた／待ち時間が短くてスムーズ"
+              placeholder={'「初めてでも安心できました」\n「予約が取りやすかったです」'}
               rows={5}
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 text-sm resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />

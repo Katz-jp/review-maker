@@ -40,6 +40,7 @@ export default function ReplyHelperPage() {
 
   const [review, setReview] = useState("");
   const [tone, setTone] = useState<Tone>("polite");
+  const [starRating, setStarRating] = useState<number | null>(null);
   const [customPhrases, setCustomPhrases] = useState<CustomPhrase[]>([]);
   const [generatedReply, setGeneratedReply] = useState("");
   const [replyEdited, setReplyEdited] = useState(false);
@@ -129,6 +130,7 @@ export default function ReplyHelperPage() {
         body: JSON.stringify({
           review: trimmed,
           tone,
+          starRating: starRating ?? undefined,
           customPhrases: phraseForReply,
         }),
       });
@@ -249,6 +251,34 @@ export default function ReplyHelperPage() {
 
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
               <h2 className="font-semibold text-gray-800 mb-3">返信設定</h2>
+              <div className="mb-3">
+                <p className="text-sm text-gray-600 mb-2">星評価（任意）</p>
+                <div className="flex flex-wrap gap-2 items-center">
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="starRating"
+                      checked={starRating === null}
+                      onChange={() => setStarRating(null)}
+                      className="text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm text-gray-800">不明</span>
+                  </label>
+                  {([1, 2, 3, 4, 5] as const).map((n) => (
+                    <label key={n} className="flex items-center gap-1.5 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="starRating"
+                        checked={starRating === n}
+                        onChange={() => setStarRating(n)}
+                        className="text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm text-gray-800">★{n}</span>
+                    </label>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">指定しない場合は口コミ内容から判断します</p>
+              </div>
               <div className="mb-3">
                 <p className="text-sm text-gray-600 mb-2">トーン（必須）</p>
                 <div className="flex flex-wrap gap-2">
