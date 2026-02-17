@@ -184,7 +184,7 @@ export default function TenantQuestionnairePage() {
                   type="button"
                   onClick={() => toggleOption(currentQuestion.id, opt)}
                   className={`
-                    min-h-[48px] px-4 py-3 rounded-xl text-left text-sm font-medium
+                    min-h-[56px] px-4 py-3 rounded-xl text-center text-2xl font-medium
                     border-2 transition-all active:scale-[0.98]
                     ${
                       isSelected(currentQuestion.id, opt)
@@ -193,7 +193,7 @@ export default function TenantQuestionnairePage() {
                     }
                   `}
                 >
-                  <span className="flex items-center justify-between">
+                  <span className="flex items-center justify-center gap-2">
                     {opt}
                     {isSelected(currentQuestion.id, opt) && (
                       <ChevronRight className="w-4 h-4 text-primary shrink-0" />
