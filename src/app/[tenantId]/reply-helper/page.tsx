@@ -37,7 +37,8 @@ export default function ReplyHelperPage() {
   const params = useParams();
   const tenantId = (params.tenantId as string) || "demo";
   const tenant = useTenant();
-  const canUsePaidFeatures = tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
+  // trialの場合は契約チェックをスキップ（制限のみ適用）
+  const canUsePaidFeatures = tenantId === "trial" || tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
 
   const [authorName, setAuthorName] = useState("");
   const [review, setReview] = useState("");
@@ -87,9 +88,9 @@ export default function ReplyHelperPage() {
 
   useEffect(() => {
     loadSettings();
-    // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
-    if (tenantId === "demo-test" && !canUsePaidFeatures) {
-      const remaining = getRemainingGenerations("reply");
+    // デモ制限チェック（trialのみ）
+    if (tenantId === "trial") {
+      const remaining = getRemainingGenerations(tenantId, "reply");
       setRemainingGenerations(remaining);
     } else {
       setRemainingGenerations(null);
@@ -133,8 +134,8 @@ export default function ReplyHelperPage() {
       return;
     }
     
-    // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
-    if (tenantId === "demo-test" && !canUsePaidFeatures && !canGenerate("reply")) {
+    // デモ制限チェック（trialのみ）
+    if (tenantId === "trial" && !canGenerate(tenantId, "reply")) {
       setGenerateError("無料お試し回数を使い切りました。無料トライアルに申し込んでください。");
       return;
     }
@@ -159,10 +160,10 @@ export default function ReplyHelperPage() {
         setGenerateError(data.error ?? "生成に失敗しました。もう一度お試しください");
         return;
       }
-      // カウントを増やす（demo-testのみ、有料プラン利用中はスキップ）
-      if (tenantId === "demo-test" && !canUsePaidFeatures) {
-        incrementGenerationCount("reply");
-        setRemainingGenerations(getRemainingGenerations("reply"));
+      // カウントを増やす（trialのみ）
+      if (tenantId === "trial") {
+        incrementGenerationCount(tenantId, "reply");
+        setRemainingGenerations(getRemainingGenerations(tenantId, "reply"));
       }
       setGeneratedReply(data.text ?? "");
       setReplyEdited(false);
@@ -240,8 +241,8 @@ export default function ReplyHelperPage() {
               お客様の口コミに合わせた返信文をAIで生成できます
             </p>
           </div>
-          {/* デモ制限表示（demo-testのみ） */}
-          {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+          {/* デモ制限表示（trialのみ） */}
+          {tenantId === "trial" && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
             <span className="text-xs font-semibold text-primary bg-green-50 px-3 py-1.5 rounded-full border border-green-200 shrink-0 whitespace-nowrap">
               無料お試し：残り{remainingGenerations}回
             </span>
@@ -249,7 +250,8 @@ export default function ReplyHelperPage() {
         </div>
       </header>
 
-      {!canUsePaidFeatures && (
+      {/* trialの場合は契約チェックをスキップ */}
+      {tenantId !== "trial" && !canUsePaidFeatures && (
         <div className="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-sm font-medium flex items-start gap-2">
           <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
@@ -438,8 +440,8 @@ export default function ReplyHelperPage() {
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
               <h2 className="font-semibold text-gray-800 mb-3">返信を生成</h2>
               
-              {/* 制限に達した場合の案内（demo-testのみ） */}
-              {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations === 0 && (
+              {/* 制限に達した場合の案内（trialのみ） */}
+              {tenantId === "trial" && remainingGenerations === 0 && (
                 <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-4">
                   <p className="text-base font-bold text-gray-900 mb-3 text-center">
                     5回のお試し、いかがでしたか？
@@ -475,7 +477,7 @@ export default function ReplyHelperPage() {
               <button
                 type="button"
                 onClick={handleGenerate}
-                disabled={generating || !canUsePaidFeatures || (tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations === 0)}
+                disabled={generating || (tenantId !== "trial" && !canUsePaidFeatures) || (tenantId === "trial" && remainingGenerations === 0)}
                 className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {generating ? (

@@ -27,7 +27,8 @@ export default function TenantQuestionnairePage() {
   const params = useParams();
   const tenantId = (params.tenantId as string) || "demo";
   const tenant = useTenant();
-  const canUseQuestionnaire = tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
+  // trialの場合は契約チェックをスキップ（制限のみ適用）
+  const canUseQuestionnaire = tenantId === "trial" || tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
 
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
@@ -47,9 +48,9 @@ export default function TenantQuestionnairePage() {
   }, [tenantId]);
 
   useEffect(() => {
-    // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
-    if (tenantId === "demo-test" && !canUseQuestionnaire) {
-      const remaining = getRemainingGenerations("generate");
+    // デモ制限チェック（trialのみ）
+    if (tenantId === "trial") {
+      const remaining = getRemainingGenerations(tenantId, "generate");
       setRemainingGenerations(remaining);
     } else {
       setRemainingGenerations(null);
@@ -59,6 +60,11 @@ export default function TenantQuestionnairePage() {
     // ページがフォーカスされた時に再取得
     const handleFocus = () => {
       fetchCustomOptions();
+      // trialの場合は残り回数も再取得
+      if (tenantId === "trial") {
+        const remaining = getRemainingGenerations(tenantId, "generate");
+        setRemainingGenerations(remaining);
+      }
     };
     window.addEventListener("focus", handleFocus);
 
@@ -109,14 +115,9 @@ export default function TenantQuestionnairePage() {
     if (currentStep < TOTAL_STEPS - 1) {
       setCurrentStep((s) => s + 1);
     } else {
-      // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
-      if (tenantId === "demo-test" && !canUseQuestionnaire && !canGenerate("generate")) {
+      // デモ制限チェック（trialのみ）
+      if (tenantId === "trial" && !canGenerate(tenantId, "generate")) {
         return; // ボタンは無効化されているのでここには来ないはずだが念のため
-      }
-      // カウントを増やす（demo-testのみ、有料プラン利用中はスキップ）
-      if (tenantId === "demo-test" && !canUseQuestionnaire) {
-        incrementGenerationCount("generate");
-        setRemainingGenerations(getRemainingGenerations("generate"));
       }
       const payload = {
         answers,
@@ -258,8 +259,8 @@ export default function TenantQuestionnairePage() {
       </section>
 
       <div className="mt-auto pt-8 space-y-3">
-        {/* デモ制限表示（demo-testのみ） */}
-        {tenantId === "demo-test" && !canUseQuestionnaire && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+        {/* デモ制限表示（trialのみ） */}
+        {tenantId === "trial" && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
           <div className="bg-green-50 rounded-xl p-3 border border-green-200">
             <p className="text-sm text-center text-gray-700">
               <span className="font-semibold text-primary">無料お試し：残り{remainingGenerations}回</span>
@@ -267,8 +268,8 @@ export default function TenantQuestionnairePage() {
           </div>
         )}
         
-        {/* 制限に達した場合の案内（demo-testのみ） */}
-        {tenantId === "demo-test" && !canUseQuestionnaire && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1 && (
+        {/* 制限に達した場合の案内（trialのみ） */}
+        {tenantId === "trial" && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1 && (
           <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-3">
             <p className="text-base font-bold text-gray-900 mb-3 text-center">
               5回のお試し、いかがでしたか？
@@ -304,7 +305,7 @@ export default function TenantQuestionnairePage() {
         <button
           type="button"
           onClick={goNext}
-          disabled={tenantId === "demo-test" && !canUseQuestionnaire && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1}
+          disabled={tenantId === "trial" && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1}
           className="block w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base text-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
         >
           {currentStep === TOTAL_STEPS - 1

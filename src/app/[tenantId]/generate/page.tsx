@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Copy, ExternalLink, Loader2 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
-import { getRemainingGenerations, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
+import { getRemainingGenerations, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 
 type Payload = {
   answers: Record<string, string[]>;
@@ -18,7 +18,8 @@ export default function TenantGeneratePage() {
   const params = useParams();
   const tenantId = (params.tenantId as string) || "demo";
   const tenant = useTenant();
-  const canUsePaidFeatures = tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
+  // trialの場合は契約チェックをスキップ（制限のみ適用）
+  const canUsePaidFeatures = tenantId === "trial" || tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
 
   const [generatedText, setGeneratedText] = useState("");
   const [loading, setLoading] = useState(true);
@@ -27,15 +28,16 @@ export default function TenantGeneratePage() {
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
 
   useEffect(() => {
-    // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
-    if (tenantId === "demo-test" && !canUsePaidFeatures) {
-      const remaining = getRemainingGenerations("generate");
+    // デモ制限チェック（trialのみ）
+    if (tenantId === "trial") {
+      const remaining = getRemainingGenerations(tenantId, "generate");
       setRemainingGenerations(remaining);
     } else {
       setRemainingGenerations(null);
     }
 
-    if (!canUsePaidFeatures) {
+    // trialの場合は契約チェックをスキップ
+    if (tenantId !== "trial" && !canUsePaidFeatures) {
       setError("この店舗は現在ご利用いただけません。");
       setLoading(false);
       return;
@@ -69,10 +71,15 @@ export default function TenantGeneratePage() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || "生成に失敗しました");
         setGeneratedText(data.text || "");
+        // 成功したらカウントを増やす（trialのみ）
+        if (tenantId === "trial") {
+          incrementGenerationCount(tenantId, "generate");
+          setRemainingGenerations(getRemainingGenerations(tenantId, "generate"));
+        }
       })
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
-  }, [canUsePaidFeatures]);
+  }, [canUsePaidFeatures, tenantId]);
 
   const handleCopy = async () => {
     if (!generatedText) return;
@@ -124,8 +131,8 @@ export default function TenantGeneratePage() {
           戻る
         </Link>
         <div className="flex items-center gap-3">
-          {/* デモ制限表示（demo-testのみ） */}
-          {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+          {/* デモ制限表示（trialのみ） */}
+          {tenantId === "trial" && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
             <span className="text-xs font-semibold text-primary bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
               無料お試し：残り{remainingGenerations}回
             </span>
@@ -148,8 +155,8 @@ export default function TenantGeneratePage() {
       </section>
 
       <div className="mt-6 space-y-3">
-        {/* 残り回数表示（demo-testのみ） */}
-        {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations !== null && remainingGenerations > 0 && (
+        {/* 残り回数表示（trialのみ） */}
+        {tenantId === "trial" && remainingGenerations !== null && remainingGenerations > 0 && (
           <div className="bg-green-50 rounded-xl p-4 border border-green-200 mb-3">
             <p className="text-sm font-semibold text-center text-gray-800">
               <span className="text-primary text-base">あと残り{remainingGenerations}回試せます</span>
@@ -163,8 +170,8 @@ export default function TenantGeneratePage() {
           </p>
         </div>
 
-        {/* 制限に達した場合の案内（demo-testのみ） */}
-        {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations === 0 && (
+        {/* 制限に達した場合の案内（trialのみ） */}
+        {tenantId === "trial" && remainingGenerations === 0 && (
           <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-3">
             <p className="text-base font-bold text-gray-900 mb-3 text-center">
               5回のお試し、いかがでしたか？

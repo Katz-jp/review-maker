@@ -46,9 +46,9 @@ export default function LandingPage() {
     if (typeof window !== "undefined") {
       const dev = isDevelopment();
       setIsDev(dev);
-      // 開発環境でない場合のみ残り回数を取得
+      // 開発環境でない場合のみ残り回数を取得（trial用）
       if (!dev) {
-        const remaining = getRemainingGenerations("generate");
+        const remaining = getRemainingGenerations("trial", "generate");
         setRemainingGenerations(remaining);
       }
     }
@@ -419,7 +419,7 @@ export default function LandingPage() {
               ) : (
                 <div className="space-y-4">
                   <Link
-                    href="/demo-test/questionnaire"
+                    href="/trial/questionnaire"
                     className="block w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
                   >
                     無料でデモを試す →
