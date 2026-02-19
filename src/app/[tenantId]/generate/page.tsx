@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Copy, ExternalLink, Loader2 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
+import { getRemainingGenerations, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 
 type Payload = {
   answers: Record<string, string[]>;
@@ -23,8 +24,17 @@ export default function TenantGeneratePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
 
   useEffect(() => {
+    // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
+    if (tenantId === "demo-test" && !canUsePaidFeatures) {
+      const remaining = getRemainingGenerations("generate");
+      setRemainingGenerations(remaining);
+    } else {
+      setRemainingGenerations(null);
+    }
+
     if (!canUsePaidFeatures) {
       setError("この店舗は現在ご利用いただけません。");
       setLoading(false);
@@ -113,7 +123,15 @@ export default function TenantGeneratePage() {
           <ArrowLeft className="w-4 h-4" />
           戻る
         </Link>
-        <span className="text-sm text-gray-500">口コミ下書き</span>
+        <div className="flex items-center gap-3">
+          {/* デモ制限表示（demo-testのみ） */}
+          {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+            <span className="text-xs font-semibold text-primary bg-green-50 px-2.5 py-1 rounded-full border border-green-200">
+              無料お試し：残り{remainingGenerations}回
+            </span>
+          )}
+          <span className="text-sm text-gray-500">口コミ下書き</span>
+        </div>
       </header>
 
       <section className="flex-1">
@@ -130,11 +148,54 @@ export default function TenantGeneratePage() {
       </section>
 
       <div className="mt-6 space-y-3">
+        {/* 残り回数表示（demo-testのみ） */}
+        {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations !== null && remainingGenerations > 0 && (
+          <div className="bg-green-50 rounded-xl p-4 border border-green-200 mb-3">
+            <p className="text-sm font-semibold text-center text-gray-800">
+              <span className="text-primary text-base">あと残り{remainingGenerations}回試せます</span>
+            </p>
+          </div>
+        )}
+
         <div className="bg-amber-50/80 rounded-2xl p-4 mb-4 border border-amber-200/60">
           <p className="text-sm font-semibold text-amber-900/90">
             いただいた回答からAIが作成した文章です。内容を確認し、必要なら修正して、納得してからクチコミを投稿してください。
           </p>
         </div>
+
+        {/* 制限に達した場合の案内（demo-testのみ） */}
+        {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations === 0 && (
+          <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-3">
+            <p className="text-base font-bold text-gray-900 mb-3 text-center">
+              5回のお試し、いかがでしたか？
+            </p>
+            <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
+              実際のクチコミの質を実感いただけたでしょうか？
+            </p>
+            <div className="space-y-2 mb-4">
+              <p className="text-sm text-gray-700">
+                「もっと多くのメニューで試したい」
+              </p>
+              <p className="text-sm text-gray-700">
+                「実際に店舗で運用してみたい」
+              </p>
+            </div>
+            <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+              そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
+            </p>
+            <a
+              href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
+            >
+              1ヶ月無料トライアルに申し込む
+            </a>
+            <p className="text-xs text-gray-600 text-center">
+              ※トライアル期間中に解約すれば費用は一切かかりません。
+            </p>
+          </div>
+        )}
         <button
           type="button"
           onClick={handleCopy}

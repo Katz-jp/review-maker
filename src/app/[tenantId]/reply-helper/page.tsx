@@ -14,6 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
+import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 
 type Tone = "friendly" | "polite" | "professional";
 
@@ -53,6 +54,7 @@ export default function ReplyHelperPage() {
 
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [phrasesSaving, setPhrasesSaving] = useState(false);
+  const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
 
   // 返信で使うフレーズは1つだけ（店舗が選んだもの）
   const selectedPhraseForReply = customPhrases.find((p) => p.enabled && p.text.trim() !== "");
@@ -85,7 +87,14 @@ export default function ReplyHelperPage() {
 
   useEffect(() => {
     loadSettings();
-  }, [loadSettings]);
+    // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
+    if (tenantId === "demo-test" && !canUsePaidFeatures) {
+      const remaining = getRemainingGenerations("reply");
+      setRemainingGenerations(remaining);
+    } else {
+      setRemainingGenerations(null);
+    }
+  }, [loadSettings, canUsePaidFeatures, tenantId]);
 
   const savePhrasesToServer = useCallback(async () => {
     if (!tenantId) return;
@@ -123,6 +132,13 @@ export default function ReplyHelperPage() {
       setGenerateError("口コミを入力してください");
       return;
     }
+    
+    // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
+    if (tenantId === "demo-test" && !canUsePaidFeatures && !canGenerate("reply")) {
+      setGenerateError("無料お試し回数を使い切りました。無料トライアルに申し込んでください。");
+      return;
+    }
+
     setGenerateError("");
     setGenerating(true);
     try {
@@ -142,6 +158,11 @@ export default function ReplyHelperPage() {
       if (!res.ok) {
         setGenerateError(data.error ?? "生成に失敗しました。もう一度お試しください");
         return;
+      }
+      // カウントを増やす（demo-testのみ、有料プラン利用中はスキップ）
+      if (tenantId === "demo-test" && !canUsePaidFeatures) {
+        incrementGenerationCount("reply");
+        setRemainingGenerations(getRemainingGenerations("reply"));
       }
       setGeneratedReply(data.text ?? "");
       setReplyEdited(false);
@@ -209,13 +230,23 @@ export default function ReplyHelperPage() {
           <ChevronLeft className="w-4 h-4" />
           店舗管理画面へ戻る
         </Link>
-        <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-          <MessageSquare className="w-6 h-6 text-primary" />
-          クチコミ返信ヘルプAI
-        </h1>
-        <p className="text-sm text-gray-500 mt-1">
-          お客様の口コミに合わせた返信文をAIで生成できます
-        </p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+              <MessageSquare className="w-6 h-6 text-primary" />
+              クチコミ返信ヘルプAI
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">
+              お客様の口コミに合わせた返信文をAIで生成できます
+            </p>
+          </div>
+          {/* デモ制限表示（demo-testのみ） */}
+          {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+            <span className="text-xs font-semibold text-primary bg-green-50 px-3 py-1.5 rounded-full border border-green-200 shrink-0 whitespace-nowrap">
+              無料お試し：残り{remainingGenerations}回
+            </span>
+          )}
+        </div>
       </header>
 
       {!canUsePaidFeatures && (
@@ -406,11 +437,46 @@ export default function ReplyHelperPage() {
           <section className="space-y-5">
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
               <h2 className="font-semibold text-gray-800 mb-3">返信を生成</h2>
+              
+              {/* 制限に達した場合の案内（demo-testのみ） */}
+              {tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations === 0 && (
+                <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-4">
+                  <p className="text-base font-bold text-gray-900 mb-3 text-center">
+                    5回のお試し、いかがでしたか？
+                  </p>
+                  <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
+                    実際のクチコミの質を実感いただけたでしょうか？
+                  </p>
+                  <div className="space-y-2 mb-4">
+                    <p className="text-sm text-gray-700">
+                      「もっと多くのメニューで試したい」
+                    </p>
+                    <p className="text-sm text-gray-700">
+                      「実際に店舗で運用してみたい」
+                    </p>
+                  </div>
+                  <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                    そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
+                  </p>
+                  <a
+                    href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
+                  >
+                    1ヶ月無料トライアルに申し込む
+                  </a>
+                  <p className="text-xs text-gray-600 text-center">
+                    ※トライアル期間中に解約すれば費用は一切かかりません。
+                  </p>
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={handleGenerate}
-                disabled={generating || !canUsePaidFeatures}
-                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                disabled={generating || !canUsePaidFeatures || (tenantId === "demo-test" && !canUsePaidFeatures && remainingGenerations === 0)}
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {generating ? (
                   <>

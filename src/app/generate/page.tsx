@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
 export default function GenerateRedirect() {
-  redirect("/demo/generate");
+  redirect("/demo-test/generate");
 }

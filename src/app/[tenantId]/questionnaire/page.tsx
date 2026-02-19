@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { questionnaireData } from "@/lib/questionnaire-data";
 import { useTenant } from "@/components/TenantProvider";
+import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 
 type Answers = Record<string, string[]>;
 type OtherInputs = Record<string, string>;
@@ -33,6 +34,7 @@ export default function TenantQuestionnairePage() {
   const [otherInputs, setOtherInputs] = useState<OtherInputs>({});
   const [freeText, setFreeText] = useState("");
   const [customOptions, setCustomOptions] = useState<CustomOptionsByQuestion>({});
+  const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
 
   const fetchCustomOptions = useCallback(() => {
     if (!tenantId) return;
@@ -45,6 +47,13 @@ export default function TenantQuestionnairePage() {
   }, [tenantId]);
 
   useEffect(() => {
+    // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
+    if (tenantId === "demo-test" && !canUseQuestionnaire) {
+      const remaining = getRemainingGenerations("generate");
+      setRemainingGenerations(remaining);
+    } else {
+      setRemainingGenerations(null);
+    }
     fetchCustomOptions();
 
     // ページがフォーカスされた時に再取得
@@ -100,6 +109,15 @@ export default function TenantQuestionnairePage() {
     if (currentStep < TOTAL_STEPS - 1) {
       setCurrentStep((s) => s + 1);
     } else {
+      // デモ制限チェック（demo-testのみ、有料プラン利用中は制限なし）
+      if (tenantId === "demo-test" && !canUseQuestionnaire && !canGenerate("generate")) {
+        return; // ボタンは無効化されているのでここには来ないはずだが念のため
+      }
+      // カウントを増やす（demo-testのみ、有料プラン利用中はスキップ）
+      if (tenantId === "demo-test" && !canUseQuestionnaire) {
+        incrementGenerationCount("generate");
+        setRemainingGenerations(getRemainingGenerations("generate"));
+      }
       const payload = {
         answers,
         otherInputs,
@@ -239,11 +257,55 @@ export default function TenantQuestionnairePage() {
         )}
       </section>
 
-      <div className="mt-auto pt-8">
+      <div className="mt-auto pt-8 space-y-3">
+        {/* デモ制限表示（demo-testのみ） */}
+        {tenantId === "demo-test" && !canUseQuestionnaire && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+          <div className="bg-green-50 rounded-xl p-3 border border-green-200">
+            <p className="text-sm text-center text-gray-700">
+              <span className="font-semibold text-primary">無料お試し：残り{remainingGenerations}回</span>
+            </p>
+          </div>
+        )}
+        
+        {/* 制限に達した場合の案内（demo-testのみ） */}
+        {tenantId === "demo-test" && !canUseQuestionnaire && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1 && (
+          <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-3">
+            <p className="text-base font-bold text-gray-900 mb-3 text-center">
+              5回のお試し、いかがでしたか？
+            </p>
+            <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
+              実際のクチコミの質を実感いただけたでしょうか？
+            </p>
+            <div className="space-y-2 mb-4">
+              <p className="text-sm text-gray-700">
+                「もっと多くのメニューで試したい」
+              </p>
+              <p className="text-sm text-gray-700">
+                「実際に店舗で運用してみたい」
+              </p>
+            </div>
+            <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+              そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
+            </p>
+            <a
+              href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
+            >
+              1ヶ月無料トライアルに申し込む
+            </a>
+            <p className="text-xs text-gray-600 text-center">
+              ※トライアル期間中に解約すれば費用は一切かかりません。
+            </p>
+          </div>
+        )}
+
         <button
           type="button"
           onClick={goNext}
-          className="block w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base text-center shadow-md active:scale-[0.98] transition-transform"
+          disabled={tenantId === "demo-test" && !canUseQuestionnaire && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1}
+          className="block w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base text-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
         >
           {currentStep === TOTAL_STEPS - 1
             ? "口コミを生成する"

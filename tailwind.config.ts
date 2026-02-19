@@ -15,6 +15,21 @@ const config: Config = {
           dark: "#22C55E",
         },
       },
+      keyframes: {
+        fadeUp: {
+          from: {
+            opacity: "0",
+            transform: "translateY(16px)",
+          },
+          to: {
+            opacity: "1",
+            transform: "translateY(0)",
+          },
+        },
+      },
+      animation: {
+        fadeUp: "fadeUp 0.5s ease both",
+      },
     },
   },
   plugins: [],
