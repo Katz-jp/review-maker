@@ -142,6 +142,19 @@ professional（法人・組織タイプ）
 指定されたフレーズがある場合は、無理なく自然に組み込む。
 不自然な挿入は禁止。
 
+■ 名前のパーソナライズ
+
+投稿者名が指定されている場合、生成される返信の冒頭を必ず「{投稿者名} 様」から始める。
+未指定の場合は「お客様」で始める。
+
+■ 投稿者に伝えるメッセージ
+
+店舗から投稿者に伝えたいメッセージ（一言メモ）が指定されている場合、その内容を返信の文末や自然な箇所に組み込む。伝えたい趣旨を崩さず、返信文として自然な表現にリライトして含める。無理に挿入せず、流れに合う場合のみ使用する。
+
+■ プライバシーガード
+
+特定の個人情報（病名や詳細すぎる居住地など）が口コミやメモに含まれる場合は、AIの判断で「お体」「お近く」などの抽象的な表現に変換し、プライバシーに配慮した温かい文章にする。
+
 ■ 出力形式
 
 返信本文のみを出力すること。
@@ -151,10 +164,19 @@ function buildUserPrompt(
   review: string,
   tone: Tone,
   starRating: number | null,
+  authorName: string,
+  memo: string,
   customPhrases: string[]
 ): string {
   const toneDesc = TONE_LABELS[tone];
-  let text = `## お客様の口コミ\n${review}`;
+  let text = "";
+  if (authorName) {
+    text += `## 投稿者名\n${authorName}\n\n`;
+  }
+  text += `## お客様の口コミ\n${review}`;
+  if (memo) {
+    text += `\n\n## 投稿者に伝えたいメッセージ（返信に組み込む）\n${memo}`;
+  }
   text += `\n\n## 星評価\n${starRating != null ? `★${starRating}` : "不明（口コミ内容から判断）"}`;
   text += `\n\n## 今回使用するトーン\n${tone}（${toneDesc}）`;
   if (customPhrases.length > 0) {
@@ -178,11 +200,15 @@ export async function POST(req: NextRequest) {
       review = "",
       tone = "polite",
       starRating = null,
+      authorName = "",
+      memo = "",
       customPhrases = [],
     }: {
       review: string;
       tone: Tone;
       starRating?: number | null;
+      authorName?: string;
+      memo?: string;
       customPhrases: string[];
     } = body;
 
@@ -202,6 +228,8 @@ export async function POST(req: NextRequest) {
     const phrases = Array.isArray(customPhrases)
       ? customPhrases.filter((p): p is string => typeof p === "string" && p.trim() !== "").map((p) => p.trim())
       : [];
+    const trimmedAuthorName = typeof authorName === "string" ? authorName.trim() : "";
+    const trimmedMemo = typeof memo === "string" ? memo.trim() : "";
 
     const openai = new OpenAI({ apiKey });
 
@@ -209,7 +237,17 @@ export async function POST(req: NextRequest) {
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: buildUserPrompt(trimmedReview, selectedTone, validStar, phrases) },
+        {
+          role: "user",
+          content: buildUserPrompt(
+            trimmedReview,
+            selectedTone,
+            validStar,
+            trimmedAuthorName,
+            trimmedMemo,
+            phrases
+          ),
+        },
       ],
       temperature: 0.7,
       max_tokens: 500,

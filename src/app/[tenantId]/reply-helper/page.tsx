@@ -38,7 +38,9 @@ export default function ReplyHelperPage() {
   const tenant = useTenant();
   const canUsePaidFeatures = tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
 
+  const [authorName, setAuthorName] = useState("");
   const [review, setReview] = useState("");
+  const [memo, setMemo] = useState("");
   const [tone, setTone] = useState<Tone>("polite");
   const [starRating, setStarRating] = useState<number | null>(null);
   const [customPhrases, setCustomPhrases] = useState<CustomPhrase[]>([]);
@@ -128,7 +130,9 @@ export default function ReplyHelperPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          authorName: authorName.trim() || undefined,
           review: trimmed,
+          memo: memo.trim() || undefined,
           tone,
           starRating: starRating ?? undefined,
           customPhrases: phraseForReply,
@@ -235,24 +239,22 @@ export default function ReplyHelperPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
           <section className="space-y-5">
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-              <h2 className="font-semibold text-gray-800 mb-2">口コミ入力</h2>
-              <textarea
-                value={review}
-                onChange={(e) => {
-                  setReview(e.target.value);
-                  setGenerateError("");
-                }}
-                placeholder="お客様からの口コミをここに貼り付けてください"
-                rows={6}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y"
-              />
-              <p className="text-xs text-gray-500 mt-1">{review.length} 文字</p>
-            </div>
-
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-              <h2 className="font-semibold text-gray-800 mb-3">返信設定</h2>
+              <h2 className="font-bold text-gray-800 mb-2">口コミ入力</h2>
               <div className="mb-3">
-                <p className="text-sm text-gray-600 mb-2">星評価（任意）</p>
+                <label className="block text-sm mb-1">
+                  <span className="font-semibold text-gray-700">投稿者名</span>
+                  <span className="font-normal text-gray-600">（任意ですが、返信に名前を入れるとお客様との距離が近くなり、信頼関係を築きやすくなります。）</span>
+                </label>
+                <input
+                  type="text"
+                  value={authorName}
+                  onChange={(e) => setAuthorName(e.target.value)}
+                  placeholder="口コミ投稿者名をペースト"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                />
+              </div>
+              <div className="mb-3">
+                <p className="text-sm font-semibold text-gray-700 mb-2">星評価（任意）</p>
                 <div className="flex flex-wrap gap-2 items-center">
                   <label className="flex items-center gap-1.5 cursor-pointer">
                     <input
@@ -279,6 +281,39 @@ export default function ReplyHelperPage() {
                 </div>
                 <p className="text-xs text-gray-500 mt-1">指定しない場合は口コミ内容から判断します</p>
               </div>
+              <div className="mb-3">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">口コミ本文</label>
+                <textarea
+                  value={review}
+                  onChange={(e) => {
+                    setReview(e.target.value);
+                    setGenerateError("");
+                  }}
+                  placeholder="お客様からの口コミをここに貼り付けてください"
+                  rows={6}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y"
+                />
+                <p className="text-xs text-gray-500 mt-1">{review.length} 文字</p>
+              </div>
+              <div>
+                <label className="block text-sm mb-1">
+                  <span className="font-semibold text-gray-700">投稿者に伝えるメッセージ（任意）</span>
+                  <span className="block font-normal text-gray-600 mt-0.5">（任意ですが、投稿者とのエピソードを１つ入れるだけで、ひとりひとりのお客様を大切にしている感じが、投稿者だけでなく、返信を読む未来のお客様にも伝わりやすくなります。）</span>
+                </label>
+                <textarea
+                  value={memo}
+                  onChange={(e) => setMemo(e.target.value)}
+                  placeholder="例：釣りの話が楽しかった／伝えたストレッチ方法ぜひ試してみて"
+                  rows={2}
+                  maxLength={80}
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y"
+                />
+                <p className="text-xs text-gray-500 mt-1">{memo.length}/80 文字</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
+              <h2 className="font-semibold text-gray-800 mb-3">返信設定</h2>
               <div className="mb-3">
                 <p className="text-sm text-gray-600 mb-2">トーン（必須）</p>
                 <div className="flex flex-wrap gap-2">
