@@ -61,7 +61,7 @@ function CustomOptionsEditor({
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="選択肢を追加（例：オーダーメイド矯正）"
+              placeholder="例：ラジオ波"
               className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
             <button
@@ -346,6 +346,12 @@ export default function OwnerPage() {
           </h2>
           <p className="text-sm text-gray-600 mb-4">
             各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。
+            <br />
+            <span className="text-xs text-gray-500 mt-1 block">※ 注意：</span>
+            <ul className="text-xs text-gray-500 mt-1 ml-4 list-disc space-y-0.5">
+              <li>１つずつ追加すること</li>
+              <li>必ず「選択肢を保存する」ボタンを押すこと（これを押さないと反映されません）</li>
+            </ul>
           </p>
           {customOptionsLoading ? (
             <div className="flex items-center justify-center py-8 gap-2 text-gray-500">
@@ -411,9 +417,24 @@ export default function OwnerPage() {
         </div>
       </section>
 
-      <div className="mt-auto pt-6">
-        <Link href="/" className="text-sm text-gray-500 hover:text-gray-700">
-          ← トップへ戻る
+      <div className="mt-auto pt-6 border-t border-gray-200">
+        <div className="pt-6">
+          <a
+            href="https://docs.google.com/forms/d/e/1FAIpQLScL6qaicGvP-__HBsraAXicZuXPe8Je1eclgAGUNDAdklZTiQ/viewform?usp=header"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            <MessageSquare className="w-4 h-4" />
+            要望や不具合を報告する
+            <ExternalLink className="w-3 h-3" />
+          </a>
+          <p className="text-xs text-gray-500 mt-1 ml-6">
+            ご意見・不具合報告はこちらからお願いします
+          </p>
+        </div>
+        <Link href="/" className="block mt-8 text-sm text-gray-500 hover:text-gray-700">
+          ← アプリのトップ画面へ
         </Link>
       </div>
     </main>

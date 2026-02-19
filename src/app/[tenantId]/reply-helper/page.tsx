@@ -428,8 +428,9 @@ export default function ReplyHelperPage() {
               {generatedReply && (
                 <>
                   <div className="mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      生成された返信（編集可）
+                    <label className="block text-sm mb-1">
+                      <span className="font-medium text-gray-700">生成された返信</span>
+                      <span className="font-normal text-gray-600">（編集可：必ず生成された内容を確認し、適宜加筆・修正してご使用ください）</span>
                     </label>
                     <textarea
                       value={generatedReply}
