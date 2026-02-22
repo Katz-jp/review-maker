@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { CreditCard, QrCode, ExternalLink, Loader2, Plus, Trash2, Settings2, MessageSquare } from "lucide-react";
-import { questionnaireData } from "@/lib/questionnaire-data";
+import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
 
 type CustomOptionsByQuestion = Record<string, string[]>;
 
@@ -92,6 +92,8 @@ export default function OwnerPage() {
   const [canceled, setCanceled] = useState(false);
 
   const [tenantStatus, setTenantStatus] = useState<"active" | "trialing" | "inactive" | "canceled" | "past_due" | null>(null);
+  const [tenantIndustry, setTenantIndustry] = useState<string | undefined>(undefined);
+  const [tenantRetailPreset, setTenantRetailPreset] = useState<string | undefined>(undefined);
   const [customOptions, setCustomOptions] = useState<CustomOptionsByQuestion>({});
   const [customOptionsLoading, setCustomOptionsLoading] = useState(true);
   const [customOptionsSaving, setCustomOptionsSaving] = useState(false);
@@ -118,7 +120,11 @@ export default function OwnerPage() {
     if (!tenantId) return;
     fetch(`/api/tenant/${tenantId}`)
       .then((res) => res.json())
-      .then((data) => setTenantStatus(data.subscriptionStatus ?? "inactive"))
+      .then((data) => {
+        setTenantStatus(data.subscriptionStatus ?? "inactive");
+        setTenantIndustry(data.industry);
+        setTenantRetailPreset(data.retailPreset);
+      })
       .catch(() => setTenantStatus("inactive"));
   }, [tenantId]);
 
@@ -360,7 +366,19 @@ export default function OwnerPage() {
             </div>
           ) : (
             <div className="space-y-5">
-              {questionnaireData.questions.map((q) => (
+              {(() => {
+                const fromTenantId =
+                  tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
+                const raw = tenantIndustry ?? fromTenantId ?? "seikotsu";
+                const industryKey: IndustryKey = Object.hasOwn(industries, raw)
+                  ? (raw as IndustryKey)
+                  : "seikotsu";
+                const retailPreset =
+                  industryKey === "retail"
+                    ? tenantRetailPreset ?? (tenantId === "retail-demo" ? "meat" : undefined)
+                    : undefined;
+                const config = getIndustryConfig(industryKey, retailPreset);
+                return config.questions.map((q) => (
                 <CustomOptionsEditor
                   key={q.id}
                   questionId={q.id}
@@ -370,7 +388,8 @@ export default function OwnerPage() {
                   onRemove={handleRemoveOption}
                   maxOptions={MAX_CUSTOM_OPTIONS}
                 />
-              ))}
+              ));
+              })()}
               <button
                 type="button"
                 onClick={handleSaveCustomOptions}

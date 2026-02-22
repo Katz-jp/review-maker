@@ -8,6 +8,8 @@ export type TenantInfo = {
   name: string;
   googleMapsUrl: string;
   subscriptionStatus: TenantStatus;
+  industry?: string;
+  retailPreset?: string;
 };
 
 export async function GET(
@@ -47,6 +49,8 @@ export async function GET(
       name: data?.name ?? "〇〇整骨院",
       googleMapsUrl: data?.googleMapsUrl ?? "https://www.google.com/maps",
       subscriptionStatus,
+      industry: data?.industry,
+      retailPreset: data?.retailPreset,
     } satisfies TenantInfo);
   } catch (err) {
     console.error("[tenant GET]", err);

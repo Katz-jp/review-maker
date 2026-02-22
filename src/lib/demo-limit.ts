@@ -1,5 +1,8 @@
 export const MAX_DEMO_GENERATIONS = 5;
 
+/** trial で選択した業種を sessionStorage に保存するキー */
+export const TRIAL_INDUSTRY_KEY = "trial_industry";
+
 function getStorageKey(tenantId: string, type: "generate" | "reply"): string {
   return `${tenantId}_${type}_count`;
 }

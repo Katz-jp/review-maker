@@ -8,6 +8,8 @@ export type TenantListItem = {
   googleMapsUrl: string;
   subscriptionStatus: string;
   updatedAt?: string;
+  industry?: string;
+  retailPreset?: string;
 };
 
 export async function GET(req: NextRequest) {
@@ -33,6 +35,8 @@ export async function GET(req: NextRequest) {
         googleMapsUrl: d.googleMapsUrl ?? "https://www.google.com/maps",
         subscriptionStatus: d.subscriptionStatus ?? "inactive",
         updatedAt: d.updatedAt,
+        industry: d.industry,
+        retailPreset: d.retailPreset,
       };
     });
 

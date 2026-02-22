@@ -12,6 +12,8 @@ type Payload = {
   otherInputs: Record<string, string>;
   freeText: string;
   tenantId?: string;
+  industry?: string;
+  retailPreset?: string;
 };
 
 export default function TenantGeneratePage() {
@@ -65,6 +67,8 @@ export default function TenantGeneratePage() {
         answers: payload.answers,
         otherInputs: payload.otherInputs,
         freeText: payload.freeText,
+        industry: payload.industry ?? "seikotsu",
+        ...(payload.industry === "retail" && { retailPreset: payload.retailPreset ?? "meat" }),
       }),
     })
       .then(async (res) => {

@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Building2, Store, Stethoscope } from "lucide-react";
-import { TRIAL_INDUSTRY_KEY } from "@/lib/trial";
+import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
 
 const INDUSTRIES = [
   {
@@ -19,7 +19,7 @@ const INDUSTRIES = [
     label: "小売店",
     description: "お店の体験をもとに口コミ文を生成します。",
     icon: Store,
-    available: false,
+    available: true,
   },
   {
     id: "haisha",

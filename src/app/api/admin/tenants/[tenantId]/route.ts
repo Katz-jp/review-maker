@@ -22,10 +22,12 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { name, googleMapsUrl, subscriptionStatus } = body as {
+    const { name, googleMapsUrl, subscriptionStatus, industry, retailPreset } = body as {
       name?: string;
       googleMapsUrl?: string;
       subscriptionStatus?: string;
+      industry?: string;
+      retailPreset?: string;
     };
 
     const updates: Record<string, unknown> = {
@@ -37,6 +39,8 @@ export async function PATCH(
     if (typeof subscriptionStatus === "string" && VALID_STATUSES.includes(subscriptionStatus as (typeof VALID_STATUSES)[number])) {
       updates.subscriptionStatus = subscriptionStatus;
     }
+    if (industry !== undefined) updates.industry = industry === "" ? null : industry;
+    if (retailPreset !== undefined) updates.retailPreset = retailPreset === "" ? null : retailPreset;
 
     const db = getAdminDb();
     if (!db) {
@@ -64,6 +68,8 @@ export async function PATCH(
       name: data?.name ?? tenantId,
       googleMapsUrl: data?.googleMapsUrl ?? "https://www.google.com/maps",
       subscriptionStatus: data?.subscriptionStatus ?? "inactive",
+      industry: data?.industry,
+      retailPreset: data?.retailPreset,
     });
   } catch (err) {
     console.error("[admin/tenants PATCH]", err);

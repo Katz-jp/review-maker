@@ -4,10 +4,10 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight, AlertCircle } from "lucide-react";
-import { questionnaireData } from "@/lib/questionnaire-data";
+import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
-import { TRIAL_INDUSTRY_KEY } from "@/lib/trial";
+import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
 
 type Answers = Record<string, string[]>;
 type OtherInputs = Record<string, string>;
@@ -83,12 +83,36 @@ export default function TenantQuestionnairePage() {
     };
   }, [tenantId, fetchCustomOptions, router]);
 
+  const industryKey: IndustryKey = (() => {
+    const fromTrial =
+      tenantId === "trial" && typeof window !== "undefined"
+        ? (() => {
+            const v = sessionStorage.getItem(TRIAL_INDUSTRY_KEY);
+            if (v === "kouri") return "retail";
+            if (v === "seikotsuin") return "seikotsu";
+            return undefined;
+          })()
+        : undefined;
+    const fromTenant = tenant?.industry;
+    const fromTenantId =
+      tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
+    const raw = fromTrial ?? fromTenant ?? fromTenantId ?? "seikotsu";
+    return Object.hasOwn(industries, raw) ? (raw as IndustryKey) : "seikotsu";
+  })();
+  const retailPreset =
+    industryKey === "retail"
+      ? tenant?.retailPreset ??
+        (tenantId === "retail-demo" || tenantId === "trial" ? "meat" : undefined)
+      : undefined;
+  const industryConfig = getIndustryConfig(industryKey, retailPreset);
+  const baseQuestions = industryConfig.questions;
+
   const questions = useMemo(() => {
-    return questionnaireData.questions.map((q) => ({
+    return baseQuestions.map((q) => ({
       ...q,
       options: mergeOptions(q.options, customOptions[q.id]),
     }));
-  }, [customOptions]);
+  }, [baseQuestions, customOptions]);
   const isFreeTextStep = currentStep === questions.length;
   const currentQuestion = !isFreeTextStep ? questions[currentStep] : null;
 
@@ -130,6 +154,8 @@ export default function TenantQuestionnairePage() {
         otherInputs,
         freeText,
         tenantId,
+        industry: industryKey,
+        ...(industryKey === "retail" && { retailPreset: retailPreset ?? "meat" }),
         answeredAt: new Date().toISOString(),
       };
       sessionStorage.setItem("questionnaireAnswers", JSON.stringify(payload));

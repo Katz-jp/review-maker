@@ -3,6 +3,10 @@ export type Tenant = {
   name: string;
   googleMapsUrl: string;
   subscriptionStatus: "active" | "canceled" | "past_due" | "trialing" | "inactive";
+  /** "seikotsu" | "retail" など。未設定時は整骨院として扱う */
+  industry?: string;
+  /** industry が "retail" のときのプリセット。"meat" | "general" など */
+  retailPreset?: string;
 };
 
 export const DEFAULT_TENANT: Tenant = {
@@ -29,6 +33,8 @@ export async function getTenant(tenantId: string): Promise<Tenant | null> {
       name: data.name ?? DEFAULT_TENANT.name,
       googleMapsUrl: data.googleMapsUrl ?? DEFAULT_TENANT.googleMapsUrl,
       subscriptionStatus: data.subscriptionStatus ?? "inactive",
+      industry: data.industry,
+      retailPreset: data.retailPreset,
     };
   } catch {
     return null;

@@ -21,6 +21,8 @@ type TenantListItem = {
   googleMapsUrl: string;
   subscriptionStatus: string;
   updatedAt?: string;
+  industry?: string;
+  retailPreset?: string;
 };
 
 function getAuthHeaders(): HeadersInit {
@@ -53,6 +55,8 @@ export default function AdminPage() {
   const [editName, setEditName] = useState("");
   const [editGoogleMapsUrl, setEditGoogleMapsUrl] = useState("");
   const [editStatus, setEditStatus] = useState("");
+  const [editIndustry, setEditIndustry] = useState("");
+  const [editRetailPreset, setEditRetailPreset] = useState("");
   const [saving, setSaving] = useState(false);
 
   const fetchCheck = useCallback(async () => {
@@ -188,6 +192,8 @@ export default function AdminPage() {
     setEditName(t.name);
     setEditGoogleMapsUrl(t.googleMapsUrl);
     setEditStatus(t.subscriptionStatus);
+    setEditIndustry(t.industry ?? "");
+    setEditRetailPreset(t.retailPreset ?? "");
   };
 
   const cancelEdit = () => {
@@ -205,6 +211,8 @@ export default function AdminPage() {
           name: editName.trim() || editingId,
           googleMapsUrl: editGoogleMapsUrl.trim() || "https://www.google.com/maps",
           subscriptionStatus: editStatus,
+          industry: editIndustry.trim() || "",
+          retailPreset: editIndustry === "retail" ? (editRetailPreset.trim() || "meat") : "",
         }),
       });
       const data = await res.json();
@@ -394,6 +402,34 @@ export default function AdminPage() {
                         ))}
                       </select>
                     </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">業種</label>
+                      <select
+                        value={editIndustry}
+                        onChange={(e) => {
+                          setEditIndustry(e.target.value);
+                          if (e.target.value !== "retail") setEditRetailPreset("");
+                        }}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                      >
+                        <option value="">未設定（整骨院として表示）</option>
+                        <option value="seikotsu">整骨院</option>
+                        <option value="retail">小売店</option>
+                      </select>
+                    </div>
+                    {editIndustry === "retail" && (
+                      <div>
+                        <label className="block text-xs text-gray-500 mb-1">小売プリセット</label>
+                        <select
+                          value={editRetailPreset}
+                          onChange={(e) => setEditRetailPreset(e.target.value)}
+                          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                        >
+                          <option value="meat">精肉店</option>
+                          <option value="general">汎用</option>
+                        </select>
+                      </div>
+                    )}
                     <div className="flex gap-2">
                       <button
                         type="button"

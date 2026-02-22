@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
-import { questionnaireData } from "@/lib/questionnaire-data";
+import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
 
 export type CustomOptionsByQuestion = Record<string, string[]>;
 
 const MAX_CUSTOM_OPTIONS_PER_QUESTION = 3;
-const QUESTION_IDS = questionnaireData.questions.map((q) => q.id);
 
-function validateQuestionId(id: string): boolean {
-  return QUESTION_IDS.includes(id);
+function getQuestionIds(industry: string | undefined, retailPreset: string | undefined): string[] {
+  const key: IndustryKey = Object.hasOwn(industries, industry ?? "")
+    ? (industry as IndustryKey)
+    : "seikotsu";
+  const config = getIndustryConfig(key, retailPreset);
+  return config.questions.map((q) => q.id);
+}
+
+function validateQuestionId(id: string, questionIds: string[]): boolean {
+  return questionIds.includes(id);
 }
 
 export async function GET(
@@ -65,6 +72,19 @@ export async function POST(
       );
     }
 
+    const db = getAdminDb();
+    if (!db) {
+      return NextResponse.json(
+        { error: "データベース接続が利用できません" },
+        { status: 500 }
+      );
+    }
+
+    const ref = db.collection("tenants").doc(tenantId);
+    const tenantSnap = await ref.get();
+    const tenantData = tenantSnap.data();
+    const questionIds = getQuestionIds(tenantData?.industry, tenantData?.retailPreset);
+
     const body = await req.json();
     const { customOptions } = body as { customOptions: CustomOptionsByQuestion };
 
@@ -77,7 +97,7 @@ export async function POST(
 
     const validated: CustomOptionsByQuestion = {};
     for (const [questionId, options] of Object.entries(customOptions)) {
-      if (!validateQuestionId(questionId)) continue;
+      if (!validateQuestionId(questionId, questionIds)) continue;
       if (!Array.isArray(options)) continue;
       const filtered = options
         .filter((o): o is string => typeof o === "string" && o.trim() !== "")
@@ -88,15 +108,6 @@ export async function POST(
       }
     }
 
-    const db = getAdminDb();
-    if (!db) {
-      return NextResponse.json(
-        { error: "データベース接続が利用できません" },
-        { status: 500 }
-      );
-    }
-
-    const ref = db.collection("tenants").doc(tenantId);
     await ref.set({ customOptions: validated }, { merge: true });
 
     return NextResponse.json({ customOptions: validated });
