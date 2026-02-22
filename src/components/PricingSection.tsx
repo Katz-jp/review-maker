@@ -116,7 +116,7 @@ export default function PricingSection() {
                     rel="noopener noreferrer"
                     className="mt-4 inline-block w-full px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-sm text-center transition-colors shadow-md hover:shadow-lg"
                   >
-                    無料トライアルを始める
+                    1ヶ月無料で始めてみる
                   </Link>
                 )}
               </div>

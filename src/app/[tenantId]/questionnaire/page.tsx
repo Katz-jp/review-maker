@@ -7,6 +7,7 @@ import { ArrowLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { questionnaireData } from "@/lib/questionnaire-data";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
+import { TRIAL_INDUSTRY_KEY } from "@/lib/trial";
 
 type Answers = Record<string, string[]>;
 type OtherInputs = Record<string, string>;
@@ -48,6 +49,11 @@ export default function TenantQuestionnairePage() {
   }, [tenantId]);
 
   useEffect(() => {
+    // trial で業種未選択の場合は業種選択へ
+    if (tenantId === "trial" && typeof window !== "undefined" && !sessionStorage.getItem(TRIAL_INDUSTRY_KEY)) {
+      router.replace("/trial/create");
+      return;
+    }
     // デモ制限チェック（trialのみ）
     if (tenantId === "trial") {
       const remaining = getRemainingGenerations(tenantId, "generate");
@@ -75,7 +81,7 @@ export default function TenantQuestionnairePage() {
       window.removeEventListener("focus", handleFocus);
       clearInterval(interval);
     };
-  }, [tenantId, fetchCustomOptions]);
+  }, [tenantId, fetchCustomOptions, router]);
 
   const questions = useMemo(() => {
     return questionnaireData.questions.map((q) => ({
@@ -135,7 +141,8 @@ export default function TenantQuestionnairePage() {
     if (currentStep > 0) {
       setCurrentStep((s) => s - 1);
     } else {
-      router.push(`/${tenantId}`);
+      // trial のときは1問目で戻る → 業種選択へ
+      router.push(tenantId === "trial" ? "/trial/create" : `/${tenantId}`);
     }
   };
 

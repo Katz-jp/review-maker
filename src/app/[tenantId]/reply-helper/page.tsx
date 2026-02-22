@@ -220,16 +220,18 @@ export default function ReplyHelperPage() {
   };
 
   const ownerHref = `/owner/${tenantId}`;
+  const backHref = tenantId === "trial" ? "/trial" : ownerHref;
+  const backLabel = tenantId === "trial" ? "トライアル選択ページに戻る" : "店舗管理画面へ戻る";
 
   return (
     <main className="min-h-screen flex flex-col px-4 sm:px-5 pt-8 pb-12 max-w-4xl mx-auto">
       <header className="mb-6">
         <Link
-          href={ownerHref}
+          href={backHref}
           className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-3"
         >
           <ChevronLeft className="w-4 h-4" />
-          店舗管理画面へ戻る
+          {backLabel}
         </Link>
         <div className="flex items-start justify-between gap-3">
           <div>
@@ -260,10 +262,10 @@ export default function ReplyHelperPage() {
               返信の生成をご利用いただくには、店舗管理画面から月額プランにご加入ください。
             </p>
             <Link
-              href={ownerHref}
+              href={backHref}
               className="mt-2 inline-block text-sm font-medium underline"
             >
-              店舗管理画面へ →
+              {tenantId === "trial" ? "トライアル選択ページへ →" : "店舗管理画面へ →"}
             </Link>
           </div>
         </div>
@@ -539,8 +541,8 @@ export default function ReplyHelperPage() {
         </div>
 
       <div className="mt-8 pt-4 border-t border-gray-200">
-        <Link href={ownerHref} className="text-sm text-gray-500 hover:text-gray-700">
-          ← 店舗管理画面へ戻る
+        <Link href={backHref} className="text-sm text-gray-500 hover:text-gray-700">
+          ← {backLabel}
         </Link>
       </div>
     </main>

@@ -171,7 +171,7 @@ export default function LandingPage() {
             rel="noopener noreferrer"
             className="inline-block mt-8 sm:mt-10 px-8 py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            無料トライアルに申し込む
+            1ヶ月無料で始めてみる
           </Link>
         </section>
 
@@ -419,13 +419,13 @@ export default function LandingPage() {
               ) : (
                 <div className="space-y-4">
                   <Link
-                    href="/trial/questionnaire"
+                    href="/trial"
                     className="block w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
                   >
                     無料でデモを試す →
                   </Link>
                   <p className="text-xs text-gray-600 text-center">
-                    ※ デモでは最大5回まで口コミ生成が可能です
+                    ※ 各デモは最大5回までお試しいただけます
                   </p>
                 </div>
               )}
@@ -460,7 +460,7 @@ export default function LandingPage() {
                   rel="noopener noreferrer"
                   className="inline-block px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold transition-colors text-center"
                 >
-                  無料トライアルを始める
+                  1ヶ月無料で始めてみる
                 </Link>
                 <Link
                   href="/contact"
