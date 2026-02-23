@@ -70,7 +70,6 @@ export function getCommonRulesForUserPrompt(styleType: string, closingType: stri
 * 感情表現は1回まで
 * 絵文字は最大1つまで使用可
 * 「！」は最大1回まで使用可
-* 文中に1回だけ、話し言葉に近いニュアンス（例：ちょっと驚きました、意外でした）を入れてもよい
 
 ■ 構成（固定しない）
 * 必ずしも時系列や項目の順番通りに書かない
