@@ -183,6 +183,9 @@ export default function IndustryLandingPage({
             </div>
           </section>
         </main>
+        <footer className="py-6 text-center text-sm text-gray-500 border-t border-green-100">
+          ©2026 くーままAIラボ
+        </footer>
       </div>
     );
   }
@@ -226,6 +229,9 @@ export default function IndustryLandingPage({
           </div>
           <PricingSection />
         </main>
+        <footer className="py-6 text-center text-sm text-gray-500 border-t border-green-100">
+          ©2026 くーままAIラボ
+        </footer>
       </div>
     );
   }
@@ -258,6 +264,9 @@ export default function IndustryLandingPage({
             対応業種一覧に戻る
           </Link>
         </main>
+        <footer className="py-6 text-center text-sm text-gray-500 border-t border-green-100">
+          ©2026 くーままAIラボ
+        </footer>
       </div>
     );
   }
@@ -268,6 +277,9 @@ export default function IndustryLandingPage({
       <Link href="/industries" className="text-primary font-semibold hover:underline">
         対応業種一覧へ
       </Link>
+      <footer className="mt-auto py-6 text-center text-sm text-gray-500">
+        ©2026 くーままAIラボ
+      </footer>
     </div>
   );
 }

@@ -99,6 +99,9 @@ export default function IndustriesListPage() {
           })}
         </section>
       </main>
+      <footer className="py-6 text-center text-sm text-gray-500 border-t border-green-100 mt-auto">
+        ©2026 くーままAIラボ
+      </footer>
     </div>
   );
 }

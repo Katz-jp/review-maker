@@ -113,13 +113,14 @@ export default function TermsPage() {
             </div>
           </div>
 
-          <footer className="mt-8 text-center">
+          <footer className="mt-8 text-center space-y-2">
             <Link
               href="/"
               className="text-sm text-gray-600 hover:text-primary-dark transition-colors"
             >
               トップに戻る
             </Link>
+            <p className="text-sm text-gray-500">©2026 くーままAIラボ</p>
           </footer>
         </div>
       </main>

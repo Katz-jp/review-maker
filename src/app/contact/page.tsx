@@ -221,6 +221,9 @@ export default function ContactPage() {
             </button>
           </form>
         </div>
+        <footer className="mt-12 py-6 text-center text-sm text-gray-500 border-t border-green-100">
+          ©2026 くーままAIラボ
+        </footer>
       </main>
     </div>
   );

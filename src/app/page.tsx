@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import PricingSection from "@/components/PricingSection";
 import FaqSection from "@/components/FaqSection";
 import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDevelopment } from "@/lib/demo-limit";
@@ -151,9 +152,7 @@ export default function LandingPage() {
         {/* ヒーローセクション */}
         <section className="px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto text-center">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight">
-            お客様の実体験を、
-            <br />
-            自然な口コミ文に整える
+            口コミを、集客の武器に。
           </h1>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
             口コミ投稿数2.5倍、作成時間わずか30秒。
@@ -166,13 +165,21 @@ export default function LandingPage() {
             口コミづくりを前提にしています。
           </p>
           <Link
-            href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block mt-8 sm:mt-10 px-8 py-3.5 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            href="/industries"
+            className="inline-block mt-8 sm:mt-10 px-10 py-4 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-lg shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            1ヶ月無料で始めてみる
+            対応業種を調べる
           </Link>
+          <div className="mt-8 sm:mt-10 flex justify-center">
+            <Image
+              src="/hero-review.png"
+              alt="生成された口コミの画面。文章をコピーする・Googleマップへ投稿するボタンが表示されています。"
+              width={320}
+              height={480}
+              className="w-full max-w-[320px] h-auto rounded-xl drop-shadow-lg"
+              priority
+            />
+          </div>
         </section>
 
         {/* 特徴セクション（3カラム） */}
@@ -180,9 +187,7 @@ export default function LandingPage() {
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-8 pb-3 border-b-2 border-primary/50">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                口コミ投稿サポートAIを
-                <br />
-                導入する理由
+                口コミが&quot;武器&quot;になる3つの理由
               </h2>
               <p className="mt-2 text-base sm:text-lg font-semibold text-primary">
                 簡単・時短・続けられる！
@@ -213,42 +218,82 @@ export default function LandingPage() {
         {/* 口コミ投稿サポートAIを使う理由 */}
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto space-y-12 sm:space-y-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-2 pb-3 border-b-2 border-primary/50">
-            口コミ投稿サポートAIを使う理由
+            口コミが&quot;集客&quot;に変わる理由
           </h2>
           {/* セクション1 なぜ口コミが必要か */}
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
               <span aria-hidden>✅ </span>
-              口コミが増えると、選ばれやすくなる
+              口コミが増えると、来店率が上がる
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              Googleマップでお店を探す人は、口コミと写真で比較して来店を決めます。
-              口コミが増えるほど、見つけてもらいやすくなり、電話やルート検索・予約につながりやすくなります。
+              Googleマップで比較される時代。
+              <br />
+              口コミの数と内容が、そのまま&quot;安心材料&quot;になります。
+              <br />
+              投稿が増えるほど、見つけてもらいやすくなり、
+              <br />
+              電話・ルート検索・予約につながりやすくなります。
             </p>
+            <div className="mt-8 flex justify-center">
+              <Image
+                src="/hero-review.png"
+                alt="生成された口コミの画面"
+                width={220}
+                height={330}
+                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md"
+              />
+            </div>
           </div>
 
           {/* セクション2 このアプリのベネフィット */}
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
               <span aria-hidden>✅ </span>
-              口コミ運用の手間を、まとめて減らす
+              口コミ運用を自動化し、止まらなくする
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              お客様は短いアンケートに答えるだけで、投稿用の文章が完成。
-              オーナーは返信文もすぐ作れて、運用が止まりません。
-              結果として、口コミの量と内容の具体性が増え、信頼が積み上がります。
+              お客様は短いアンケートに答えるだけ。
+              <br />
+              オーナーは返信をワンクリックで作成。
+              <br />
+              運用が止まらないから、口コミが積み上がり、
+              <br />
+              信頼も自然に増えていきます。
             </p>
+            <div className="mt-8 flex justify-center">
+              <Image
+                src="/reply-helper-screen.png"
+                alt="クチコミ返信ヘルプAIの画面。口コミ入力に合わせた返信文をAIで生成できます。"
+                width={220}
+                height={330}
+                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md"
+              />
+            </div>
           </div>
 
           {/* セクション3 向いている業種 */}
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
               <span aria-hidden>✅ </span>
-              店舗型ビジネスに向いています
+              地域検索で上位に選ばれやすくなる
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              整骨院・整体・美容室・サロン・飲食店・クリニックなど、地域で選ばれるために口コミが重要な業種におすすめです。
+              腰痛・交通事故・美容・整体など、
+              <br />
+              お店の強みを自然に含んだ口コミが増えることで、
+              <br />
+              地域検索で比較されたときに強くなります。
             </p>
+            <div className="mt-8 flex justify-center">
+              <Image
+                src="/questionnaire-screen.png"
+                alt="お客様アンケートの画面。受けたメニューなどを複数選択できます。"
+                width={220}
+                height={330}
+                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md"
+              />
+            </div>
           </div>
 
         </section>
@@ -433,8 +478,8 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 料金プラン（先行導入・成長支援プラン） */}
-        <PricingSection />
+        {/* 料金プラン（先行導入・成長支援プラン）— 非表示 */}
+        {/* <PricingSection /> */}
 
         {/* よくある質問 */}
         <FaqSection />
@@ -442,34 +487,18 @@ export default function LandingPage() {
         {/* お問い合わせセクション */}
         <section id="contact" className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto scroll-mt-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3 pb-3 border-b-2 border-primary/50">
-            １ヶ月無料でお試しいただけます！
+            ご質問・ご要望はお気軽にどうぞ！
           </h2>
-          <p className="text-center text-base font-semibold text-gray-800 mb-2">
-            初月無料、２ヶ月目・３ヶ月目は50％OFFでご利用いただけます。
-          </p>
           <p className="text-center text-sm sm:text-base text-gray-600 mb-8 max-w-xl mx-auto">
-            無料トライアル中も口コミ作成・返信作成ツール、どちらも回数無制限で使えます。
+            「対応業種に自分の業種がなかった」「自分の店舗ならどの業種がぴったりかな？」など、ご質問やご要望はこちらからお寄せください。
           </p>
-          <div className="max-w-lg mx-auto">
-            <div className="bg-white rounded-2xl p-6 sm:p-8 border border-green-100 shadow-sm">
-              <p className="text-gray-600 mb-4 text-center">無料トライアル・ご質問はお気軽にどうぞ。</p>
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-                <Link
-                  href="https://docs.google.com/forms/d/e/1FAIpQLSfilsWAERsNkC6Z_761_i-XPR9wVUAbKE7uByouR5iNng4y_w/viewform?usp=header"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-block px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold transition-colors text-center"
-                >
-                  1ヶ月無料で始めてみる
-                </Link>
-                <Link
-                  href="/contact"
-                  className="inline-block px-6 py-3 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold transition-colors text-center"
-                >
-                  お問い合わせ
-                </Link>
-              </div>
-            </div>
+          <div className="max-w-lg mx-auto flex justify-center">
+            <Link
+              href="/contact"
+              className="inline-block px-10 py-4 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-lg transition-colors text-center"
+            >
+              お問い合わせ
+            </Link>
           </div>
         </section>
       </main>
@@ -499,6 +528,7 @@ export default function LandingPage() {
                 info@kuhmom-ailabo.com
               </a>
             </p>
+            <p>©2026 くーままAIラボ</p>
           </div>
         </div>
       </footer>
