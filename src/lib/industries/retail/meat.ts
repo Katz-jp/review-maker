@@ -111,7 +111,7 @@ ${closingReminder}
 ■ アンケート回答（この内容のみ使用。ここに書かれている選択肢だけを口コミに反映する）
 ${summary}
 
-${COMMON_OUTPUT_FORMAT}`;
+${COMMON_OUTPUT_FORMAT}
 【最終確認】文体は「${styleType}」、締めは「${closingType}」で書くこと。`;
   },
   systemMessage:
