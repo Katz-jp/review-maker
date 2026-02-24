@@ -37,9 +37,9 @@ export async function POST(req: NextRequest) {
         { role: "system", content: config.systemMessage },
         { role: "user", content: prompt },
       ],
-      temperature: 0.55,
-      presence_penalty: 0.3,
-      frequency_penalty: 0.2,
+      temperature: 0.75,
+      presence_penalty: 0.5,
+      frequency_penalty: 0.45,
       max_tokens: 500,
     });
 
