@@ -107,8 +107,9 @@ ${closingReminder}
 ■ アンケート回答（この内容のみ使用。ここに書かれている選択肢だけを口コミに反映する）
 ${summary}
 
+【最終確認】文体は「${styleType}」、締めは「${closingType}」で書くこと。
+
 ${COMMON_OUTPUT_FORMAT}`;
-【最終確認】文体は「${styleType}」、締めは「${closingType}」で書くこと。`;
   },
   systemMessage:
     "あなたは整骨院・接骨院のGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。口コミ本文のみ出力します。",

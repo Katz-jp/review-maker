@@ -165,11 +165,15 @@ export default function TenantQuestionnairePage() {
 
   const goPrev = () => {
     if (currentStep > 0) {
-      // 2問目以降では常に質問1のページへ
-      setCurrentStep(0);
+      // 2ページ目以降はアンケート内の1つ前のステップへ
+      setCurrentStep((prev) => prev - 1);
     } else {
-      // 質問1のときに戻る → 業種選択 or テナントトップへ
-      router.push(tenantId === "trial" ? "/trial/create" : `/${tenantId}`);
+      // 1ページ目のときはブラウザの1つ前のページへ（履歴がなければテナントトップへ）
+      if (typeof window !== "undefined" && window.history.length > 1) {
+        router.back();
+      } else {
+        router.push(tenantId === "trial" ? "/trial/create" : `/${tenantId}`);
+      }
     }
   };
 
