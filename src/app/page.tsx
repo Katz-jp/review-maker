@@ -183,6 +183,20 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* 口コミは未来への営業資産 */}
+        <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto text-center bg-white border-y border-green-100">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-6">
+            口コミは、未来への営業資産。
+          </h2>
+          <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            広告は止めれば消えます。
+            <br />
+            でも口コミは、検索結果に残り続け、
+            <br />
+            未来の患者さんに読まれ続けます。
+          </p>
+        </section>
+
         {/* 特徴セクション（3カラム） */}
         <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
           <div className="max-w-5xl mx-auto">

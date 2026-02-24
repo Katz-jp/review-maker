@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import PricingSection from "@/components/PricingSection";
 
@@ -71,6 +72,19 @@ export default function IndustryLandingPage({
                 1ヶ月無料トライアル
               </a>
             </div>
+            <div className="mt-8 flex justify-center overflow-hidden">
+              <Image
+                src="/industry-hero-review.png"
+                alt="生成された口コミの画面"
+                width={320}
+                height={480}
+                className="w-full max-w-[320px] h-auto rounded-xl drop-shadow-lg object-contain"
+                unoptimized
+              />
+            </div>
+            <p className="mt-6 text-center text-base sm:text-lg font-semibold text-gray-700">
+              施術の合間に、さくっと使えます。
+            </p>
           </section>
 
           {/* こんなお悩み */}
@@ -139,6 +153,30 @@ export default function IndustryLandingPage({
                   <p className="text-gray-700">投稿＋返信で更新頻度アップ。</p>
                 </li>
               </ul>
+            </div>
+          </section>
+
+          {/* 選ばれる整骨院は、口コミで決まる */}
+          <section className="px-4 sm:px-6 py-14 sm:py-20 bg-white border-y border-green-100">
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="inline-block mb-6 pb-3 border-b-2 border-primary/40">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  選ばれる整骨院は、口コミで決まる
+                </h2>
+              </div>
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                痛みや不安を抱えた患者さんは、
+                <br />
+                必ず口コミを読んでから来院を決めます。
+                <br />
+                そのときに
+                <br />
+                「自分と似た症状の声」があるかどうかで
+                <br />
+                選ばれるかどうかが決まります。
+                <br />
+                口コミは、信頼を見える化する資産です。
+              </p>
             </div>
           </section>
 
