@@ -350,15 +350,16 @@ export default function OwnerPage() {
             <Settings2 className="w-5 h-5 text-primary" />
             オリジナル選択肢の設定
           </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。
-            <br />
+          <div className="text-sm text-gray-600 mb-4">
+            <p>
+              各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。
+            </p>
             <span className="text-xs text-gray-500 mt-1 block">※ 注意：</span>
             <ul className="text-xs text-gray-500 mt-1 ml-4 list-disc space-y-0.5">
               <li>１つずつ追加すること</li>
               <li>必ず「選択肢を保存する」ボタンを押すこと（これを押さないと反映されません）</li>
             </ul>
-          </p>
+          </div>
           {customOptionsLoading ? (
             <div className="flex items-center justify-center py-8 gap-2 text-gray-500">
               <Loader2 className="w-5 h-5 animate-spin" />

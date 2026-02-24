@@ -20,7 +20,7 @@ function mergeOptions(
   customOptions: string[] = []
 ): string[] {
   const withoutOther = baseOptions.filter((o) => o !== "その他");
-  return [...withoutOther, ...customOptions, "その他"];
+  return [...customOptions, ...withoutOther, "その他"];
 }
 
 export default function TenantQuestionnairePage() {
