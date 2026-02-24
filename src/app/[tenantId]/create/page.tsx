@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Building2, Store, Stethoscope } from "lucide-react";
 import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
+
+const INDUSTRY_IDS = ["seikotsuin", "kouri"] as const;
 
 const INDUSTRIES = [
   {
@@ -33,7 +35,21 @@ const INDUSTRIES = [
 export default function TrialCreatePage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const tenantId = (params.tenantId as string) || "";
+
+  // ?industry=seikotsuin または kouri で来た場合はその業種でデモに直行
+  useEffect(() => {
+    if (tenantId !== "trial") return;
+    const industry = searchParams.get("industry");
+    if (industry && INDUSTRY_IDS.includes(industry as (typeof INDUSTRY_IDS)[number])) {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(TRIAL_INDUSTRY_KEY, industry);
+        router.replace("/trial/questionnaire");
+      }
+      return;
+    }
+  }, [tenantId, searchParams, router]);
 
   // trial 以外はそのままアンケートへ（業種選択は trial のみ）
   useEffect(() => {

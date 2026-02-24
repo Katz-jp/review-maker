@@ -360,10 +360,10 @@ export default function LandingPage() {
           <div className="max-w-3xl mx-auto">
             <div className="text-center mb-8">
               <div className="inline-block bg-primary text-white text-xs font-bold tracking-wider px-3.5 py-1 rounded-full mb-3.5">
-                FREE TRIAL
+                Try it now!
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-                まずは無料でお試しください
+                実際にアプリを触ってご体感ください！
               </h2>
               <p className="text-base text-gray-600 max-w-2xl mx-auto">
                 実際にアンケートに答えて、AIが生成する口コミ文を体験できます。
@@ -419,10 +419,10 @@ export default function LandingPage() {
               ) : (
                 <div className="space-y-4">
                   <Link
-                    href="/trial"
+                    href="/industries"
                     className="block w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
                   >
-                    無料でデモを試す →
+                    対応業種を選ぶ →
                   </Link>
                   <p className="text-xs text-gray-600 text-center">
                     ※ 各デモは最大5回までお試しいただけます

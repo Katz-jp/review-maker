@@ -165,9 +165,10 @@ export default function TenantQuestionnairePage() {
 
   const goPrev = () => {
     if (currentStep > 0) {
-      setCurrentStep((s) => s - 1);
+      // 2問目以降では常に質問1のページへ
+      setCurrentStep(0);
     } else {
-      // trial のときは1問目で戻る → 業種選択へ
+      // 質問1のときに戻る → 業種選択 or テナントトップへ
       router.push(tenantId === "trial" ? "/trial/create" : `/${tenantId}`);
     }
   };
@@ -345,6 +346,28 @@ export default function TenantQuestionnairePage() {
             ? "口コミを生成する"
             : "次へ"}
         </button>
+
+        {/* 左下: 業種ページに戻る（trialのみ） */}
+        {tenantId === "trial" && (
+          <div className="pt-2 text-left">
+            <Link
+              href={
+                industryKey === "seikotsu"
+                  ? "/industries/seikotsu"
+                  : industryKey === "retail"
+                    ? "/industries/retail"
+                    : "/industries"
+              }
+              className="text-sm text-gray-500 hover:text-primary-dark transition-colors"
+            >
+              {industryKey === "seikotsu"
+                ? "整骨院のページに戻る"
+                : industryKey === "retail"
+                  ? "小売店のページに戻る"
+                  : "対応業種一覧に戻る"}
+            </Link>
+          </div>
+        )}
       </div>
     </main>
   );
