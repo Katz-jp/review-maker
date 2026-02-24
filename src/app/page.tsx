@@ -65,7 +65,7 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
+    <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased overflow-x-hidden">
       {/* ヘッダー（スマホ: ハンバーガー / PC: 横並びナビ） */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-green-100 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
@@ -148,7 +148,7 @@ export default function LandingPage() {
         )}
       </header>
 
-      <main className="flex-1">
+      <main className="flex-1 overflow-x-hidden">
         {/* ヒーローセクション */}
         <section className="px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto text-center">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight">
@@ -170,14 +170,15 @@ export default function LandingPage() {
           >
             対応業種を調べる
           </Link>
-          <div className="mt-8 sm:mt-10 flex justify-center">
+          <div className="mt-8 sm:mt-10 flex justify-center overflow-hidden">
             <Image
               src="/hero-review.png"
               alt="生成された口コミの画面。文章をコピーする・Googleマップへ投稿するボタンが表示されています。"
               width={320}
               height={480}
-              className="w-full max-w-[320px] h-auto rounded-xl drop-shadow-lg"
+              className="w-full max-w-[320px] h-auto rounded-xl drop-shadow-lg object-contain"
               priority
+              unoptimized
             />
           </div>
         </section>
@@ -235,13 +236,14 @@ export default function LandingPage() {
               <br />
               電話・ルート検索・予約につながりやすくなります。
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center overflow-hidden">
               <Image
                 src="/hero-review.png"
                 alt="生成された口コミの画面"
                 width={220}
                 height={330}
-                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md"
+                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md object-contain"
+                unoptimized
               />
             </div>
           </div>
@@ -261,13 +263,14 @@ export default function LandingPage() {
               <br />
               信頼も自然に増えていきます。
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center overflow-hidden">
               <Image
                 src="/reply-helper-screen.png"
                 alt="クチコミ返信ヘルプAIの画面。口コミ入力に合わせた返信文をAIで生成できます。"
                 width={220}
                 height={330}
-                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md"
+                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md object-contain"
+                unoptimized
               />
             </div>
           </div>
@@ -285,13 +288,14 @@ export default function LandingPage() {
               <br />
               地域検索で比較されたときに強くなります。
             </p>
-            <div className="mt-8 flex justify-center">
+            <div className="mt-8 flex justify-center overflow-hidden">
               <Image
                 src="/questionnaire-screen.png"
                 alt="お客様アンケートの画面。受けたメニューなどを複数選択できます。"
                 width={220}
                 height={330}
-                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md"
+                className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md object-contain"
+                unoptimized
               />
             </div>
           </div>
