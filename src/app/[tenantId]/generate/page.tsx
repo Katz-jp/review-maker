@@ -175,7 +175,7 @@ export default function TenantGeneratePage() {
         <div className="rounded-2xl p-4 mb-4 bg-amber-50/80 border border-amber-200/60">
           <p className="text-sm font-semibold text-amber-900/90 mb-3">【投稿はかんたん3ステップ】</p>
           <ol className="text-sm text-amber-900/90 space-y-2 list-none">
-            <li>① ↓の「コピーしてGoogleマップに進む」を押す</li>
+            <li>① ↓の「コピーしてGoogleマップに進む」を押す<br />（文章は自動でコピーされます）</li>
             <li>② ☆をタップして評価（星が⭐️黄色になります）</li>
             <li>③ 文章を貼り付けて「投稿」！</li>
           </ol>
