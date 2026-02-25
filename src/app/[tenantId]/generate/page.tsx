@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Copy, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, Copy, Loader2 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 
@@ -92,6 +92,14 @@ export default function TenantGeneratePage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleCopyAndOpenMaps = async () => {
+    if (!generatedText) return;
+    await navigator.clipboard.writeText(generatedText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+    window.open(tenant.googleMapsUrl, "_blank", "noopener,noreferrer");
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen flex flex-col items-center justify-center px-5">
@@ -147,8 +155,13 @@ export default function TenantGeneratePage() {
 
       <section className="flex-1">
         <label className="block font-semibold text-gray-800 mb-2">
-          生成された口コミ
+          文章を作成しました！
         </label>
+        <p className="text-sm font-semibold text-amber-900/90 mb-4">
+          AIが作成した下書きです。
+          <br />
+          自由に修正してから投稿してください。
+        </p>
         <textarea
           value={generatedText}
           onChange={(e) => setGeneratedText(e.target.value)}
@@ -159,6 +172,15 @@ export default function TenantGeneratePage() {
       </section>
 
       <div className="mt-6 space-y-3">
+        <div className="rounded-2xl p-4 mb-4 bg-amber-50/80 border border-amber-200/60">
+          <p className="text-sm font-semibold text-amber-900/90 mb-3">【投稿はかんたん3ステップ】</p>
+          <ol className="text-sm text-amber-900/90 space-y-2 list-none">
+            <li>① ↓の「コピーしてGoogleマップに進む」を押す</li>
+            <li>② ☆をタップして評価（星が⭐️黄色になります）</li>
+            <li>③ 文章を貼り付けて「投稿」！</li>
+          </ol>
+        </div>
+
         {/* 残り回数表示（trialのみ） */}
         {tenantId === "trial" && remainingGenerations !== null && remainingGenerations > 0 && (
           <div className="bg-green-50 rounded-xl p-4 border border-green-200 mb-3">
@@ -167,12 +189,6 @@ export default function TenantGeneratePage() {
             </p>
           </div>
         )}
-
-        <div className="bg-amber-50/80 rounded-2xl p-4 mb-4 border border-amber-200/60">
-          <p className="text-sm font-semibold text-amber-900/90">
-            いただいた回答からAIが作成した文章です。内容を確認し、必要なら修正して、納得してからクチコミを投稿してください。
-          </p>
-        </div>
 
         {/* 制限に達した場合の案内（trialのみ） */}
         {tenantId === "trial" && remainingGenerations === 0 && (
@@ -209,7 +225,7 @@ export default function TenantGeneratePage() {
         )}
         <button
           type="button"
-          onClick={handleCopy}
+          onClick={handleCopyAndOpenMaps}
           className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
         >
           {copied ? (
@@ -220,20 +236,10 @@ export default function TenantGeneratePage() {
           ) : (
             <>
               <Copy className="w-5 h-5" />
-              文章をコピーする
+              コピーしてGoogleマップに進む
             </>
           )}
         </button>
-
-        <a
-          href={tenant.googleMapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl border-2 border-primary text-primary-dark hover:bg-primary/10 font-semibold text-base transition-colors"
-        >
-          <ExternalLink className="w-5 h-5" />
-          Googleマップへ投稿する
-        </a>
       </div>
     </main>
   );
