@@ -153,7 +153,7 @@ export default function TenantGeneratePage() {
         </div>
       </header>
 
-      <section className="flex-1">
+      <section className="flex-[0.5_1_0%] min-h-0">
         <label className="block font-semibold text-gray-800 mb-2">
           文章を作成しました！
         </label>
