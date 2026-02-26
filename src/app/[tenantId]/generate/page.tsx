@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { ArrowLeft, Copy, Loader2 } from "lucide-react";
+import { ArrowLeft, Copy, Loader2, RotateCcw, Undo2 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 
@@ -24,43 +24,23 @@ export default function TenantGeneratePage() {
   const canUsePaidFeatures = tenantId === "trial" || tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
 
   const [generatedText, setGeneratedText] = useState("");
+  const [previousText, setPreviousText] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
 
-  useEffect(() => {
-    // デモ制限チェック（trialのみ）
-    if (tenantId === "trial") {
-      const remaining = getRemainingGenerations(tenantId, "generate");
-      setRemainingGenerations(remaining);
-    } else {
-      setRemainingGenerations(null);
-    }
-
-    // trialの場合は契約チェックをスキップ
-    if (tenantId !== "trial" && !canUsePaidFeatures) {
-      setError("この店舗は現在ご利用いただけません。");
-      setLoading(false);
-      return;
-    }
+  const doGenerate = async (): Promise<string> => {
     const raw = sessionStorage.getItem("questionnaireAnswers");
-    if (!raw) {
-      setError("回答データが見つかりません。最初からやり直してください。");
-      setLoading(false);
-      return;
-    }
-
+    if (!raw) throw new Error("回答データが見つかりません。最初からやり直してください。");
     let payload: Payload;
     try {
       payload = JSON.parse(raw) as Payload;
     } catch {
-      setError("回答データの形式が不正です。");
-      setLoading(false);
-      return;
+      throw new Error("回答データの形式が不正です。");
     }
-
-    fetch("/api/generate", {
+    const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -70,12 +50,29 @@ export default function TenantGeneratePage() {
         industry: payload.industry ?? "seikotsu",
         ...(payload.industry === "retail" && { retailPreset: payload.retailPreset ?? "meat" }),
       }),
-    })
-      .then(async (res) => {
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "生成に失敗しました");
-        setGeneratedText(data.text || "");
-        // 成功したらカウントを増やす（trialのみ）
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "生成に失敗しました");
+    return data.text || "";
+  };
+
+  useEffect(() => {
+    // デモ制限チェック（trialのみ）
+    if (tenantId === "trial") {
+      setRemainingGenerations(getRemainingGenerations(tenantId, "generate"));
+    } else {
+      setRemainingGenerations(null);
+    }
+
+    if (tenantId !== "trial" && !canUsePaidFeatures) {
+      setError("この店舗は現在ご利用いただけません。");
+      setLoading(false);
+      return;
+    }
+
+    doGenerate()
+      .then((text) => {
+        setGeneratedText(text);
         if (tenantId === "trial") {
           incrementGenerationCount(tenantId, "generate");
           setRemainingGenerations(getRemainingGenerations(tenantId, "generate"));
@@ -84,6 +81,31 @@ export default function TenantGeneratePage() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [canUsePaidFeatures, tenantId]);
+
+  const handleRegenerate = async () => {
+    if (tenantId === "trial" && remainingGenerations === 0) return;
+    setPreviousText(generatedText);
+    setRegenerating(true);
+    try {
+      const text = await doGenerate();
+      setGeneratedText(text);
+      if (tenantId === "trial") {
+        incrementGenerationCount(tenantId, "generate");
+        setRemainingGenerations(getRemainingGenerations(tenantId, "generate"));
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "生成に失敗しました");
+    } finally {
+      setRegenerating(false);
+    }
+  };
+
+  const handleRestorePrevious = () => {
+    if (previousText !== null) {
+      setGeneratedText(previousText);
+      setPreviousText(null);
+    }
+  };
 
   const handleCopy = async () => {
     if (!generatedText) return;
@@ -169,6 +191,30 @@ export default function TenantGeneratePage() {
           className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 text-base resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
           placeholder="口コミが表示されます"
         />
+        <div className="flex flex-wrap gap-2 mt-3">
+          <button
+            type="button"
+            onClick={handleRegenerate}
+            disabled={regenerating || (tenantId === "trial" && remainingGenerations === 0)}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-green-50/50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {regenerating ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <RotateCcw className="w-4 h-4" />
+            )}
+            別の表現を試す
+          </button>
+          <button
+            type="button"
+            onClick={handleRestorePrevious}
+            disabled={previousText === null}
+            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-green-50/50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Undo2 className="w-4 h-4" />
+            前の文章に戻す
+          </button>
+        </div>
       </section>
 
       <div className="mt-6 space-y-3">

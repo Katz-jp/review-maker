@@ -12,6 +12,7 @@ import {
   MessageSquare,
   ChevronLeft,
   AlertCircle,
+  Undo2,
 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS, TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
@@ -48,6 +49,7 @@ export default function ReplyHelperPage() {
   const [starRating, setStarRating] = useState<number | null>(null);
   const [customPhrases, setCustomPhrases] = useState<CustomPhrase[]>([]);
   const [generatedReply, setGeneratedReply] = useState("");
+  const [previousReply, setPreviousReply] = useState<string | null>(null);
   const [replyEdited, setReplyEdited] = useState(false);
 
   const [generating, setGenerating] = useState(false);
@@ -190,6 +192,7 @@ export default function ReplyHelperPage() {
         incrementGenerationCount(tenantId, "reply");
         setRemainingGenerations(getRemainingGenerations(tenantId, "reply"));
       }
+      if (generatedReply.trim()) setPreviousReply(generatedReply);
       setGeneratedReply(data.text ?? "");
       setReplyEdited(false);
     } catch {
@@ -201,6 +204,13 @@ export default function ReplyHelperPage() {
 
   const handleRegenerate = () => {
     handleGenerate();
+  };
+
+  const handleRestorePrevious = () => {
+    if (previousReply !== null) {
+      setGeneratedReply(previousReply);
+      setPreviousReply(null);
+    }
   };
 
   const handleCopy = async () => {
@@ -509,8 +519,7 @@ export default function ReplyHelperPage() {
                 <>
                   <div className="mt-4">
                     <label className="block text-sm mb-1">
-                      <span className="font-medium text-gray-700">生成された返信</span>
-                      <span className="font-normal text-gray-600">（編集可：必ず生成された内容を確認し、適宜加筆・修正してご使用ください）</span>
+                      <span className="font-medium text-gray-700">返信案（編集できます）</span>
                     </label>
                     <textarea
                       value={generatedReply}
@@ -525,23 +534,33 @@ export default function ReplyHelperPage() {
                       {generatedReply.length} 文字
                     </p>
                   </div>
-                  <div className="flex flex-wrap gap-2 mt-4">
+                  <div className="mt-4 space-y-3">
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={handleRegenerate}
+                        disabled={generating}
+                        className="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium disabled:opacity-50 flex items-center gap-1"
+                      >
+                        <RotateCcw className="w-4 h-4" />
+                        他の案を見る
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCopy}
+                        className="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium flex items-center gap-1"
+                      >
+                        <Copy className="w-4 h-4" />
+                        {copyNotice ? "コピーしました！" : "コピー"}
+                      </button>
+                    </div>
                     <button
                       type="button"
-                      onClick={handleRegenerate}
-                      disabled={generating}
-                      className="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium disabled:opacity-50 flex items-center gap-1"
+                      onClick={handleRestorePrevious}
+                      disabled={previousReply === null}
+                      className="text-sm text-gray-600 hover:text-gray-800 hover:underline disabled:opacity-50 disabled:cursor-not-allowed disabled:no-underline disabled:hover:text-gray-600"
                     >
-                      <RotateCcw className="w-4 h-4" />
-                      再生成
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCopy}
-                      className="px-4 py-2 rounded-xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 text-sm font-medium flex items-center gap-1"
-                    >
-                      <Copy className="w-4 h-4" />
-                      {copyNotice ? "コピーしました！" : "コピー"}
+                      ひとつ前の案に戻す
                     </button>
                   </div>
                 </>
