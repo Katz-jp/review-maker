@@ -286,12 +286,12 @@ export default function TenantQuestionnairePage() {
               よかったらひとこと（任意）
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              施術以外で印象に残ったこと、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
+              その他 印象に残ったこと、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
             </p>
             <textarea
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
-              placeholder={'「LINEで予約も簡単だった」\n「強さを細かく調整してくれた」\n「自宅でできるケアを教えてくれた」'}
+              placeholder={'「LINEで予約や連絡ができて便利」\n「また利用したい」\n「思っていたよりよかった」'}
               rows={5}
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 text-sm resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />

@@ -28,7 +28,7 @@ export const retailMeatConfig: IndustryConfig = {
         "豚肉",
         "ホルモン",
         "焼肉用",
-        "鳥肉",
+        "鶏肉",
         "味付け肉",
         "その他",
       ],
