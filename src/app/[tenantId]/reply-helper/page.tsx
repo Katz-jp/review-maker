@@ -316,16 +316,6 @@ export default function ReplyHelperPage() {
               <div className="mb-3">
                 <p className="text-base font-semibold text-gray-700 mb-2">星評価（任意）</p>
                 <div className="flex flex-wrap gap-4 items-center">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="starRating"
-                      checked={starRating === null}
-                      onChange={() => setStarRating(null)}
-                      className="text-primary focus:ring-primary"
-                    />
-                    <span className="text-base text-gray-800">不明</span>
-                  </label>
                   {([1, 2, 3, 4, 5] as const).map((n) => (
                     <label key={n} className="flex items-center gap-2 cursor-pointer">
                       <input
