@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import { getReplyIndustryTerms, type ReplyIndustryTerms } from "@/lib/reply-industry";
 
 export type Tone = "friendly" | "polite" | "professional";
 
@@ -9,8 +10,27 @@ const TONE_LABELS: Record<Tone, string> = {
   professional: "法人・組織タイプ",
 };
 
-const SYSTEM_PROMPT = `あなたは整骨院・接骨院の口コミ返信を作成するAIです。
+function buildSystemPrompt(terms: ReplyIndustryTerms): string {
+  const medicalNoticeBlock = terms.hasMedicalNotice
+    ? `
+■ 整骨院・接骨院特有の注意事項
+
+症状改善を断定しない
+
+医療広告ガイドラインを意識し、効果を保証しない
+
+専門性は出しつつ誇張しない
+
+不安や不満には真摯に向き合う姿勢を示す
+`
+    : "";
+
+  return `あなたは${terms.roleLabel}の口コミ返信を作成するAIです。
 以下のルールを厳守し、お客様の口コミに対する返信文を1つだけ出力してください。
+
+■ 自店舗の呼び方（厳守）
+
+返信文で自店舗を指すときは必ず「${terms.selfRef}」を用いること（「当院」「当店」など他表現は使わない）。
 
 ■ 共通必須ルール
 
@@ -43,7 +63,7 @@ const SYSTEM_PROMPT = `あなたは整骨院・接骨院の口コミ返信を作
 
 改善アピールを強く出さない
 
-再来院を促さない
+${terms.visitAgain}を促さない
 
 感情を抑えた落ち着いた文体にする
 
@@ -61,13 +81,13 @@ const SYSTEM_PROMPT = `あなたは整骨院・接骨院の口コミ返信を作
 
 直接的な否定はしない
 
-自院の通常対応をやんわり説明する
+${terms.instructionSelf}の通常対応をやんわり説明する
 
 改善姿勢は1文だけ簡潔に入れる
 
 言い訳に見えないようにする
 
-再来院を強く促さない
+${terms.visitAgain}を強く促さない
 
 第三者が読んで安心できる文章にする
 
@@ -126,17 +146,7 @@ professional（法人・組織タイプ）
 感情は控えめ
 
 「誠にありがとうございます」「存じます」など格式ある表現を使用
-
-■ 整骨院特有の注意事項
-
-症状改善を断定しない
-
-医療広告ガイドラインを意識し、効果を保証しない
-
-専門性は出しつつ誇張しない
-
-不安や不満には真摯に向き合う姿勢を示す
-
+${medicalNoticeBlock}
 ■ 返信に自然に組み込みたいフレーズ（任意）
 
 指定されたフレーズがある場合は、無理なく自然に組み込む。
@@ -159,6 +169,7 @@ professional（法人・組織タイプ）
 
 返信本文のみを出力すること。
 前置き・説明文・補足は一切不要。`;
+}
 
 function buildUserPrompt(
   review: string,
@@ -203,6 +214,8 @@ export async function POST(req: NextRequest) {
       authorName = "",
       memo = "",
       customPhrases = [],
+      industry,
+      retailPreset,
     }: {
       review: string;
       tone: Tone;
@@ -210,7 +223,12 @@ export async function POST(req: NextRequest) {
       authorName?: string;
       memo?: string;
       customPhrases: string[];
+      industry?: string;
+      retailPreset?: string;
     } = body;
+
+    const terms = getReplyIndustryTerms(industry, retailPreset);
+    const systemPrompt = buildSystemPrompt(terms);
 
     const trimmedReview = typeof review === "string" ? review.trim() : "";
     if (!trimmedReview) {
@@ -236,7 +254,7 @@ export async function POST(req: NextRequest) {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: SYSTEM_PROMPT },
+        { role: "system", content: systemPrompt },
         {
           role: "user",
           content: buildUserPrompt(

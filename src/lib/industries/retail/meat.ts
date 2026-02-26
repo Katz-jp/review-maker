@@ -29,6 +29,7 @@ export const retailMeatConfig: IndustryConfig = {
         "ホルモン",
         "焼肉用",
         "鳥肉",
+        "味付け肉",
         "その他",
       ],
     },
@@ -47,12 +48,15 @@ export const retailMeatConfig: IndustryConfig = {
     },
     {
       id: "atmosphere",
-      label: "お店の雰囲気",
+      label: "お店の雰囲気・設備",
       options: [
         "清潔感がある",
         "スタッフが親切",
         "説明が丁寧",
         "駐車場がある",
+        "店内が見やすい",
+        "入りやすい雰囲気",
+        "アットホームな雰囲気",
         "その他",
       ],
     },
@@ -73,12 +77,13 @@ export const retailMeatConfig: IndustryConfig = {
       id: "recommend",
       label: "おすすめしたい人",
       options: [
-        "品質にこだわる方",
-        "コスパ重視の方",
-        "地元食材を探している方",
-        "贈り物を探している方",
-        "料理好きの方",
-        "日々の献立に迷っている方",
+        "品質にこだわる人",
+        "コスパ重視の人",
+        "地元食材を探している人",
+        "贈り物を探している人",
+        "料理好きの人",
+        "日々の献立に迷っている人",
+        "忙しい人",
         "その他",
       ],
     },
@@ -87,7 +92,7 @@ export const retailMeatConfig: IndustryConfig = {
     const labels: Record<string, string> = {
       product: "買ったもの",
       goodPoints: "良かった点",
-      atmosphere: "お店の雰囲気",
+      atmosphere: "お店の雰囲気・設備",
       purpose: "用途",
       recommend: "おすすめしたい人",
     };
@@ -112,5 +117,5 @@ ${COMMON_OUTPUT_FORMAT}
 【最終確認】文体は「${styleType}」、締めは「${closingType}」で書くこと。`;
   },
   systemMessage:
-    "あなたは精肉店のGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。口コミ本文のみ出力します。",
+    "あなたは精肉店のGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。口コミ本文のみ出力します。出力には絵文字（😊など）か「！」を必ず1つ以上含め、1〜2箇所改行すること。",
 };

@@ -14,7 +14,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
-import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
+import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS, TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
+import { industries, type IndustryKey } from "@/lib/industries";
 
 type Tone = "friendly" | "polite" | "professional";
 
@@ -60,6 +61,28 @@ export default function ReplyHelperPage() {
   // 返信で使うフレーズは1つだけ（店舗が選んだもの）
   const selectedPhraseForReply = customPhrases.find((p) => p.enabled && p.text.trim() !== "");
   const phraseForReply = selectedPhraseForReply ? [selectedPhraseForReply.text.trim()] : [];
+
+  // 業種（テナント or trial の sessionStorage）— 返信の「当院」「当店」などに使用
+  const industryKey: IndustryKey = (() => {
+    const fromTrial =
+      tenantId === "trial" && typeof window !== "undefined"
+        ? (() => {
+            const v = sessionStorage.getItem(TRIAL_INDUSTRY_KEY);
+            if (v === "kouri") return "retail";
+            if (v === "seikotsuin") return "seikotsu";
+            return undefined;
+          })()
+        : undefined;
+    const fromTenant = tenant?.industry;
+    const fromTenantId =
+      tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
+    const raw = fromTrial ?? fromTenant ?? fromTenantId ?? "seikotsu";
+    return Object.hasOwn(industries, raw) ? (raw as IndustryKey) : "seikotsu";
+  })();
+  const retailPreset =
+    industryKey === "retail"
+      ? tenant?.retailPreset ?? (tenantId === "retail-demo" || tenantId === "trial" ? "meat" : undefined)
+      : undefined;
 
   const loadSettings = useCallback(async () => {
     if (!tenantId) return;
@@ -153,6 +176,8 @@ export default function ReplyHelperPage() {
           tone,
           starRating: starRating ?? undefined,
           customPhrases: phraseForReply,
+          industry: industryKey,
+          ...(industryKey === "retail" && retailPreset != null && { retailPreset }),
         }),
       });
       const data = await res.json();
@@ -237,7 +262,7 @@ export default function ReplyHelperPage() {
           <div>
             <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2">
               <MessageSquare className="w-6 h-6 text-primary" />
-              クチコミ返信ヘルプAI
+              オーナー様用クチコミ返信ヘルプAI
             </h1>
             <p className="text-sm text-gray-500 mt-1">
               お客様の口コミに合わせた返信文をAIで生成できます
@@ -274,24 +299,24 @@ export default function ReplyHelperPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 flex-1">
           <section className="space-y-5">
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-              <h2 className="font-bold text-gray-800 mb-2">口コミ入力</h2>
+              <h2 className="font-bold text-gray-800 mb-2">① お客様からのクチコミを貼り付ける</h2>
               <div className="mb-3">
-                <label className="block text-sm mb-1">
+                <label className="block text-base mb-1">
                   <span className="font-semibold text-gray-700">投稿者名</span>
-                  <span className="font-normal text-gray-600">（任意ですが、返信に名前を入れるとお客様との距離が近くなり、信頼関係を築きやすくなります。）</span>
+                  <span className="block text-sm font-normal text-gray-600 mt-0.5">（返信に名前を入れるとお客様との距離が近くなり、信頼関係を築きやすくなります。）</span>
                 </label>
                 <input
                   type="text"
                   value={authorName}
                   onChange={(e) => setAuthorName(e.target.value)}
-                  placeholder="口コミ投稿者名をペースト"
+                  placeholder="ここに名前を入力（貼り付ける）"
                   className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
                 />
               </div>
               <div className="mb-3">
-                <p className="text-sm font-semibold text-gray-700 mb-2">星評価（任意）</p>
-                <div className="flex flex-wrap gap-2 items-center">
-                  <label className="flex items-center gap-1.5 cursor-pointer">
+                <p className="text-base font-semibold text-gray-700 mb-2">星評価（任意）</p>
+                <div className="flex flex-wrap gap-4 items-center">
+                  <label className="flex items-center gap-2 cursor-pointer">
                     <input
                       type="radio"
                       name="starRating"
@@ -299,10 +324,10 @@ export default function ReplyHelperPage() {
                       onChange={() => setStarRating(null)}
                       className="text-primary focus:ring-primary"
                     />
-                    <span className="text-sm text-gray-800">不明</span>
+                    <span className="text-base text-gray-800">不明</span>
                   </label>
                   {([1, 2, 3, 4, 5] as const).map((n) => (
-                    <label key={n} className="flex items-center gap-1.5 cursor-pointer">
+                    <label key={n} className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="radio"
                         name="starRating"
@@ -310,14 +335,14 @@ export default function ReplyHelperPage() {
                         onChange={() => setStarRating(n)}
                         className="text-primary focus:ring-primary"
                       />
-                      <span className="text-sm text-gray-800">★{n}</span>
+                      <span className="text-base text-gray-800">★{n}</span>
                     </label>
                   ))}
                 </div>
                 <p className="text-xs text-gray-500 mt-1">指定しない場合は口コミ内容から判断します</p>
               </div>
               <div className="mb-3">
-                <label className="block text-sm font-semibold text-gray-700 mb-1">口コミ本文</label>
+                <label className="block text-base font-semibold text-gray-700 mb-1">口コミ本文</label>
                 <textarea
                   value={review}
                   onChange={(e) => {
@@ -331,9 +356,9 @@ export default function ReplyHelperPage() {
                 <p className="text-xs text-gray-500 mt-1">{review.length} 文字</p>
               </div>
               <div>
-                <label className="block text-sm mb-1">
-                  <span className="font-semibold text-gray-700">投稿者に伝えるメッセージ（任意）</span>
-                  <span className="block font-normal text-gray-600 mt-0.5">（任意ですが、投稿者とのエピソードを１つ入れるだけで、ひとりひとりのお客様を大切にしている感じが、投稿者だけでなく、返信を読む未来のお客様にも伝わりやすくなります。）</span>
+                <label className="block mb-1">
+                  <span className="text-base font-semibold text-gray-700">② 投稿者に伝えるメッセージ（任意）</span>
+                  <span className="block text-sm font-normal text-gray-600 mt-0.5">（任意ですが、投稿者とのエピソードを１つ入れるだけで、ひとりひとりのお客様を大切にしている感じが、投稿者だけでなく、返信を読む未来のお客様にも伝わりやすくなります。）</span>
                 </label>
                 <textarea
                   value={memo}
@@ -348,9 +373,9 @@ export default function ReplyHelperPage() {
             </div>
 
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-              <h2 className="font-semibold text-gray-800 mb-3">返信設定</h2>
-              <div className="mb-3">
-                <p className="text-sm text-gray-600 mb-2">トーン（必須）</p>
+              <h2 className="font-semibold text-gray-800 mb-3">③ 返信設定</h2>
+              <div className="mb-6">
+                <p className="text-base font-semibold text-gray-600 mb-2">・トーンを選ぶ（必須）</p>
                 <div className="flex flex-wrap gap-2">
                   {TONE_OPTIONS.map((opt) => (
                     <label
@@ -370,11 +395,9 @@ export default function ReplyHelperPage() {
                   ))}
                 </div>
               </div>
-              <p className="text-xs text-gray-500 mb-4">（150〜200文字を推奨）</p>
-
               <div>
-                <p className="text-sm text-gray-600 mb-1">カスタムフレーズ（最大5つまで登録可能）</p>
-                <p className="text-xs text-gray-500 mb-2"><span className="text-amber-500 font-semibold">＊</span>返信で使いたいフレーズを1つ選んでください</p>
+                <p className="text-base text-gray-600 mb-1">・カスタムフレーズを選ぶ（任意）</p>
+                <p className="text-xs text-gray-500 mb-2"><span className="text-amber-500 font-semibold">＊</span>オリジナルフレーズを５つまで登録できます。返信に使えるのは１つのみです。</p>
                 {settingsLoading ? (
                   <div className="flex items-center gap-2 text-gray-500 text-sm py-2">
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -439,10 +462,7 @@ export default function ReplyHelperPage() {
           </section>
 
           <section className="space-y-5">
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-              <h2 className="font-semibold text-gray-800 mb-3">返信を生成</h2>
-              
-              {/* 制限に達した場合の案内（trialのみ） */}
+            {/* 制限に達した場合の案内（trialのみ） */}
               {tenantId === "trial" && remainingGenerations === 0 && (
                 <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-4">
                   <p className="text-base font-bold text-gray-900 mb-3 text-center">
@@ -488,7 +508,7 @@ export default function ReplyHelperPage() {
                     生成中…
                   </>
                 ) : (
-                  "返信を生成"
+                  "返信文を作成する"
                 )}
               </button>
               {generateError && (
@@ -536,7 +556,6 @@ export default function ReplyHelperPage() {
                   </div>
                 </>
               )}
-            </div>
           </section>
         </div>
 
