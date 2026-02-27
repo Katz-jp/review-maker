@@ -58,7 +58,7 @@ export default function IndustryLandingPage({
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href={trialId ? `/trial/create?industry=${trialId}` : "/trial/create"}
+                href={trialId ? `/trial?industry=${trialId}` : "/trial"}
                 className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
               >
                 無料でデモを試す
@@ -204,7 +204,7 @@ export default function IndustryLandingPage({
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href={trialId ? `/trial/create?industry=${trialId}` : "/trial/create"}
+                  href={trialId ? `/trial?industry=${trialId}` : "/trial"}
                   className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
                 >
                   無料でデモを試す
@@ -264,7 +264,7 @@ export default function IndustryLandingPage({
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
-                href={trialId ? `/trial/create?industry=${trialId}` : "/trial/create"}
+                href={trialId ? `/trial?industry=${trialId}` : "/trial"}
                 className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
               >
                 無料でデモを試す
@@ -427,7 +427,7 @@ export default function IndustryLandingPage({
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
-                  href={trialId ? `/trial/create?industry=${trialId}` : "/trial/create"}
+                  href={trialId ? `/trial?industry=${trialId}` : "/trial"}
                   className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
                 >
                   無料でデモを試す

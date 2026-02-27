@@ -3,7 +3,14 @@
 import Link from "next/link";
 import { MessageCircle, Sparkles, Home } from "lucide-react";
 
-export function TrialChoiceContent() {
+interface TrialChoiceContentProps {
+  industry?: string;
+}
+
+export function TrialChoiceContent({ industry }: TrialChoiceContentProps) {
+  const createHref = industry
+    ? `/trial/create?industry=${industry}`
+    : "/trial/create";
   return (
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
       <header className="text-center mb-8">
@@ -17,7 +24,7 @@ export function TrialChoiceContent() {
 
       <section className="flex-1 space-y-5">
         <Link
-          href="/trial/create"
+          href={createHref}
           className="block bg-white rounded-2xl p-6 shadow-sm border-2 border-green-100 hover:border-primary/50 hover:shadow-md transition-all"
         >
           <div className="flex items-start gap-4">
