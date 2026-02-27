@@ -157,7 +157,7 @@ export default function LandingPage() {
           <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
             口コミ投稿数2.5倍、作成時間わずか30秒。
             <br />
-            <span className="font-bold">忙しいオーナーのためのMEO対策AIツール</span>
+            <span className="font-bold">忙しいオーナーのためのMEO、SEO、AEO対策AIツール</span>
           </p>
           <p className="mt-4 text-sm text-gray-500 max-w-2xl mx-auto">
             当アプリは、インセンティブなし・実体験ベースの
@@ -193,7 +193,7 @@ export default function LandingPage() {
             <br />
             でも口コミは、検索結果に残り続け、
             <br />
-            未来の患者さんに読まれ続けます。
+            未来のお客さまに読まれ続けます。
           </p>
         </section>
 
@@ -242,7 +242,7 @@ export default function LandingPage() {
               口コミが増えると、来店率が上がる
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              Googleマップで比較される時代。
+              口コミで比較される時代。
               <br />
               口コミの数と内容が、そのまま&quot;安心材料&quot;になります。
               <br />
@@ -295,9 +295,15 @@ export default function LandingPage() {
               <span aria-hidden>✅ </span>
               地域検索で上位に選ばれやすくなる
             </h3>
-            <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              腰痛・交通事故・美容・整体など、
-              <br />
+            <p className="text-center text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed px-1">
+              <span className="inline-flex flex-wrap justify-center gap-x-1.5 gap-y-1">
+                <span className="whitespace-nowrap">「交通事故＋整体」</span>
+                <span className="whitespace-nowrap">「馬肉＋熊本」</span>
+                <span className="whitespace-nowrap">「美容室＋近所」</span>
+                <span className="whitespace-nowrap">「歯医者＋痛くない」</span>
+              </span>
+              など、
+              <br className="sm:hidden" />
               お店の強みを自然に含んだ口コミが増えることで、
               <br />
               地域検索で比較されたときに強くなります。

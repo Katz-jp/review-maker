@@ -29,6 +29,7 @@ export default function TenantGeneratePage() {
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedTextOnly, setCopiedTextOnly] = useState(false);
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
 
   const doGenerate = async (): Promise<string> => {
@@ -112,6 +113,13 @@ export default function TenantGeneratePage() {
     await navigator.clipboard.writeText(generatedText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleCopyTextOnly = async () => {
+    if (!generatedText) return;
+    await navigator.clipboard.writeText(generatedText);
+    setCopiedTextOnly(true);
+    setTimeout(() => setCopiedTextOnly(false), 2000);
   };
 
   const handleCopyAndOpenMaps = async () => {
@@ -286,6 +294,20 @@ export default function TenantGeneratePage() {
             </>
           )}
         </button>
+        <div className="mt-14 text-center text-sm text-gray-600">
+          他のサイトに使う場合はこちら
+          <br />
+          →{" "}
+          <button
+            type="button"
+            onClick={handleCopyTextOnly}
+            disabled={!generatedText}
+            className="font-bold text-gray-700 hover:text-primary underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            文章だけコピーする
+          </button>
+          {copiedTextOnly && <span className="ml-1.5 text-primary text-xs">コピーしました</span>}
+        </div>
       </div>
     </main>
   );
