@@ -14,7 +14,11 @@ type Payload = {
   tenantId?: string;
   industry?: string;
   retailPreset?: string;
+  satisfaction?: number;
 };
+
+const DENTAL_FEEDBACK_FORM_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSesqu-iZkjsXaIiIOUqEh2fiyUsIk2TZ9AONvHTbK3LeTZEgw/viewform?usp=header";
 
 export default function TenantGeneratePage() {
   const params = useParams();
@@ -31,6 +35,9 @@ export default function TenantGeneratePage() {
   const [copied, setCopied] = useState(false);
   const [copiedTextOnly, setCopiedTextOnly] = useState(false);
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
+  const [satisfaction, setSatisfaction] = useState<number | null>(null);
+  const [industry, setIndustry] = useState<string | null>(null);
+  const [showReviewSection, setShowReviewSection] = useState(true);
 
   const doGenerate = async (): Promise<string> => {
     const raw = sessionStorage.getItem("questionnaireAnswers");
@@ -49,6 +56,7 @@ export default function TenantGeneratePage() {
         otherInputs: payload.otherInputs,
         freeText: payload.freeText,
         industry: payload.industry ?? "seikotsu",
+        satisfaction: payload.satisfaction ?? null,
         ...(payload.industry === "retail" && { retailPreset: payload.retailPreset ?? "meat" }),
       }),
     });
@@ -71,6 +79,22 @@ export default function TenantGeneratePage() {
       return;
     }
 
+    // アンケート回答から業種と満足度を取得
+    const raw = sessionStorage.getItem("questionnaireAnswers");
+    if (raw) {
+      try {
+        const payload = JSON.parse(raw) as Payload;
+        if (typeof payload.satisfaction === "number") {
+          setSatisfaction(payload.satisfaction);
+        }
+        if (payload.industry) {
+          setIndustry(payload.industry);
+        }
+      } catch {
+        // noop
+      }
+    }
+
     doGenerate()
       .then((text) => {
         setGeneratedText(text);
@@ -82,6 +106,19 @@ export default function TenantGeneratePage() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, [canUsePaidFeatures, tenantId]);
+
+  // 歯科かつ低評価のときだけ、クチコミ生成〜投稿案内ブロックを折りたたんでおき、
+  // それ以外のときは常に表示する
+  useEffect(() => {
+    const isDental = industry === "dental";
+    const lowScore = isDental && satisfaction !== null && satisfaction <= 3;
+
+    if (lowScore) {
+      setShowReviewSection(false);
+    } else {
+      setShowReviewSection(true);
+    }
+  }, [industry, satisfaction]);
 
   const handleRegenerate = async () => {
     if (tenantId === "trial" && remainingGenerations === 0) return;
@@ -162,6 +199,10 @@ export default function TenantGeneratePage() {
     );
   }
 
+  const isDental = industry === "dental";
+  const isLowScore = isDental && satisfaction !== null && satisfaction <= 3;
+  const isHighScore = isDental && satisfaction !== null && satisfaction >= 4;
+
   return (
     <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
       <header className="flex items-center justify-between mb-6">
@@ -184,131 +225,186 @@ export default function TenantGeneratePage() {
       </header>
 
       <section className="flex-[0.5_1_0%] min-h-0">
-        <label className="block font-semibold text-gray-800 mb-2">
-          文章を作成しました！
-        </label>
-        <p className="text-sm font-semibold text-amber-900/90 mb-4">
-          AIが作成した下書きです。
-          <br />
-          自由に修正してから投稿してください。
-        </p>
-        <textarea
-          value={generatedText}
-          onChange={(e) => setGeneratedText(e.target.value)}
-          rows={8}
-          className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 text-base resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-          placeholder="口コミが表示されます"
-        />
-        <div className="flex flex-wrap gap-2 mt-3">
-          <button
-            type="button"
-            onClick={handleRegenerate}
-            disabled={regenerating || (tenantId === "trial" && remainingGenerations === 0)}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-green-50/50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {regenerating ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <RotateCcw className="w-4 h-4" />
-            )}
-            別の表現を試す
-          </button>
-          <button
-            type="button"
-            onClick={handleRestorePrevious}
-            disabled={previousText === null}
-            className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-green-50/50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Undo2 className="w-4 h-4" />
-            前の文章に戻す
-          </button>
-        </div>
+        {isLowScore && (
+          <div className="mb-4">
+            <p className="text-sm font-semibold text-amber-900 mb-2">
+              ご回答ありがとうございました。
+              <br />
+              より良い歯科医院づくりのため、
+              <br />
+              気になった点があれば教えていただけると助かります。
+            </p>
+            <button
+              type="button"
+              onClick={() =>
+                window.open(DENTAL_FEEDBACK_FORM_URL, "_blank", "noopener,noreferrer")
+              }
+              className="mt-3 inline-flex items-center justify-center w-full px-5 py-3 rounded-2xl bg-primary hover:bg-primary-dark text-white text-base font-semibold shadow-md active:scale-[0.98] transition-transform"
+            >
+              ご意見を送る
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowReviewSection(true)}
+              className="mt-4 text-xs text-gray-500 underline underline-offset-2"
+            >
+              Googleマップにクチコミを投稿する
+            </button>
+          </div>
+        )}
+        {showReviewSection && (
+          <>
+            <p className="text-sm font-semibold text-amber-900/90 mb-4">
+              参考用の口コミ文を作成しました
+              <br />
+              自由に修正してから投稿できます
+            </p>
+            <textarea
+              value={generatedText}
+              onChange={(e) => setGeneratedText(e.target.value)}
+              rows={8}
+              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 text-base resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+              placeholder="口コミが表示されます"
+            />
+            <div className="flex flex-wrap gap-2 mt-3">
+              <button
+                type="button"
+                onClick={handleRegenerate}
+                disabled={regenerating || (tenantId === "trial" && remainingGenerations === 0)}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-green-50/50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {regenerating ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <RotateCcw className="w-4 h-4" />
+                )}
+                別の表現を試す
+              </button>
+              <button
+                type="button"
+                onClick={handleRestorePrevious}
+                disabled={previousText === null}
+                className="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-green-50/50 text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Undo2 className="w-4 h-4" />
+                前の文章に戻す
+              </button>
+            </div>
+          </>
+        )}
       </section>
 
-      <div className="mt-6 space-y-3">
-        <div className="rounded-2xl p-4 mb-4 bg-amber-50/80 border border-amber-200/60">
-          <p className="text-sm font-semibold text-amber-900/90 mb-3">【投稿はかんたん3ステップ】</p>
-          <ol className="text-sm text-amber-900/90 space-y-2 list-none">
-            <li>① ↓の「コピーしてGoogleマップに進む」を押す<br />（文章は自動でコピーされます）</li>
-            <li>② ☆をタップして評価（星が⭐️黄色になります）</li>
-            <li>③ 文章を貼り付けて「投稿」！</li>
-          </ol>
-        </div>
-
-        {/* 残り回数表示（trialのみ） */}
-        {tenantId === "trial" && remainingGenerations !== null && remainingGenerations > 0 && (
-          <div className="bg-green-50 rounded-xl p-4 border border-green-200 mb-3">
-            <p className="text-sm font-semibold text-center text-gray-800">
-              <span className="text-primary text-base">あと残り{remainingGenerations}回試せます</span>
-            </p>
+      {showReviewSection && (
+        <div className="mt-6 space-y-3">
+          <div className="rounded-2xl p-4 mb-4 bg-amber-50/80 border border-amber-200/60">
+            <p className="text-sm font-semibold text-amber-900/90 mb-3">【投稿はかんたん3ステップ】</p>
+            <ol className="text-sm text-amber-900/90 space-y-2 list-none">
+              <li>① ↓のボタンから口コミ文をコピー<br />（文章は自動でコピーされます）</li>
+              <li>② ☆をタップして評価（星が⭐️黄色になります）</li>
+              <li>③ 文章を貼り付けて「投稿」！</li>
+            </ol>
           </div>
-        )}
 
-        {/* 制限に達した場合の案内（trialのみ） */}
-        {tenantId === "trial" && remainingGenerations === 0 && (
-          <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-3">
-            <p className="text-base font-bold text-gray-900 mb-3 text-center">
-              5回のお試し、いかがでしたか？
-            </p>
-            <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
-              実際のクチコミの質を実感いただけたでしょうか？
-            </p>
-            <div className="space-y-2 mb-4">
-              <p className="text-sm text-gray-700">
-                「もっと多くのメニューで試したい」
-              </p>
-              <p className="text-sm text-gray-700">
-                「実際に店舗で運用してみたい」
+          {/* 残り回数表示（trialのみ） */}
+          {tenantId === "trial" && remainingGenerations !== null && remainingGenerations > 0 && (
+            <div className="bg-green-50 rounded-xl p-4 border border-green-200 mb-3">
+              <p className="text-sm font-semibold text-center text-gray-800">
+                <span className="text-primary text-base">あと残り{remainingGenerations}回試せます</span>
               </p>
             </div>
-            <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-              そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
-            </p>
-            <a
-              href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
-            >
-              1ヶ月無料トライアルに申し込む
-            </a>
-            <p className="text-xs text-gray-600 text-center">
-              ※トライアル期間中に解約すれば費用は一切かかりません。
-            </p>
-          </div>
-        )}
-        <button
-          type="button"
-          onClick={handleCopyAndOpenMaps}
-          className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
-        >
-          {copied ? (
-            <>
-              <Copy className="w-5 h-5" />
-              コピーしました！
-            </>
-          ) : (
-            <>
-              <Copy className="w-5 h-5" />
-              コピーしてGoogleマップに進む
-            </>
           )}
-        </button>
-        <div className="mt-14 text-center text-sm text-gray-600">
-          他のサイトに使う場合はこちら
-          <br />
-          →{" "}
-          <button
-            type="button"
-            onClick={handleCopyTextOnly}
-            disabled={!generatedText}
-            className="font-bold text-gray-700 hover:text-primary underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            文章だけコピーする
-          </button>
-          {copiedTextOnly && <span className="ml-1.5 text-primary text-xs">コピーしました</span>}
+
+          {/* 制限に達した場合の案内（trialのみ） */}
+          {tenantId === "trial" && remainingGenerations === 0 && (
+            <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-3">
+              <p className="text-base font-bold text-gray-900 mb-3 text-center">
+                5回のお試し、いかがでしたか？
+              </p>
+              <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
+                実際のクチコミの質を実感いただけたでしょうか？
+              </p>
+              <div className="space-y-2 mb-4">
+                <p className="text-sm text-gray-700">
+                  「もっと多くのメニューで試したい」
+                </p>
+                <p className="text-sm text-gray-700">
+                  「実際に店舗で運用してみたい」
+                </p>
+              </div>
+              <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
+              </p>
+              <a
+                href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
+              >
+                1ヶ月無料トライアルに申し込む
+              </a>
+              <p className="text-xs text-gray-600 text-center">
+                ※トライアル期間中に解約すれば費用は一切かかりません。
+              </p>
+            </div>
+          )}
+          {isLowScore ? (
+            <div className="space-y-2">
+              <p className="text-xs text-gray-500 text-center">
+                下記はGoogleマップへの口コミ投稿用の下書きです（任意でご利用ください）。
+              </p>
+              <button
+                type="button"
+                onClick={handleCopyAndOpenMaps}
+                className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm shadow-md active:scale-[0.98] transition-transform"
+              >
+                {copied ? (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    コピーしました！
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Googleマップで口コミを書く（任意）
+                  </>
+                )}
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleCopyAndOpenMaps}
+              className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+            >
+              {copied ? (
+                <>
+                  <Copy className="w-5 h-5" />
+                  コピーしました！
+                </>
+              ) : (
+                <>
+                  <Copy className="w-5 h-5" />
+                  コピーしてGoogleマップに進む
+                </>
+              )}
+            </button>
+          )}
+          <div className="mt-14 text-center text-sm text-gray-600">
+            他のサイトに使う場合はこちら
+            <br />
+            →{" "}
+            <button
+              type="button"
+              onClick={handleCopyTextOnly}
+              disabled={!generatedText}
+              className="font-bold text-gray-700 hover:text-primary underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              文章だけコピーする
+            </button>
+            {copiedTextOnly && <span className="ml-1.5 text-primary text-xs">コピーしました</span>}
+          </div>
         </div>
-      </div>
+      )}
     </main>
   );
 }

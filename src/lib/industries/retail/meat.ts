@@ -87,6 +87,18 @@ export const retailMeatConfig: IndustryConfig = {
         "その他",
       ],
     },
+    {
+      id: "safety",
+      label: "この施設は安心して通えると感じましたか？",
+      multiSelect: false,
+      options: [
+        "とても感じた",
+        "感じた",
+        "どちらとも言えない",
+        "あまり感じなかった",
+        "感じなかった",
+      ],
+    },
   ],
   buildPrompt(answers, otherInputs, freeText) {
     const labels: Record<string, string> = {
@@ -95,6 +107,7 @@ export const retailMeatConfig: IndustryConfig = {
       atmosphere: "お店の雰囲気・設備",
       purpose: "用途",
       recommend: "おすすめしたい人",
+      safety: "この施設は安心して通えると感じましたか？",
     };
 
     const summary = buildSummaryWithMax3Categories(answers, otherInputs, labels, freeText);

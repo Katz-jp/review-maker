@@ -13,16 +13,19 @@ type Answers = Record<string, string[]>;
 type OtherInputs = Record<string, string>;
 type CustomOptionsByQuestion = Record<string, string[]>;
 
-const TOTAL_STEPS = 6;
-
 const HIDDEN_OPTIONS = ["パーソナルトレーニング"];
 
 function mergeOptions(
   baseOptions: string[],
   customOptions: string[] = []
 ): string[] {
-  const withoutOther = baseOptions.filter((o) => o !== "その他");
-  const merged = [...customOptions, ...withoutOther, "その他"];
+  const hasOther = baseOptions.includes("その他");
+  const withoutOther = hasOther
+    ? baseOptions.filter((o) => o !== "その他")
+    : baseOptions;
+  const merged = hasOther
+    ? [...customOptions, ...withoutOther, "その他"]
+    : [...customOptions, ...withoutOther];
   return merged.filter((o) => !HIDDEN_OPTIONS.includes(o));
 }
 
@@ -34,12 +37,21 @@ export default function TenantQuestionnairePage() {
   // trialの場合は契約チェックをスキップ（制限のみ適用）
   const canUseQuestionnaire = tenantId === "trial" || tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
 
+  // hydration mismatch 回避のため、初回描画はサーバーと同じ値に揃え、マウント後に sessionStorage を反映する
+  const [industryKey, setIndustryKey] = useState<IndustryKey>(() => {
+    const fromTenant = tenant?.industry;
+    const fromTenantId = tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
+    const raw = fromTenant ?? fromTenantId ?? "seikotsu";
+    return Object.hasOwn(industries, raw) ? (raw as IndustryKey) : "seikotsu";
+  });
+
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [otherInputs, setOtherInputs] = useState<OtherInputs>({});
   const [freeText, setFreeText] = useState("");
   const [customOptions, setCustomOptions] = useState<CustomOptionsByQuestion>({});
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
+  const [satisfaction, setSatisfaction] = useState<number | null>(null); // 満足度（1〜5）
 
   const fetchCustomOptions = useCallback(() => {
     if (!tenantId) return;
@@ -86,22 +98,25 @@ export default function TenantQuestionnairePage() {
     };
   }, [tenantId, fetchCustomOptions, router]);
 
-  const industryKey: IndustryKey = (() => {
-    const fromTrial =
-      tenantId === "trial" && typeof window !== "undefined"
-        ? (() => {
-            const v = sessionStorage.getItem(TRIAL_INDUSTRY_KEY);
-            if (v === "kouri") return "retail";
-            if (v === "seikotsuin") return "seikotsu";
-            return undefined;
-          })()
-        : undefined;
-    const fromTenant = tenant?.industry;
-    const fromTenantId =
-      tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
-    const raw = fromTrial ?? fromTenant ?? fromTenantId ?? "seikotsu";
-    return Object.hasOwn(industries, raw) ? (raw as IndustryKey) : "seikotsu";
-  })();
+  useEffect(() => {
+    // trial の場合のみ sessionStorage の業種を反映（マウント後）
+    if (tenantId !== "trial") {
+      const fromTenant = tenant?.industry;
+      const fromTenantId = tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
+      const raw = fromTenant ?? fromTenantId ?? "seikotsu";
+      setIndustryKey(Object.hasOwn(industries, raw) ? (raw as IndustryKey) : "seikotsu");
+      return;
+    }
+    if (typeof window === "undefined") return;
+    const v = sessionStorage.getItem(TRIAL_INDUSTRY_KEY);
+    const next =
+      v === "kouri" ? "retail" :
+      v === "seikotsuin" ? "seikotsu" :
+      v === "haisha" ? "dental" :
+      undefined;
+    if (next && Object.hasOwn(industries, next)) setIndustryKey(next as IndustryKey);
+  }, [tenantId, tenant?.industry]);
+
   const retailPreset =
     industryKey === "retail"
       ? tenant?.retailPreset ??
@@ -116,17 +131,55 @@ export default function TenantQuestionnairePage() {
       options: mergeOptions(q.options, customOptions[q.id]),
     }));
   }, [baseQuestions, customOptions]);
-  const isFreeTextStep = currentStep === questions.length;
-  const currentQuestion = !isFreeTextStep ? questions[currentStep] : null;
+  type Step =
+    | { type: "question"; questionIndex: number }
+    | { type: "freeText" }
+    | { type: "rating" };
+
+  const steps: Step[] = useMemo(() => {
+    // 歯医者(dental)だけ、2ページ目に自由記入（悩み）を移動し、最後に満足度(星)を置く
+    if (industryKey === "dental") {
+      const base: Step[] = [];
+      if (questions.length > 0) base.push({ type: "question", questionIndex: 0 });
+      base.push({ type: "freeText" });
+      for (let i = 1; i < questions.length; i += 1) {
+        base.push({ type: "question", questionIndex: i });
+      }
+      base.push({ type: "rating" });
+      return base;
+    }
+
+    // その他業種は「設問 → 自由記入（任意）」の順を維持
+    return [
+      ...questions.map((_, i) => ({ type: "question" as const, questionIndex: i })),
+      { type: "freeText" as const },
+    ];
+  }, [industryKey, questions]);
+
+  const TOTAL_STEPS = steps.length;
+  const current = steps[currentStep];
+  const isRatingStep = current?.type === "rating";
+  const isFreeTextStep = current?.type === "freeText";
+  const currentQuestion =
+    current?.type === "question" ? questions[current.questionIndex] : null;
 
   const toggleOption = (questionId: string, option: string) => {
+    const question = questions.find((q) => q.id === questionId);
+    const isMultiSelect = question?.multiSelect !== false;
+
     setAnswers((prev) => {
       const current = prev[questionId] || [];
+      if (!isMultiSelect) {
+        // 単一選択の場合は常に1つだけ保持
+        return { ...prev, [questionId]: [option] };
+      }
+
       const exists = current.includes(option);
-      const next = exists
-        ? current.filter((o) => o !== option)
-        : [...current, option];
-      return { ...prev, [questionId]: next };
+      const next = exists ? current.filter((o) => o !== option) : [...current, option];
+      return {
+        ...prev,
+        [questionId]: next,
+      };
     });
     if (option !== "その他") {
       setOtherInputs((prev) => {
@@ -158,6 +211,7 @@ export default function TenantQuestionnairePage() {
         freeText,
         tenantId,
         industry: industryKey,
+        satisfaction,
         ...(industryKey === "retail" && { retailPreset: retailPreset ?? "meat" }),
         answeredAt: new Date().toISOString(),
       };
@@ -234,9 +288,15 @@ export default function TenantQuestionnairePage() {
             <h3 className="font-semibold text-gray-800 mb-2 text-base">
               {currentQuestion.label}
             </h3>
-            <p className="text-sm text-primary-dark font-medium mb-4">
-              複数選択OK
-            </p>
+            {currentQuestion.id === "treatment" && industryKey === "dental" ? (
+              <p className="text-sm text-gray-500 mb-4">
+                今回ご来院された理由を教えてください
+              </p>
+            ) : currentQuestion.id === "recommend" && industryKey === "dental" ? null : currentQuestion.multiSelect === false ? null : (
+              <p className="text-sm text-primary-dark font-medium mb-4">
+                複数選択OK
+              </p>
+            )}
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {currentQuestion.options.map((opt) => (
                 <button
@@ -280,18 +340,66 @@ export default function TenantQuestionnairePage() {
               </div>
             )}
           </div>
-        ) : (
+        ) : isRatingStep ? (
           <div>
             <h3 className="font-semibold text-gray-800 mb-2 text-base">
-              よかったらひとこと（任意）
+              満足度
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              その他 印象に残ったこと、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
+              今回のご来院の満足度を教えてください（必須）
             </p>
+            <div className="flex items-center justify-center gap-2">
+              {[1, 2, 3, 4, 5].map((score) => (
+                <button
+                  key={score}
+                  type="button"
+                  onClick={() => setSatisfaction(score)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-full border-2 text-xl transition-all active:scale-[0.96] ${
+                    satisfaction !== null && satisfaction >= score
+                      ? "border-yellow-400 bg-yellow-300/80 text-yellow-900"
+                      : "border-gray-200 bg-white text-gray-400 hover:border-yellow-300 hover:bg-yellow-50"
+                  }`}
+                  aria-label={`満足度${score}`}
+                >
+                  ⭐
+                </button>
+              ))}
+            </div>
+            {satisfaction === null && (
+              <p className="mt-3 text-xs text-red-500 text-center">
+                星をタップして満足度を選んでください。
+              </p>
+            )}
+          </div>
+        ) : (
+          <div>
+            {industryKey === "dental" ? (
+              <>
+                <h3 className="font-semibold text-gray-800 mb-2 text-base">
+                  来院前、どんなことで困っていましたか？
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  例）歯が痛かった／銀歯が気になっていた／歯医者が苦手だった など
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="font-semibold text-gray-800 mb-2 text-base">
+                  よかったらひとこと（任意）
+                </h3>
+                <p className="text-sm text-gray-500 mb-4">
+                  その他 印象に残ったこと、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
+                </p>
+              </>
+            )}
             <textarea
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
-              placeholder={'「LINEで予約や連絡ができて便利」\n「また利用したい」\n「思っていたよりよかった」'}
+              placeholder={
+                industryKey === "dental"
+                  ? "例）\n歯が痛くて寝つけなかった\n銀歯が目立つのが気になっていた\n久しぶりの歯医者で少し不安だった など"
+                  : '「LINEで予約や連絡ができて便利」\n「また利用したい」\n「思っていたよりよかった」'
+              }
               rows={5}
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 text-sm resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -346,7 +454,10 @@ export default function TenantQuestionnairePage() {
         <button
           type="button"
           onClick={goNext}
-          disabled={tenantId === "trial" && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1}
+          disabled={
+            (tenantId === "trial" && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1) ||
+            (isRatingStep && satisfaction === null)
+          }
           className="block w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base text-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
         >
           {currentStep === TOTAL_STEPS - 1
@@ -363,7 +474,9 @@ export default function TenantQuestionnairePage() {
                   ? "/industries/seikotsu"
                   : industryKey === "retail"
                     ? "/industries/retail"
-                    : "/industries"
+                    : industryKey === "dental"
+                      ? "/industries/dentist"
+                      : "/industries"
               }
               className="text-sm text-gray-500 hover:text-primary-dark transition-colors"
             >
@@ -371,7 +484,9 @@ export default function TenantQuestionnairePage() {
                 ? "整骨院のページに戻る"
                 : industryKey === "retail"
                   ? "小売店のページに戻る"
-                  : "対応業種一覧に戻る"}
+                  : industryKey === "dental"
+                    ? "歯医者・クリニックのページに戻る"
+                    : "対応業種一覧に戻る"}
             </Link>
           </div>
         )}

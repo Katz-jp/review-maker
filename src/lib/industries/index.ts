@@ -1,10 +1,12 @@
 import { seikotsuConfig } from "./seikotsu";
+import { dentalConfig } from "./dental";
 import { getRetailConfig, defaultRetailPreset, retailPresets } from "./retail";
 import type { IndustryConfig } from "./types";
 
 /** 業種ごとの設定。retail は preset で中身が変わる */
 export const industries = {
   seikotsu: seikotsuConfig,
+  dental: dentalConfig,
   retail: {
     presets: retailPresets,
     defaultPreset: defaultRetailPreset,
@@ -23,6 +25,9 @@ export type { IndustryConfig } from "./types";
 export function getIndustryConfig(industryKey: IndustryKey, retailPreset?: string): IndustryConfig {
   if (industryKey === "seikotsu") {
     return seikotsuConfig;
+  }
+  if (industryKey === "dental") {
+    return dentalConfig;
   }
   return industries.retail.getConfig(retailPreset);
 }

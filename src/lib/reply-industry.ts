@@ -22,6 +22,13 @@ const REPLY_TERMS: Record<IndustryKey, ReplyIndustryTerms> = {
     visitAgain: "再来院",
     hasMedicalNotice: true,
   },
+  dental: {
+    roleLabel: "歯科クリニック",
+    selfRef: "当院",
+    instructionSelf: "自院",
+    visitAgain: "再来院",
+    hasMedicalNotice: true,
+  },
   retail: {
     roleLabel: "小売店",
     selfRef: "当店",

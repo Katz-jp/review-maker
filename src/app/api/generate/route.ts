@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
       freeText = "",
       industry = DEFAULT_INDUSTRY,
       retailPreset,
+      satisfaction = null,
     } = body;
 
     const industryKey = Object.hasOwn(industries, industry)
@@ -29,7 +30,14 @@ export async function POST(req: NextRequest) {
     const config = getIndustryConfig(industryKey, retailPreset);
 
     const openai = new OpenAI({ apiKey });
-    const prompt = config.buildPrompt(answers, otherInputs, freeText);
+    const prompt = config.buildPrompt(
+      answers,
+      {
+        ...otherInputs,
+        ...(satisfaction !== null && { __satisfaction: String(satisfaction) }),
+      },
+      freeText
+    );
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",

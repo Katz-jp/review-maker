@@ -87,6 +87,18 @@ export const seikotsuConfig: IndustryConfig = {
         "その他",
       ],
     },
+    {
+      id: "safety",
+      label: "この施設は安心して通えると感じましたか？",
+      multiSelect: false,
+      options: [
+        "とても感じた",
+        "感じた",
+        "どちらとも言えない",
+        "あまり感じなかった",
+        "感じなかった",
+      ],
+    },
   ],
   buildPrompt(answers, otherInputs, freeText) {
     const labels: Record<string, string> = {
@@ -95,6 +107,7 @@ export const seikotsuConfig: IndustryConfig = {
       change: "施術後の感想",
       atmosphere: "雰囲気や対応",
       recommend: "おすすめしたい人",
+      safety: "この施設は安心して通えると感じましたか？",
     };
 
     const summary = buildSummaryWithMax3Categories(answers, otherInputs, labels, freeText);

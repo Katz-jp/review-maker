@@ -6,7 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Building2, Store, Stethoscope } from "lucide-react";
 import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
 
-const INDUSTRY_IDS = ["seikotsuin", "kouri"] as const;
+const INDUSTRY_IDS = ["seikotsuin", "kouri", "haisha"] as const;
 
 const INDUSTRIES = [
   {
@@ -28,7 +28,7 @@ const INDUSTRIES = [
     label: "歯医者・クリニック",
     description: "診療体験をもとに口コミの下書きを作成します。",
     icon: Building2,
-    available: false,
+    available: true,
   },
 ] as const;
 

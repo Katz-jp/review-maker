@@ -455,29 +455,52 @@ export default function IndustryLandingPage({
     return (
       <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-green-100 shadow-sm">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
-            <Link href="/industries" className="inline-flex items-center gap-1 text-gray-600 hover:text-primary-dark text-sm font-medium transition-colors">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+            <Link
+              href="/industries"
+              className="inline-flex items-center gap-1 text-gray-600 hover:text-primary-dark text-sm font-medium transition-colors"
+            >
               <ArrowLeft className="w-4 h-4" />
               対応業種一覧
             </Link>
+            <Link
+              href="/"
+              className="text-sm font-medium text-gray-600 hover:text-primary-dark transition-colors"
+            >
+              口コミ投稿サポートAI
+            </Link>
           </div>
         </header>
-        <main className="flex-1 px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto text-center">
-          <span className="inline-block text-xs font-bold text-gray-500 bg-gray-200 px-3 py-1 rounded-full mb-4">
-            準備中
-          </span>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">
-            歯医者・クリニック向け
-          </h1>
-          <p className="text-gray-600 mb-8">
-            診療体験をもとに口コミの下書きを作成する機能を準備しています。しばらくお待ちください。
-          </p>
-          <Link
-            href="/industries"
-            className="inline-block py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold transition-colors"
-          >
-            対応業種一覧に戻る
-          </Link>
+        <main className="flex-1">
+          {/* ヒーロー */}
+          <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto text-center">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+              歯医者・クリニックのための
+              <br />
+              口コミ戦略ツール
+            </h1>
+            <p className="mt-4 text-xl sm:text-2xl font-semibold text-gray-800">
+              「怖い・痛そう」で迷っている患者さんに、
+              <br />
+              安心して選んでもらえる口コミを増やしませんか？
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href={trialId ? `/trial?industry=${trialId}` : "/trial"}
+                className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+              >
+                無料でデモを試す
+              </Link>
+              <a
+                href={TRIAL_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block py-4 px-6 rounded-xl bg-white border-2 border-primary text-primary hover:bg-primary/10 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+              >
+                1ヶ月無料トライアル
+              </a>
+            </div>
+          </section>
         </main>
         <footer className="py-6 text-center text-sm text-gray-500 border-t border-green-100">
           ©2026 くーままAIラボ

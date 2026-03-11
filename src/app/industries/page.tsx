@@ -23,7 +23,7 @@ const INDUSTRIES = [
     label: "歯医者・クリニック",
     description: "診療体験をもとに口コミの下書きを作成します。",
     icon: Building2,
-    available: false,
+    available: true,
   },
 ] as const;
 
