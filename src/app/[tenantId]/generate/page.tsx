@@ -230,7 +230,7 @@ export default function TenantGeneratePage() {
             <p className="text-sm font-semibold text-amber-900 mb-2">
               ご回答ありがとうございました。
               <br />
-              より良い歯科医院づくりのため、
+              より良いサービスづくりのため、
               <br />
               気になった点があれば教えていただけると助かります。
             </p>
@@ -241,12 +241,12 @@ export default function TenantGeneratePage() {
               }
               className="mt-3 inline-flex items-center justify-center w-full px-5 py-3 rounded-2xl bg-primary hover:bg-primary-dark text-white text-base font-semibold shadow-md active:scale-[0.98] transition-transform"
             >
-              ご意見を送る
+              意見を送る
             </button>
             <button
               type="button"
               onClick={() => setShowReviewSection(true)}
-              className="mt-4 text-xs text-gray-500 underline underline-offset-2"
+              className="mt-4 text-sm text-gray-500 underline underline-offset-2"
             >
               Googleマップにクチコミを投稿する
             </button>

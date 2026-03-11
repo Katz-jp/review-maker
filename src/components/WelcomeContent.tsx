@@ -15,13 +15,17 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
 
       <section className="text-center mb-10">
         <h1 className="text-2xl font-extrabold text-gray-800 leading-tight">
-          口コミ投稿に
+          アンケートと
           <br />
-          ご協力お願いします
+          クチコミ投稿にご協力お願いします
         </h1>
         <p className="text-2xl mt-2 tracking-widest">⭐️⭐️⭐️⭐️⭐️</p>
         <p className="text-base text-gray-600 mt-3">
-          今日のご感想を口コミで教えていただけると嬉しいです😊
+          より良いサービスづくりと
+          <br />
+          これからご利用される方の参考のため、
+          <br />
+          ご感想を教えていただけると嬉しいです😊
         </p>
       </section>
 
@@ -33,7 +37,7 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
           className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md active:scale-[0.98] transition-transform"
         >
           <MapPin className="w-5 h-5" />
-          Googleマップを開いて投稿する（30秒）
+          Googleに口コミを投稿する（30秒）
         </a>
 
         <Link
@@ -42,17 +46,15 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
         >
           <span className="flex items-center justify-center gap-2">
             <Sparkles className="w-5 h-5" />
-            AIで口コミを作る
+            質問に答えて口コミを作る
           </span>
           <span className="block text-sm font-normal text-gray-500 mt-1">
-            質問に答えるだけで文章を作成
+            かんたんな質問に答えるだけで
+            <br />
+            口コミの文章が作れます
           </span>
         </Link>
       </div>
-
-      <p className="text-xs text-gray-400 text-center mt-8">
-        AIは口コミ文章の作成をお手伝いします。内容は自由に編集して投稿してください
-      </p>
     </main>
   );
 }
