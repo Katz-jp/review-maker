@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { requireAdminSecret } from "@/lib/admin-auth";
 
+const VALID_STATUSES = ["active", "canceled", "past_due", "trialing", "inactive"] as const;
+
 export type TenantListItem = {
   tenantId: string;
   name: string;
@@ -59,10 +61,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { tenantId, name, googleMapsUrl } = body as {
+    const { tenantId, name, googleMapsUrl, subscriptionStatus, industry, retailPreset } = body as {
       tenantId?: string;
       name?: string;
       googleMapsUrl?: string;
+      subscriptionStatus?: string;
+      industry?: string;
+      retailPreset?: string;
     };
 
     if (!tenantId || typeof tenantId !== "string" || !/^[a-zA-Z0-9_-]+$/.test(tenantId.trim())) {
@@ -90,11 +95,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const status =
+      typeof subscriptionStatus === "string" &&
+      VALID_STATUSES.includes(subscriptionStatus as (typeof VALID_STATUSES)[number])
+        ? subscriptionStatus
+        : "inactive";
+    const nextIndustry = industry === "" ? null : industry;
+    const nextRetailPreset =
+      nextIndustry === "retail" ? (retailPreset === "" ? null : retailPreset) : null;
+
     await ref.set(
       {
         name: typeof name === "string" && name.trim() ? name.trim() : id,
         googleMapsUrl: typeof googleMapsUrl === "string" && googleMapsUrl.trim() ? googleMapsUrl.trim() : "https://www.google.com/maps",
-        subscriptionStatus: "inactive",
+        subscriptionStatus: status,
+        industry: nextIndustry,
+        retailPreset: nextRetailPreset,
         updatedAt: new Date().toISOString(),
       },
       { merge: true }
@@ -104,7 +120,9 @@ export async function POST(req: NextRequest) {
       tenantId: id,
       name: typeof name === "string" && name.trim() ? name.trim() : id,
       googleMapsUrl: typeof googleMapsUrl === "string" && googleMapsUrl.trim() ? googleMapsUrl.trim() : "https://www.google.com/maps",
-      subscriptionStatus: "inactive",
+      subscriptionStatus: status,
+      industry: nextIndustry,
+      retailPreset: nextRetailPreset,
     });
   } catch (err) {
     console.error("[admin/tenants POST]", err);

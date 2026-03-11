@@ -11,6 +11,7 @@ import {
   Store,
   ChevronLeft,
 } from "lucide-react";
+import { INDUSTRY_OPTIONS, RETAIL_PRESET_OPTIONS } from "@/lib/industries/admin-options";
 
 /** sessionStorage に保存する際のキー（認証済みパスワードを保持） */
 const ADMIN_SESSION_KEY = "adminAuth";
@@ -50,6 +51,9 @@ export default function AdminPage() {
   const [newTenantId, setNewTenantId] = useState("");
   const [newName, setNewName] = useState("");
   const [newGoogleMapsUrl, setNewGoogleMapsUrl] = useState("https://www.google.com/maps");
+  const [newStatus, setNewStatus] = useState("inactive");
+  const [newIndustry, setNewIndustry] = useState("");
+  const [newRetailPreset, setNewRetailPreset] = useState("meat");
   const [addError, setAddError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -171,6 +175,9 @@ export default function AdminPage() {
           tenantId: newTenantId.trim(),
           name: newName.trim() || newTenantId.trim(),
           googleMapsUrl: newGoogleMapsUrl.trim() || "https://www.google.com/maps",
+          subscriptionStatus: newStatus,
+          industry: newIndustry.trim() || "",
+          retailPreset: newIndustry === "retail" ? (newRetailPreset.trim() || "meat") : "",
         }),
       });
       const data = await res.json();
@@ -182,6 +189,9 @@ export default function AdminPage() {
       setNewTenantId("");
       setNewName("");
       setNewGoogleMapsUrl("https://www.google.com/maps");
+      setNewStatus("inactive");
+      setNewIndustry("");
+      setNewRetailPreset("meat");
     } finally {
       setAdding(false);
     }
@@ -343,6 +353,48 @@ export default function AdminPage() {
               className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">契約状態</label>
+            <select
+              value={newStatus}
+              onChange={(e) => setNewStatus(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              {Object.entries(STATUS_LABELS).map(([v, l]) => (
+                <option key={v} value={v}>{l}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">業種</label>
+            <select
+              value={newIndustry}
+              onChange={(e) => {
+                const v = e.target.value;
+                setNewIndustry(v);
+                if (v !== "retail") setNewRetailPreset("meat");
+              }}
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            >
+              {INDUSTRY_OPTIONS.map((opt) => (
+                <option key={opt.value || "unset"} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+          {newIndustry === "retail" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">小売プリセット</label>
+              <select
+                value={newRetailPreset}
+                onChange={(e) => setNewRetailPreset(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+              >
+                {RETAIL_PRESET_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+          )}
           {addError && <p className="text-sm text-red-600">{addError}</p>}
           <button
             type="submit"
@@ -412,9 +464,9 @@ export default function AdminPage() {
                         }}
                         className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
                       >
-                        <option value="">未設定（整骨院として表示）</option>
-                        <option value="seikotsu">整骨院</option>
-                        <option value="retail">小売店</option>
+                        {INDUSTRY_OPTIONS.map((opt) => (
+                          <option key={opt.value || "unset"} value={opt.value}>{opt.label}</option>
+                        ))}
                       </select>
                     </div>
                     {editIndustry === "retail" && (
@@ -425,8 +477,9 @@ export default function AdminPage() {
                           onChange={(e) => setEditRetailPreset(e.target.value)}
                           className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
                         >
-                          <option value="meat">精肉店</option>
-                          <option value="general">汎用</option>
+                          {RETAIL_PRESET_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                          ))}
                         </select>
                       </div>
                     )}
