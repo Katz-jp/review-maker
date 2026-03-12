@@ -17,8 +17,16 @@ type Payload = {
   satisfaction?: number;
 };
 
-const DENTAL_FEEDBACK_FORM_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSesqu-iZkjsXaIiIOUqEh2fiyUsIk2TZ9AONvHTbK3LeTZEgw/viewform?usp=header";
+const DENTAL_FEEDBACK_FORM_ENTRY_ID = "683328231";
+const DENTAL_FEEDBACK_FORM_BASE =
+  "https://docs.google.com/forms/d/e/1FAIpQLSesqu-iZkjsXaIiIOUqEh2fiyUsIk2TZ9AONvHTbK3LeTZEgw/viewform";
+
+function getDentalFeedbackFormUrl(tenantId: string): string {
+  const params = new URLSearchParams({
+    [`entry.${DENTAL_FEEDBACK_FORM_ENTRY_ID}`]: tenantId,
+  });
+  return `${DENTAL_FEEDBACK_FORM_BASE}?usp=pp_url&${params.toString()}`;
+}
 
 export default function TenantGeneratePage() {
   const params = useParams();
@@ -237,7 +245,7 @@ export default function TenantGeneratePage() {
             <button
               type="button"
               onClick={() =>
-                window.open(DENTAL_FEEDBACK_FORM_URL, "_blank", "noopener,noreferrer")
+                window.open(getDentalFeedbackFormUrl(tenantId), "_blank", "noopener,noreferrer")
               }
               className="mt-3 inline-flex items-center justify-center w-full px-5 py-3 rounded-2xl bg-primary hover:bg-primary-dark text-white text-base font-semibold shadow-md active:scale-[0.98] transition-transform"
             >
