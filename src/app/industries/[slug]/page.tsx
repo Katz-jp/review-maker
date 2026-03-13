@@ -471,18 +471,19 @@ export default function IndustryLandingPage({
             </Link>
           </div>
         </header>
+
         <main className="flex-1">
           {/* ヒーロー */}
           <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4 leading-tight">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
               歯医者・クリニックのための
               <br />
               口コミ戦略ツール
             </h1>
-            <p className="mt-4 text-xl sm:text-2xl font-semibold text-gray-800">
-              「怖い・痛そう」で迷っている患者さんに、
+            <p className="mt-6 text-xl sm:text-2xl font-semibold text-gray-800">
+              Googleマップの口コミを
               <br />
-              安心して選んでもらえる口コミを増やしませんか？
+              「選ばれるクリニック」の装置に変えませんか？
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -499,6 +500,158 @@ export default function IndustryLandingPage({
               >
                 1ヶ月無料トライアル
               </a>
+            </div>
+            <div className="mt-8 flex justify-center overflow-hidden">
+              <Image
+                src="/industry-hero-dental.png"
+                alt="生成された口コミの画面"
+                width={320}
+                height={480}
+                className="w-full max-w-[320px] h-auto rounded-xl drop-shadow-lg object-contain"
+                unoptimized
+              />
+            </div>
+            <p className="mt-6 text-center text-base sm:text-lg font-semibold text-gray-700">
+              診療の合間に、さくっと使えます。
+            </p>
+          </section>
+
+          {/* こんなお悩み */}
+          <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
+                こんなお悩みありませんか？
+              </h2>
+              <ul className="space-y-3 text-base sm:text-lg text-gray-700">
+                <li>・「怖い・痛そう」で敬遠されている</li>
+                <li>・Google検索で他院に埋もれている</li>
+                <li>・口コミが少なくて不安</li>
+                <li>・返信が面倒で後回しになっている</li>
+                <li>・痛くない・丁寧・予約しやすいなどの強みが伝わっていない</li>
+              </ul>
+              <p className="mt-8 text-center text-lg font-semibold text-gray-800">
+                ひとつでも当てはまるなら、この仕組みが役立ちます。
+              </p>
+            </div>
+          </section>
+
+          {/* 患者さんはこうやってクリニックを選んでいます */}
+          <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
+              患者さんはこうやってクリニックを選んでいます
+            </h2>
+            <ol className="space-y-4 text-base sm:text-lg text-gray-700 list-decimal list-inside">
+              <li>「地域名＋歯医者／痛くない／矯正」で検索</li>
+              <li>Googleマップを開く</li>
+              <li>口コミ数と星を見る</li>
+              <li>返信の丁寧さを見る</li>
+              <li>「ここにしよう」と決める</li>
+            </ol>
+            <p className="mt-10 text-center text-xl font-bold text-primary">
+              選ばれるかどうかは
+              <br />
+              &quot;口コミの見え方&quot;で決まります。
+            </p>
+          </section>
+
+          {/* このツールでできること */}
+          <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10">
+                このツールでできること
+              </h2>
+              <ul className="space-y-8">
+                <li>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">① 口コミ投稿率を上げる</h3>
+                  <p className="text-gray-700">質問形式で書きやすく。「書こうかな」で終わらせません。</p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">② キーワードを自然に増やす</h3>
+                  <p className="text-gray-700">痛くない・丁寧・予約しやすいなど狙ったワードを自然に反映。</p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">③ 返信を自動生成</h3>
+                  <p className="text-gray-700">忙しい診療の合間でも、丁寧な返信を即作成。</p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">④ 低評価（★1〜3）は院内のみでフィードバック</h3>
+                  <p className="text-gray-700">不満の声は院内だけで確認。患者さんの気持ちをすくい取り、改善に繋げられます。ネガティブな口コミをそのまま公開せずに済みます。</p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">⑤ 回答は即時にメールでお知らせ</h3>
+                  <p className="text-gray-700">新しい口コミやフィードバックが届いたら、すぐメールで通知。見逃しを防ぎ、早めの対応ができます。</p>
+                </li>
+                <li>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">⑥ Googleマップ上で&quot;地域の中で最も活気ある歯科医院&quot;として</h3>
+                  <p className="text-gray-700">口コミの投稿数増加＋口コミに対する返信から、更新頻度がアップ。Googleマップ内での存在感が増すことで、検索で引っかかりやすくなります。</p>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          {/* 選ばれる歯科クリニックは、口コミで決まる */}
+          <section className="px-4 sm:px-6 py-14 sm:py-20 bg-white border-y border-green-100">
+            <div className="max-w-3xl mx-auto text-center">
+              <div className="inline-block mb-6 pb-3 border-b-2 border-primary/40">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  選ばれる歯科クリニックは、口コミで決まる
+                </h2>
+              </div>
+              <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
+                「怖い・痛そう」で迷っている患者さんは、
+                <br />
+                必ず口コミを読んでから来院を決めます。
+                <br />
+                そのときに
+                <br />
+                「痛くなくて安心した」「説明が丁寧だった」といった声があるかどうかで
+                <br />
+                選ばれるかどうかが決まります。
+                <br />
+                口コミは、信頼を見える化する資産です。
+              </p>
+            </div>
+          </section>
+
+          {/* 先生・医院にとっての本当のメリット */}
+          <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
+              先生・医院にとっての本当のメリット
+            </h2>
+            <ul className="space-y-3 text-base sm:text-lg text-gray-700">
+              <li>・月に新規患者が1人増えれば十分回収可能</li>
+              <li>・広告より低コスト</li>
+              <li>・口コミは消えない&quot;資産&quot;</li>
+              <li>・低評価は院内で受け止め、改善に活かせる</li>
+              <li>・回答・フィードバックは即メールで把握できる</li>
+              <li>・「ちゃんと患者さんに向き合っている医院」という印象づけに効果抜群</li>
+            </ul>
+          </section>
+
+          {/* 料金 + CTA */}
+          <PricingSection />
+
+          <section className="px-4 sm:px-6 py-12 sm:py-16 bg-green-50 border-t border-green-100">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-lg font-semibold text-gray-800 mb-6">
+                まずは1ヶ月、無料で体験してください。
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href={trialId ? `/trial?industry=${trialId}` : "/trial"}
+                  className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+                >
+                  無料でデモを試す
+                </Link>
+                <a
+                  href={TRIAL_FORM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block py-4 px-6 rounded-xl bg-white border-2 border-primary text-primary hover:bg-primary/10 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+                >
+                  1ヶ月無料トライアル
+                </a>
+              </div>
             </div>
           </section>
         </main>
