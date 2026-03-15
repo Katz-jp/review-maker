@@ -28,6 +28,34 @@ function getDentalFeedbackFormUrl(tenantId: string): string {
   return `${DENTAL_FEEDBACK_FORM_BASE}?usp=pp_url&${params.toString()}`;
 }
 
+const WRITEREVIEW_BASE = "https://search.google.com/local/writereview?placeid=";
+
+/** テナントID別のテスト用 Place ID（試用後は管理画面で設定し、ここは削除可） */
+const TEST_PLACE_IDS: Record<string, string> = {
+  "dental-002": "ChIJNXCKdxnyQDUR8XpEafSt7dY",
+};
+
+/** テナントの口コミ投稿用URLを返す。Place ID が未設定の場合は googleMapsUrl から placeid を抽出し、なければそのまま googleMapsUrl を返す */
+function getReviewOrMapUrl(
+  tenant: { placeId?: string; googleMapsUrl: string },
+  tenantId?: string
+): string {
+  const explicit = tenant.placeId?.trim();
+  if (explicit) return `${WRITEREVIEW_BASE}${encodeURIComponent(explicit)}`;
+
+  const testPlaceId = tenantId && TEST_PLACE_IDS[tenantId];
+  if (testPlaceId) return `${WRITEREVIEW_BASE}${encodeURIComponent(testPlaceId)}`;
+
+  try {
+    const u = new URL(tenant.googleMapsUrl);
+    const fromQuery = u.searchParams.get("placeid")?.trim();
+    if (fromQuery) return `${WRITEREVIEW_BASE}${encodeURIComponent(fromQuery)}`;
+  } catch {
+    // URL が不正な場合はそのまま googleMapsUrl を使用
+  }
+  return tenant.googleMapsUrl;
+}
+
 export default function TenantGeneratePage() {
   const params = useParams();
   const tenantId = (params.tenantId as string) || "demo";
@@ -45,7 +73,6 @@ export default function TenantGeneratePage() {
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
   const [satisfaction, setSatisfaction] = useState<number | null>(null);
   const [industry, setIndustry] = useState<string | null>(null);
-  const [showReviewSection, setShowReviewSection] = useState(true);
 
   const doGenerate = async (): Promise<string> => {
     const raw = sessionStorage.getItem("questionnaireAnswers");
@@ -115,19 +142,6 @@ export default function TenantGeneratePage() {
       .finally(() => setLoading(false));
   }, [canUsePaidFeatures, tenantId]);
 
-  // 歯科かつ低評価のときだけ、クチコミ生成〜投稿案内ブロックを折りたたんでおき、
-  // それ以外のときは常に表示する
-  useEffect(() => {
-    const isDental = industry === "dental";
-    const lowScore = isDental && satisfaction !== null && satisfaction <= 3;
-
-    if (lowScore) {
-      setShowReviewSection(false);
-    } else {
-      setShowReviewSection(true);
-    }
-  }, [industry, satisfaction]);
-
   const handleRegenerate = async () => {
     if (tenantId === "trial" && remainingGenerations === 0) return;
     setPreviousText(generatedText);
@@ -172,7 +186,7 @@ export default function TenantGeneratePage() {
     await navigator.clipboard.writeText(generatedText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    window.open(tenant.googleMapsUrl, "_blank", "noopener,noreferrer");
+    window.open(getReviewOrMapUrl(tenant, tenantId), "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -208,8 +222,6 @@ export default function TenantGeneratePage() {
   }
 
   const isDental = industry === "dental";
-  const isLowScore = isDental && satisfaction !== null && satisfaction <= 3;
-  const isHighScore = isDental && satisfaction !== null && satisfaction >= 4;
 
   return (
     <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
@@ -233,35 +245,7 @@ export default function TenantGeneratePage() {
       </header>
 
       <section className="flex-[0.5_1_0%] min-h-0">
-        {isLowScore && (
-          <div className="mb-4">
-            <p className="text-sm font-semibold text-amber-900 mb-2">
-              ご回答ありがとうございました。
-              <br />
-              より良いサービスづくりのため、
-              <br />
-              気になった点があれば教えていただけると助かります。
-            </p>
-            <button
-              type="button"
-              onClick={() =>
-                window.open(getDentalFeedbackFormUrl(tenantId), "_blank", "noopener,noreferrer")
-              }
-              className="mt-3 inline-flex items-center justify-center w-full px-5 py-3 rounded-2xl bg-primary hover:bg-primary-dark text-white text-base font-semibold shadow-md active:scale-[0.98] transition-transform"
-            >
-              意見を送る
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowReviewSection(true)}
-              className="mt-4 text-sm text-gray-500 underline underline-offset-2"
-            >
-              Googleマップにクチコミを投稿する
-            </button>
-          </div>
-        )}
-        {showReviewSection && (
-          <>
+        <>
             <p className="text-sm font-semibold text-amber-900/90 mb-4">
               参考用の口コミ文を作成しました
               <br />
@@ -298,12 +282,10 @@ export default function TenantGeneratePage() {
                 前の文章に戻す
               </button>
             </div>
-          </>
-        )}
+        </>
       </section>
 
-      {showReviewSection && (
-        <div className="mt-6 space-y-3">
+      <div className="mt-6 space-y-3">
           <div className="rounded-2xl p-4 mb-4 bg-amber-50/80 border border-amber-200/60">
             <p className="text-sm font-semibold text-amber-900/90 mb-3">【投稿はかんたん3ステップ】</p>
             <ol className="text-sm text-amber-900/90 space-y-2 list-none">
@@ -355,28 +337,68 @@ export default function TenantGeneratePage() {
               </p>
             </div>
           )}
-          {isLowScore ? (
-            <div className="space-y-2">
-              <p className="text-xs text-gray-500 text-center">
-                下記はGoogleマップへの口コミ投稿用の下書きです（任意でご利用ください）。
-              </p>
-              <button
-                type="button"
-                onClick={handleCopyAndOpenMaps}
-                className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm shadow-md active:scale-[0.98] transition-transform"
-              >
-                {copied ? (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    コピーしました！
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-4 h-4" />
-                    Googleマップで口コミを書く（任意）
-                  </>
-                )}
-              </button>
+          {isDental ? (
+            <div className="space-y-3">
+              {/* 星1〜3: ご意見を送るを上、星4〜5 or null: Googleマップを上 */}
+              {satisfaction !== null && satisfaction <= 3 ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.open(getDentalFeedbackFormUrl(tenantId), "_blank", "noopener,noreferrer")
+                    }
+                    className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+                  >
+                    ご意見を送る（直接当院へ届きます）
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyAndOpenMaps}
+                    className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+                  >
+                    {copied ? (
+                      <>
+                        <Copy className="w-5 h-5" />
+                        コピーしました！
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-5 h-5" />
+                        コピーしてGoogleマップに進む
+                      </>
+                    )}
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleCopyAndOpenMaps}
+                    className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+                  >
+                    {copied ? (
+                      <>
+                        <Copy className="w-5 h-5" />
+                        コピーしました！
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-5 h-5" />
+                        コピーしてGoogleマップに進む
+                      </>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      window.open(getDentalFeedbackFormUrl(tenantId), "_blank", "noopener,noreferrer")
+                    }
+                    className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+                  >
+                    ご意見を送る（直接当院へ届きます）
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <button
@@ -412,7 +434,6 @@ export default function TenantGeneratePage() {
             {copiedTextOnly && <span className="ml-1.5 text-primary text-xs">コピーしました</span>}
           </div>
         </div>
-      )}
     </main>
   );
 }

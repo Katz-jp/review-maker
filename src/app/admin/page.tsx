@@ -20,6 +20,7 @@ type TenantListItem = {
   tenantId: string;
   name: string;
   googleMapsUrl: string;
+  placeId?: string;
   subscriptionStatus: string;
   updatedAt?: string;
   industry?: string;
@@ -51,6 +52,7 @@ export default function AdminPage() {
   const [newTenantId, setNewTenantId] = useState("");
   const [newName, setNewName] = useState("");
   const [newGoogleMapsUrl, setNewGoogleMapsUrl] = useState("https://www.google.com/maps");
+  const [newPlaceId, setNewPlaceId] = useState("");
   const [newStatus, setNewStatus] = useState("inactive");
   const [newIndustry, setNewIndustry] = useState("");
   const [newRetailPreset, setNewRetailPreset] = useState("meat");
@@ -58,6 +60,7 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editGoogleMapsUrl, setEditGoogleMapsUrl] = useState("");
+  const [editPlaceId, setEditPlaceId] = useState("");
   const [editStatus, setEditStatus] = useState("");
   const [editIndustry, setEditIndustry] = useState("");
   const [editRetailPreset, setEditRetailPreset] = useState("");
@@ -175,6 +178,7 @@ export default function AdminPage() {
           tenantId: newTenantId.trim(),
           name: newName.trim() || newTenantId.trim(),
           googleMapsUrl: newGoogleMapsUrl.trim() || "https://www.google.com/maps",
+          placeId: newPlaceId.trim() || undefined,
           subscriptionStatus: newStatus,
           industry: newIndustry.trim() || "",
           retailPreset: newIndustry === "retail" ? (newRetailPreset.trim() || "meat") : "",
@@ -189,6 +193,7 @@ export default function AdminPage() {
       setNewTenantId("");
       setNewName("");
       setNewGoogleMapsUrl("https://www.google.com/maps");
+      setNewPlaceId("");
       setNewStatus("inactive");
       setNewIndustry("");
       setNewRetailPreset("meat");
@@ -201,6 +206,7 @@ export default function AdminPage() {
     setEditingId(t.tenantId);
     setEditName(t.name);
     setEditGoogleMapsUrl(t.googleMapsUrl);
+    setEditPlaceId(t.placeId ?? "");
     setEditStatus(t.subscriptionStatus);
     setEditIndustry(t.industry ?? "");
     setEditRetailPreset(t.retailPreset ?? "");
@@ -220,6 +226,7 @@ export default function AdminPage() {
         body: JSON.stringify({
           name: editName.trim() || editingId,
           googleMapsUrl: editGoogleMapsUrl.trim() || "https://www.google.com/maps",
+          placeId: editPlaceId.trim() || undefined,
           subscriptionStatus: editStatus,
           industry: editIndustry.trim() || "",
           retailPreset: editIndustry === "retail" ? (editRetailPreset.trim() || "meat") : "",
@@ -354,6 +361,17 @@ export default function AdminPage() {
             />
           </div>
           <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Place ID（任意・口コミ投稿リンク用）</label>
+            <input
+              type="text"
+              value={newPlaceId}
+              onChange={(e) => setNewPlaceId(e.target.value)}
+              placeholder="例: ChIJ..."
+              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+            <p className="text-xs text-gray-500 mt-0.5">設定時は「Googleマップに進む」が口コミ投稿ページへ直リンクします</p>
+          </div>
+          <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">契約状態</label>
             <select
               value={newStatus}
@@ -439,6 +457,16 @@ export default function AdminPage() {
                         type="url"
                         value={editGoogleMapsUrl}
                         onChange={(e) => setEditGoogleMapsUrl(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-500 mb-1">Place ID（口コミ投稿リンク用）</label>
+                      <input
+                        type="text"
+                        value={editPlaceId}
+                        onChange={(e) => setEditPlaceId(e.target.value)}
+                        placeholder="例: ChIJ..."
                         className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
                       />
                     </div>

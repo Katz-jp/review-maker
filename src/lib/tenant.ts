@@ -2,6 +2,8 @@ export type Tenant = {
   id: string;
   name: string;
   googleMapsUrl: string;
+  /** Google Place ID。設定時は口コミ投稿用URL（writereview）のリンクに使用 */
+  placeId?: string;
   subscriptionStatus: "active" | "canceled" | "past_due" | "trialing" | "inactive";
   /** "seikotsu" | "retail" など。未設定時は整骨院として扱う */
   industry?: string;
@@ -32,6 +34,7 @@ export async function getTenant(tenantId: string): Promise<Tenant | null> {
       id: tenantId,
       name: data.name ?? DEFAULT_TENANT.name,
       googleMapsUrl: data.googleMapsUrl ?? DEFAULT_TENANT.googleMapsUrl,
+      placeId: data.placeId,
       subscriptionStatus: data.subscriptionStatus ?? "inactive",
       industry: data.industry,
       retailPreset: data.retailPreset,

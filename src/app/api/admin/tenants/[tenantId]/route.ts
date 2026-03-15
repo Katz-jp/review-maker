@@ -22,9 +22,10 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { name, googleMapsUrl, subscriptionStatus, industry, retailPreset } = body as {
+    const { name, googleMapsUrl, placeId, subscriptionStatus, industry, retailPreset } = body as {
       name?: string;
       googleMapsUrl?: string;
+      placeId?: string;
       subscriptionStatus?: string;
       industry?: string;
       retailPreset?: string;
@@ -36,6 +37,7 @@ export async function PATCH(
 
     if (typeof name === "string") updates.name = name.trim() || tenantId;
     if (typeof googleMapsUrl === "string") updates.googleMapsUrl = googleMapsUrl.trim() || "https://www.google.com/maps";
+    if (placeId !== undefined) updates.placeId = typeof placeId === "string" && placeId.trim() ? placeId.trim() : null;
     if (typeof subscriptionStatus === "string" && VALID_STATUSES.includes(subscriptionStatus as (typeof VALID_STATUSES)[number])) {
       updates.subscriptionStatus = subscriptionStatus;
     }
@@ -67,6 +69,7 @@ export async function PATCH(
       tenantId,
       name: data?.name ?? tenantId,
       googleMapsUrl: data?.googleMapsUrl ?? "https://www.google.com/maps",
+      placeId: data?.placeId ?? undefined,
       subscriptionStatus: data?.subscriptionStatus ?? "inactive",
       industry: data?.industry,
       retailPreset: data?.retailPreset,

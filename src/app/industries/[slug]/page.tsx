@@ -128,7 +128,7 @@ export default function IndustryLandingPage({
           {/* このツールでできること */}
           <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10 pb-3 border-b-2 border-primary">
                 このツールでできること
               </h2>
               <ul className="space-y-8">
@@ -331,7 +331,7 @@ export default function IndustryLandingPage({
           {/* このツールでできること */}
           <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10 pb-3 border-b-2 border-primary">
                 このツールでできること
               </h2>
               <ul className="space-y-8">
@@ -557,7 +557,7 @@ export default function IndustryLandingPage({
           {/* このツールでできること */}
           <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
             <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10 pb-3 border-b-2 border-primary">
                 このツールでできること
               </h2>
               <ul className="space-y-8">

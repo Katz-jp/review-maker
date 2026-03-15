@@ -8,6 +8,7 @@ export type TenantListItem = {
   tenantId: string;
   name: string;
   googleMapsUrl: string;
+  placeId?: string;
   subscriptionStatus: string;
   updatedAt?: string;
   industry?: string;
@@ -35,6 +36,7 @@ export async function GET(req: NextRequest) {
         tenantId: doc.id,
         name: d.name ?? "",
         googleMapsUrl: d.googleMapsUrl ?? "https://www.google.com/maps",
+        placeId: d.placeId,
         subscriptionStatus: d.subscriptionStatus ?? "inactive",
         updatedAt: d.updatedAt,
         industry: d.industry,
@@ -61,10 +63,11 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { tenantId, name, googleMapsUrl, subscriptionStatus, industry, retailPreset } = body as {
+    const { tenantId, name, googleMapsUrl, placeId, subscriptionStatus, industry, retailPreset } = body as {
       tenantId?: string;
       name?: string;
       googleMapsUrl?: string;
+      placeId?: string;
       subscriptionStatus?: string;
       industry?: string;
       retailPreset?: string;
@@ -104,10 +107,12 @@ export async function POST(req: NextRequest) {
     const nextRetailPreset =
       nextIndustry === "retail" ? (retailPreset === "" ? null : retailPreset) : null;
 
+    const nextPlaceId = typeof placeId === "string" && placeId.trim() ? placeId.trim() : null;
     await ref.set(
       {
         name: typeof name === "string" && name.trim() ? name.trim() : id,
         googleMapsUrl: typeof googleMapsUrl === "string" && googleMapsUrl.trim() ? googleMapsUrl.trim() : "https://www.google.com/maps",
+        ...(nextPlaceId !== null && { placeId: nextPlaceId }),
         subscriptionStatus: status,
         industry: nextIndustry,
         retailPreset: nextRetailPreset,
@@ -120,6 +125,7 @@ export async function POST(req: NextRequest) {
       tenantId: id,
       name: typeof name === "string" && name.trim() ? name.trim() : id,
       googleMapsUrl: typeof googleMapsUrl === "string" && googleMapsUrl.trim() ? googleMapsUrl.trim() : "https://www.google.com/maps",
+      placeId: nextPlaceId ?? undefined,
       subscriptionStatus: status,
       industry: nextIndustry,
       retailPreset: nextRetailPreset,

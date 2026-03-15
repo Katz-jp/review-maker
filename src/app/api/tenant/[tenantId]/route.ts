@@ -7,6 +7,7 @@ export type TenantInfo = {
   tenantId: string;
   name: string;
   googleMapsUrl: string;
+  placeId?: string;
   subscriptionStatus: TenantStatus;
   industry?: string;
   retailPreset?: string;
@@ -48,6 +49,7 @@ export async function GET(
       tenantId,
       name: data?.name ?? "〇〇整骨院",
       googleMapsUrl: data?.googleMapsUrl ?? "https://www.google.com/maps",
+      placeId: data?.placeId ?? undefined,
       subscriptionStatus,
       industry: data?.industry,
       retailPreset: data?.retailPreset,
