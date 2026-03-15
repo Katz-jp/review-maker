@@ -103,6 +103,10 @@ export default function OwnerPage() {
 
   const canUsePaidFeatures = tenantStatus === "active" || tenantStatus === "trialing";
   const isRestricted = tenantStatus === "canceled" || tenantStatus === "past_due";
+  const fromTenantIdForIndustry =
+    tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
+  const effectiveIndustry = tenantIndustry ?? fromTenantIdForIndustry ?? "seikotsu";
+  const isDental = effectiveIndustry === "dental";
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -248,6 +252,68 @@ export default function OwnerPage() {
       )}
 
       <section className="flex-1 space-y-6">
+        {/* 操作方法動画 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
+          <h2 className="font-semibold text-gray-800 mb-4">
+            操作方法動画
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            以下の動画で使い方をご確認いただけます。
+          </p>
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-medium text-gray-800 text-sm mb-2">クチコミ作成AIの流れを説明した動画</h3>
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
+                <iframe
+                  src="https://www.youtube.com/embed/nb5kaQUmy4Q"
+                  title="クチコミ作成AIの流れを説明した動画"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-800 text-sm mb-2">オリジナルの選択肢の追加・削除方法</h3>
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
+                <iframe
+                  src="https://www.youtube.com/embed/PcRkGMbkoJ0"
+                  title="オリジナルの選択肢の追加・削除方法"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
+            {isDental && (
+              <div>
+                <h3 className="font-medium text-gray-800 text-sm mb-2">ネガティブな感想の扱い方（サービス改善のヒントとして活用）</h3>
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
+                  <iframe
+                    src="https://www.youtube.com/embed/Zh7udblCZek"
+                    title="ネガティブな感想の扱い方"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+              </div>
+            )}
+            <div>
+              <h3 className="font-medium text-gray-800 text-sm mb-2">クチコミ返信ヘルプ AI の使い方</h3>
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
+                <iframe
+                  src="https://www.youtube.com/embed/SSW514dPT70"
+                  title="クチコミ返信ヘルプ AI の使い方"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {canUsePaidFeatures ? (
           <Link
             href={`/${tenantId}/reply-helper`}
