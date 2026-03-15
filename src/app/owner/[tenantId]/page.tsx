@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { QRCodeSVG } from "qrcode.react";
 import { CreditCard, QrCode, ExternalLink, Loader2, Plus, Trash2, Settings2, MessageSquare } from "lucide-react";
 import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
 
@@ -424,6 +425,9 @@ export default function OwnerPage() {
           </p>
           <div className="p-3 rounded-xl bg-gray-50 text-sm text-gray-700 font-mono break-all">
             {customerUrl}
+          </div>
+          <div className="mt-4 flex justify-center">
+            <QRCodeSVG value={customerUrl} size={180} level="M" className="rounded-lg border border-gray-200 bg-white p-2" />
           </div>
           <a
             href={customerUrl}
