@@ -65,14 +65,15 @@ export async function PATCH(
 
     const snap = await ref.get();
     const data = snap.data();
+    const co = data?.customOptions as { name?: string; googleMapsUrl?: string; placeId?: string; industry?: string; retailPreset?: string } | undefined;
     return NextResponse.json({
       tenantId,
-      name: data?.name ?? tenantId,
-      googleMapsUrl: data?.googleMapsUrl ?? "https://www.google.com/maps",
-      placeId: data?.placeId ?? undefined,
+      name: data?.name ?? co?.name ?? tenantId,
+      googleMapsUrl: data?.googleMapsUrl ?? co?.googleMapsUrl ?? "https://www.google.com/maps",
+      placeId: data?.placeId ?? co?.placeId ?? undefined,
       subscriptionStatus: data?.subscriptionStatus ?? "inactive",
-      industry: data?.industry,
-      retailPreset: data?.retailPreset,
+      industry: data?.industry ?? co?.industry,
+      retailPreset: data?.retailPreset ?? co?.retailPreset,
     });
   } catch (err) {
     console.error("[admin/tenants PATCH]", err);

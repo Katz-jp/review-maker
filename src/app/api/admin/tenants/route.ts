@@ -32,15 +32,16 @@ export async function GET(req: NextRequest) {
     const snapshot = await db.collection("tenants").get();
     const items: TenantListItem[] = snapshot.docs.map((doc) => {
       const d = doc.data();
+      const co = d?.customOptions as { name?: string; googleMapsUrl?: string; placeId?: string; industry?: string; retailPreset?: string } | undefined;
       return {
         tenantId: doc.id,
-        name: d.name ?? "",
-        googleMapsUrl: d.googleMapsUrl ?? "https://www.google.com/maps",
-        placeId: d.placeId,
-        subscriptionStatus: d.subscriptionStatus ?? "inactive",
-        updatedAt: d.updatedAt,
-        industry: d.industry,
-        retailPreset: d.retailPreset,
+        name: d?.name ?? co?.name ?? "",
+        googleMapsUrl: d?.googleMapsUrl ?? co?.googleMapsUrl ?? "https://www.google.com/maps",
+        placeId: d?.placeId ?? co?.placeId,
+        subscriptionStatus: d?.subscriptionStatus ?? "inactive",
+        updatedAt: d?.updatedAt,
+        industry: d?.industry ?? co?.industry,
+        retailPreset: d?.retailPreset ?? co?.retailPreset,
       };
     });
 

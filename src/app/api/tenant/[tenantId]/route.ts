@@ -45,14 +45,15 @@ export async function GET(
         ? data.subscriptionStatus
         : "inactive";
 
+    const co = data?.customOptions as { name?: string; googleMapsUrl?: string; placeId?: string; industry?: string; retailPreset?: string } | undefined;
     return NextResponse.json({
       tenantId,
-      name: data?.name ?? "〇〇整骨院",
-      googleMapsUrl: data?.googleMapsUrl ?? "https://www.google.com/maps",
-      placeId: data?.placeId ?? undefined,
+      name: data?.name ?? co?.name ?? "〇〇整骨院",
+      googleMapsUrl: data?.googleMapsUrl ?? co?.googleMapsUrl ?? "https://www.google.com/maps",
+      placeId: data?.placeId ?? co?.placeId ?? undefined,
       subscriptionStatus,
-      industry: data?.industry,
-      retailPreset: data?.retailPreset,
+      industry: data?.industry ?? co?.industry,
+      retailPreset: data?.retailPreset ?? co?.retailPreset,
     } satisfies TenantInfo);
   } catch (err) {
     console.error("[tenant GET]", err);

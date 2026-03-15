@@ -30,14 +30,15 @@ export async function getTenant(tenantId: string): Promise<Tenant | null> {
     if (!snap.exists()) return null;
 
     const data = snap.data();
+    const co = data?.customOptions as { name?: string; googleMapsUrl?: string; placeId?: string; industry?: string; retailPreset?: string } | undefined;
     return {
       id: tenantId,
-      name: data.name ?? DEFAULT_TENANT.name,
-      googleMapsUrl: data.googleMapsUrl ?? DEFAULT_TENANT.googleMapsUrl,
-      placeId: data.placeId,
-      subscriptionStatus: data.subscriptionStatus ?? "inactive",
-      industry: data.industry,
-      retailPreset: data.retailPreset,
+      name: data?.name ?? co?.name ?? DEFAULT_TENANT.name,
+      googleMapsUrl: data?.googleMapsUrl ?? co?.googleMapsUrl ?? DEFAULT_TENANT.googleMapsUrl,
+      placeId: data?.placeId ?? co?.placeId,
+      subscriptionStatus: data?.subscriptionStatus ?? "inactive",
+      industry: data?.industry ?? co?.industry,
+      retailPreset: data?.retailPreset ?? co?.retailPreset,
     };
   } catch {
     return null;
