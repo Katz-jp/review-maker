@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { MapPin, Sparkles } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
+import { getReviewOrMapUrl } from "@/lib/review-link";
 
 export function WelcomeContent({ tenantId }: { tenantId: string }) {
   const tenant = useTenant();
@@ -31,7 +32,7 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
 
       <div className="space-y-4">
         <a
-          href={tenant.googleMapsUrl}
+          href={getReviewOrMapUrl(tenant, tenantId)}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md active:scale-[0.98] transition-transform"

@@ -28,60 +28,7 @@ function getDentalFeedbackFormUrl(tenantId: string): string {
   return `${DENTAL_FEEDBACK_FORM_BASE}?usp=pp_url&${params.toString()}`;
 }
 
-const WRITEREVIEW_BASE = "https://search.google.com/local/writereview?placeid=";
-
-/** テナントID別のテスト用 Place ID（試用後は管理画面で設定し、ここは削除可） */
-const TEST_PLACE_IDS: Record<string, string> = {
-  "dental-002": "ChIJNXCKdxnyQDUR8XpEafSt7dY",
-};
-
-/**
- * Googleマップの place URL から Place ID を抽出する。
- * 例: ...!16s%2Fg%2F1tdr5yyg!... や ...!16s/g/1xxx... から "g/1tdr5yyg" を取得
- */
-function extractPlaceIdFromMapsUrl(url: string): string | null {
-  try {
-    // クエリの placeid= を優先
-    const u = new URL(url);
-    const fromQuery = u.searchParams.get("placeid")?.trim();
-    if (fromQuery) return fromQuery;
-
-    // パス内の !16s%2Fg%2F1xxx または !16s/g/1xxx 形式を検出（writereview で使える形式）
-    const match = url.match(/!16s(?:%2F|\/)(g(?:%2F|\/)[^!&?]+)/i);
-    if (match) {
-      const raw = decodeURIComponent(match[1]);
-      if (raw.startsWith("g/")) return raw;
-    }
-  } catch {
-    // ignore
-  }
-  return null;
-}
-
-/** テナントの口コミ投稿用URLを返す。Place ID が未設定の場合は googleMapsUrl から placeid を抽出し、なければそのまま googleMapsUrl を返す */
-function getReviewOrMapUrl(
-  tenant: { placeId?: string; googleMapsUrl: string },
-  tenantId?: string
-): string {
-  const explicit = tenant.placeId?.trim();
-  if (explicit) return `${WRITEREVIEW_BASE}${encodeURIComponent(explicit)}`;
-
-  const testPlaceId = tenantId && TEST_PLACE_IDS[tenantId];
-  if (testPlaceId) return `${WRITEREVIEW_BASE}${encodeURIComponent(testPlaceId)}`;
-
-  try {
-    const u = new URL(tenant.googleMapsUrl);
-    const fromQuery = u.searchParams.get("placeid")?.trim();
-    if (fromQuery) return `${WRITEREVIEW_BASE}${encodeURIComponent(fromQuery)}`;
-  } catch {
-    // URL が不正な場合は次へ
-  }
-
-  const fromPath = extractPlaceIdFromMapsUrl(tenant.googleMapsUrl);
-  if (fromPath) return `${WRITEREVIEW_BASE}${encodeURIComponent(fromPath)}`;
-
-  return tenant.googleMapsUrl;
-}
+import { getReviewOrMapUrl } from "@/lib/review-link";
 
 export default function TenantGeneratePage() {
   const params = useParams();
