@@ -1,8 +1,10 @@
 import {
   pickStyleAndClosing,
   getCommonRulesForUserPrompt,
+  buildSummaryWithMax3Categories,
   getClosingReminder,
-  COMMON_OUTPUT_FORMAT,
+  getCommonOutputFormat,
+  parseSatisfactionFromOtherInputs,
 } from "@/lib/prompts/common";
 import type { IndustryConfig } from "./types";
 
@@ -16,18 +18,39 @@ const DENTAL_NOTICE = `■ 歯科特有の注意
 * 誇張・脚色しない
 * 一般的な歯科の特徴を勝手に補完してはいけない`;
 
-function parseSatisfaction(otherInputs: Record<string, string>): number | null {
-  const raw = otherInputs.__satisfaction;
-  if (!raw) return null;
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : null;
-}
-
 export const dentalConfig: IndustryConfig = {
   questions: [
     {
+      id: "change",
+      label: "治療後の印象",
+      options: [
+        "痛みが楽になった",
+        "噛みやすくなった",
+        "見た目がきれいになった",
+        "気になっていたところが改善した",
+        "不安が減った・安心できた",
+        "通院しやすくなった",
+        "その他",
+      ],
+    },
+    {
+      id: "symptom",
+      label: "悩み・症状",
+      options: [
+        "歯が痛い・しみる",
+        "噛むと痛い",
+        "詰めもの・被せものが気になる",
+        "歯並び・かみ合わせが気になる",
+        "見た目（色・形）が気になる",
+        "歯ぐきからの出血・腫れ",
+        "口臭が気になる",
+        "定期検診・メンテナンス",
+        "その他",
+      ],
+    },
+    {
       id: "treatment",
-      label: "来院理由",
+      label: "受けた治療",
       options: [
         "虫歯の治療",
         "定期クリーニング・検診",
@@ -42,108 +65,102 @@ export const dentalConfig: IndustryConfig = {
       ],
     },
     {
-      id: "impression",
-      label: "実際に来院してどうでしたか？",
+      id: "visitCount",
+      label: "来院回数",
+      multiSelect: false,
+      options: ["今回が初めて", "2〜3回目", "4回以上通っている"],
+    },
+    {
+      id: "atmosphere",
+      label: "雰囲気・対応",
       options: [
-        "治療が丁寧",
+        "院内が清潔",
         "説明がわかりやすい",
-        "痛みが少ない",
+        "痛みに配慮してくれる",
         "安心できる先生",
-        "無理な治療提案がない",
         "スタッフが親切",
         "受付の対応が良い",
-        "院内が清潔",
-        "設備がきれい",
         "落ち着く雰囲気",
-        "予約が取りやすい",
-        "待ち時間が少ない",
+        "予約が取りやすい・待ち時間が少ない",
         "通いやすい場所",
         "その他",
       ],
     },
     {
       id: "recommend",
-      label: "この歯医者をおすすめしたいですか？",
+      label: "おすすめしたい人",
       options: [
-        "ぜひおすすめしたい",
-        "おすすめできる",
-        "どちらとも言えない",
-        "あまりおすすめできない",
-      ],
-    },
-    {
-      id: "safety",
-      label: "この施設は安心して通えると感じましたか？",
-      multiSelect: false,
-      options: [
-        "とても感じた",
-        "感じた",
-        "どちらとも言えない",
-        "あまり感じなかった",
-        "感じなかった",
+        "歯医者が苦手な人",
+        "丁寧に説明してほしい人",
+        "できるだけ痛みを抑えたい人",
+        "子どもの歯医者さんを探している人",
+        "見た目（白い歯・歯並び）をきれいにしたい人",
+        "仕事や育児で忙しい人",
+        "近くに通いやすい歯医者を探している人",
+        "その他",
       ],
     },
   ],
 
   buildPrompt(answers, otherInputs, freeText) {
-    const treatmentVals = answers.treatment ?? [];
-    const impressionVals = answers.impression ?? [];
+    const satisfaction = parseSatisfactionFromOtherInputs(otherInputs);
+    const isHighScore = satisfaction !== null && satisfaction >= 4;
+    const labels: Record<string, string> = {
+      change: "治療後の印象",
+      symptom: "悩み・症状",
+      treatment: "受けた治療",
+      visitCount: "来院回数",
+      atmosphere: "雰囲気・対応",
+      recommend: "おすすめしたい人",
+    };
+
+    const answersForSummary =
+      satisfaction !== null && satisfaction <= 3
+        ? Object.fromEntries(
+            Object.entries(answers).filter(([key]) => key !== "recommend")
+          )
+        : answers;
+    const otherInputsForSummary =
+      satisfaction !== null && satisfaction <= 3
+        ? Object.fromEntries(
+            Object.entries(otherInputs).filter(([key]) => key !== "recommend")
+          )
+        : otherInputs;
+
+    const summary = buildSummaryWithMax3Categories(
+      answersForSummary,
+      otherInputsForSummary,
+      labels,
+      freeText
+    );
+
     const recommendVals = answers.recommend ?? [];
-    const safetyVals = answers.safety ?? [];
-    const satisfaction = parseSatisfaction(otherInputs);
+    const freeHasNegativeOsusume =
+      (freeText?.includes("おすすめしない") ?? false) ||
+      (freeText?.includes("おすすめできない") ?? false) ||
+      (freeText?.includes("あまりおすすめしない") ?? false);
 
-    // 「安心」「おすすめ」系の文言は、選択 or 自由記入で触れているときだけ許可する
-    const allowAnshin =
-      impressionVals.some((v) => v.includes("安心")) ||
-      safetyVals.some((v) => v === "とても感じた" || v === "感じた") ||
-      (freeText?.includes("安心") ?? false);
     const allowOsusume =
-      recommendVals.some((v) => v === "ぜひおすすめしたい" || v === "おすすめできる") ||
-      (freeText?.includes("おすすめ") ?? false);
-
-    let summary = "";
-    if (treatmentVals.length) {
-      const parts = [...treatmentVals];
-      if (otherInputs.treatment) parts.push(otherInputs.treatment);
-      summary += `【来院理由】${parts.join("、")}\n`;
-    }
-    if (freeText) {
-      summary += `【来院前に困っていたこと】${freeText}\n`;
-    }
-    if (impressionVals.length) {
-      const parts = [...impressionVals];
-      if (otherInputs.impression) parts.push(otherInputs.impression);
-      summary += `【実際に来院してどうでしたか？】${parts.join("、")}\n`;
-    }
-    if (recommendVals.length) {
-      const parts = [...recommendVals];
-      if (otherInputs.recommend) parts.push(otherInputs.recommend);
-      summary += `【この歯医者をおすすめしたいですか？】${parts.join("、")}\n`;
-    }
-    if (safetyVals.length) {
-      const parts = [...safetyVals];
-      if (otherInputs.safety) parts.push(otherInputs.safety);
-      summary += `【この施設は安心して通えると感じましたか？】${parts.join("、")}\n`;
-    }
-    if (satisfaction !== null) {
-      summary += `【満足度（星）】${satisfaction}\n`;
-    }
+      !freeHasNegativeOsusume &&
+      (recommendVals.some(
+        (v) =>
+          v.includes("おすすめしたい") ||
+          v.includes("人に勧めたい") ||
+          v.includes("紹介したい")
+      ) ||
+        (freeText?.includes("おすすめです") ?? false) ||
+        (freeText?.includes("おすすめしたい") ?? false));
 
     const { styleType, closingType } = pickStyleAndClosing();
-    const commonRules = getCommonRulesForUserPrompt(styleType, closingType);
-    const closingReminder = getClosingReminder(closingType);
-
-    const lowScoreRules =
-      satisfaction !== null && satisfaction <= 3
-        ? `■ 追加ルール（満足度が星1〜3のとき：厳守）
-* 再来院（また来るかどうか）については言及しない。「また来たい」「また行きたい」「これからも通いたい」「次回も」など、再訪・継続・今後の利用を示す表現は書かない
-* 絵文字（😊など）は一切使わない（代わりに「！」は最低1つ入れる）`
-        : "";
+    const commonRules = getCommonRulesForUserPrompt(styleType, closingType, satisfaction);
+    const closingReminder = getClosingReminder(closingType, satisfaction);
+    const outputFormat = getCommonOutputFormat(satisfaction);
 
     const wordingGuards = `■ 文言の制約（厳守）
-* アンケートで選ばれていない限り、「安心」「安心感」「信頼できる」等の“安心系”の言い回しを勝手に入れない（自由記入で書かれている場合は可）
-* アンケートで選ばれていない限り、「おすすめ」「おすすめしたい」「人に勧めたい」等の“おすすめ系”の言い回しを勝手に入れない（自由記入で書かれている場合は可）
-${allowAnshin ? "" : "* 今回は「安心」系の表現は使わない\n"}${allowOsusume ? "" : "* 今回は「おすすめ」系の表現は使わない\n"}`;
+* 満足度が星1〜3の場合は、「おすすめ」「おすすめしたい」「人に勧めたい」「他の方にも〜してほしい」等の“おすすめ系”の言い回しを勝手に入れない（自由記入で書かれている場合は可）
+* アンケート回答と【補足】に書かれていない要素（例：待ち時間、説明の丁寧さ、スタッフの対応、予約の取りやすさ、雰囲気など）について、新しく評価や意見を追加しないこと
+* 特に「もう少し〜であればよかった」「改善されると良い」「期待しています」など、改善提案や期待に関する文は、自由記入に明示的に書かれていない場合は書かないこと
+${!isHighScore && !allowOsusume ? "* 今回は「おすすめ」系の表現は一切使わない\n" : ""}`;
 
     return `${DENTAL_ROLE}
 
@@ -153,18 +170,26 @@ ${commonRules}
 
 ${closingReminder}
 
-${lowScoreRules}
-
 ${wordingGuards}
+
+■ 出力前チェック
+以下をすべて満たしているか自分で確認すること：
+* 満足度が星1〜3の場合：
+  - 再来や通院継続について書いていない
+  - 強いポジティブ表現（「とても満足」「最高」「おすすめ」など）が含まれていない
+  - 「おすすめ」「人に勧めたい」等のおすすめ表現が含まれていない
+  - 結論として「また行きたい」「これからも通いたい」などで締めていない
+条件に違反している場合は、自分で書き直してから最終的な口コミ本文のみを出力すること。
 
 ■ アンケート回答（この内容のみ使用。ここに書かれている選択肢だけを口コミに反映する）
 ${summary}
 
 【最終確認】文体は「${styleType}」、締めは「${closingType}」で書くこと。
 
-${COMMON_OUTPUT_FORMAT}`;
+${outputFormat}`;
   },
 
   systemMessage:
-    "あなたは歯科クリニックのGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。治療効果の断定や保証表現は使わない。口コミ本文のみ出力します。出力には絵文字（😊など）か「！」を必ず1つ以上含め、1〜2箇所改行すること。",
+    "あなたは歯科クリニックのGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。治療効果の断定や保証表現は使わない。口コミ本文のみ出力します。満足度が星1〜3の場合は、絵文字（😊など）や「！」は使わず、トーンはニュートラル（中立）にしてください。共通ルールよりも、この歯科向け指示を優先します。",
 };
+

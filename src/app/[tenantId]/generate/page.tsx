@@ -48,6 +48,31 @@ export default function TenantGeneratePage() {
   const [satisfaction, setSatisfaction] = useState<number | null>(null);
   const [industry, setIndustry] = useState<string | null>(null);
 
+  const trackEvent = (event: "open_google_maps" | "open_inhouse_feedback") => {
+    const url = `/api/tenant/${tenantId}/stats/events`;
+    const body = JSON.stringify({
+      event,
+      ...(event === "open_google_maps" && typeof satisfaction === "number"
+        ? { satisfaction }
+        : {}),
+    });
+    try {
+      if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+        const blob = new Blob([body], { type: "application/json" });
+        (navigator as Navigator).sendBeacon(url, blob);
+        return;
+      }
+    } catch {
+      // noop
+    }
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body,
+      keepalive: true,
+    }).catch(() => {});
+  };
+
   const doGenerate = async (): Promise<string> => {
     const raw = sessionStorage.getItem("questionnaireAnswers");
     if (!raw) throw new Error("回答データが見つかりません。最初からやり直してください。");
@@ -160,7 +185,13 @@ export default function TenantGeneratePage() {
     await navigator.clipboard.writeText(generatedText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    trackEvent("open_google_maps");
     window.open(getReviewOrMapUrl(tenant, tenantId), "_blank", "noopener,noreferrer");
+  };
+
+  const handleOpenDentalFeedback = () => {
+    trackEvent("open_inhouse_feedback");
+    window.open(getDentalFeedbackFormUrl(tenantId), "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -220,6 +251,31 @@ export default function TenantGeneratePage() {
 
       <section className="flex-[0.5_1_0%] min-h-0">
         <>
+            {satisfaction !== null && (
+              <div className="mb-4 rounded-2xl bg-yellow-50 border border-yellow-200 px-4 py-3">
+                <p className="text-xs font-semibold text-yellow-900 mb-1">
+                  あなたの評価
+                </p>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-0.5 text-lg">
+                    {[1, 2, 3, 4, 5].map((score) => {
+                      const isActive = satisfaction >= score;
+                      return (
+                        <span
+                          key={score}
+                          className={isActive ? "text-yellow-400" : "text-gray-300"}
+                        >
+                          {isActive ? "⭐" : "☆"}
+                        </span>
+                      );
+                    })}
+                  </div>
+                  <span className="text-xs text-gray-600">
+                    ({satisfaction} / 5)
+                  </span>
+                </div>
+              </div>
+            )}
             <p className="text-sm font-semibold text-amber-900/90 mb-4">
               参考用の口コミ文を作成しました
               <br />
@@ -318,9 +374,7 @@ export default function TenantGeneratePage() {
                 <>
                   <button
                     type="button"
-                    onClick={() =>
-                      window.open(getDentalFeedbackFormUrl(tenantId), "_blank", "noopener,noreferrer")
-                    }
+                    onClick={handleOpenDentalFeedback}
                     className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
                   >
                     ご意見を送る（直接当院へ届きます）
@@ -364,9 +418,7 @@ export default function TenantGeneratePage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() =>
-                      window.open(getDentalFeedbackFormUrl(tenantId), "_blank", "noopener,noreferrer")
-                    }
+                    onClick={handleOpenDentalFeedback}
                     className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
                   >
                     ご意見を送る（直接当院へ届きます）

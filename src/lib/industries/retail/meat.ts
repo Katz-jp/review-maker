@@ -3,7 +3,8 @@ import {
   getCommonRulesForUserPrompt,
   buildSummaryWithMax3Categories,
   getClosingReminder,
-  COMMON_OUTPUT_FORMAT,
+  getCommonOutputFormat,
+  parseSatisfactionFromOtherInputs,
 } from "@/lib/prompts/common";
 import type { IndustryConfig } from "../types";
 
@@ -53,7 +54,6 @@ export const retailMeatConfig: IndustryConfig = {
         "清潔感がある",
         "スタッフが親切",
         "説明が丁寧",
-        "駐車場がある",
         "店内が見やすい",
         "入りやすい雰囲気",
         "アットホームな雰囲気",
@@ -87,33 +87,22 @@ export const retailMeatConfig: IndustryConfig = {
         "その他",
       ],
     },
-    {
-      id: "safety",
-      label: "この施設は安心して通えると感じましたか？",
-      multiSelect: false,
-      options: [
-        "とても感じた",
-        "感じた",
-        "どちらとも言えない",
-        "あまり感じなかった",
-        "感じなかった",
-      ],
-    },
   ],
   buildPrompt(answers, otherInputs, freeText) {
+    const satisfaction = parseSatisfactionFromOtherInputs(otherInputs);
     const labels: Record<string, string> = {
       product: "買ったもの",
       goodPoints: "良かった点",
       atmosphere: "お店の雰囲気・設備",
       purpose: "用途",
       recommend: "おすすめしたい人",
-      safety: "この施設は安心して通えると感じましたか？",
     };
 
     const summary = buildSummaryWithMax3Categories(answers, otherInputs, labels, freeText);
     const { styleType, closingType } = pickStyleAndClosing();
-    const commonRules = getCommonRulesForUserPrompt(styleType, closingType);
-    const closingReminder = getClosingReminder(closingType);
+    const commonRules = getCommonRulesForUserPrompt(styleType, closingType, satisfaction);
+    const closingReminder = getClosingReminder(closingType, satisfaction);
+    const outputFormat = getCommonOutputFormat(satisfaction);
 
     return `${MEAT_ROLE}
 
@@ -126,9 +115,9 @@ ${closingReminder}
 ■ アンケート回答（この内容のみ使用。ここに書かれている選択肢だけを口コミに反映する）
 ${summary}
 
-${COMMON_OUTPUT_FORMAT}
+${outputFormat}
 【最終確認】文体は「${styleType}」、締めは「${closingType}」で書くこと。`;
   },
   systemMessage:
-    "あなたは精肉店のGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。口コミ本文のみ出力します。出力には絵文字（😊など）か「！」を必ず1つ以上含め、1〜2箇所改行すること。",
+    "あなたは精肉店のGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。口コミ本文のみ出力します。原則として絵文字（😊など）か「！」を1つ以上含め、1〜2箇所改行すること（※満足度が星1〜3の場合は、絵文字や「！」を使わず、トーンはニュートラルにし、再来や継続利用に触れない）。",
 };

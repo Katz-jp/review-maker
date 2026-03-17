@@ -95,6 +95,12 @@ export default function OwnerPage() {
   const [tenantStatus, setTenantStatus] = useState<"active" | "trialing" | "inactive" | "canceled" | "past_due" | null>(null);
   const [tenantIndustry, setTenantIndustry] = useState<string | undefined>(undefined);
   const [tenantRetailPreset, setTenantRetailPreset] = useState<string | undefined>(undefined);
+  const [usageStats, setUsageStats] = useState<{
+    mapsClickCount: number;
+    mapsSatisfactionAvg: number | null;
+    mapsSatisfactionCount: number;
+    feedbackClickCount: number;
+  } | null>(null);
   const [customOptions, setCustomOptions] = useState<CustomOptionsByQuestion>({});
   const [customOptionsLoading, setCustomOptionsLoading] = useState(true);
   const [customOptionsSaving, setCustomOptionsSaving] = useState(false);
@@ -131,6 +137,28 @@ export default function OwnerPage() {
         setTenantRetailPreset(data.retailPreset);
       })
       .catch(() => setTenantStatus("inactive"));
+  }, [tenantId]);
+
+  useEffect(() => {
+    if (!tenantId) return;
+    fetch(`/api/tenant/${tenantId}/stats`, { cache: "no-store" })
+      .then((res) => res.json())
+      .then((data) => {
+        setUsageStats({
+          mapsClickCount: typeof data.mapsClickCount === "number" ? data.mapsClickCount : 0,
+          mapsSatisfactionAvg: typeof data.mapsSatisfactionAvg === "number" ? data.mapsSatisfactionAvg : null,
+          mapsSatisfactionCount: typeof data.mapsSatisfactionCount === "number" ? data.mapsSatisfactionCount : 0,
+          feedbackClickCount: typeof data.feedbackClickCount === "number" ? data.feedbackClickCount : 0,
+        });
+      })
+      .catch(() =>
+        setUsageStats({
+          mapsClickCount: 0,
+          mapsSatisfactionAvg: null,
+          mapsSatisfactionCount: 0,
+          feedbackClickCount: 0,
+        })
+      );
   }, [tenantId]);
 
   useEffect(() => {
@@ -232,6 +260,34 @@ export default function OwnerPage() {
         <p className="text-sm text-gray-500 mt-1">テナントID: {tenantId}</p>
       </header>
 
+      <div className="mb-6 bg-white rounded-2xl p-5 shadow-sm border border-green-100">
+        <h2 className="font-semibold text-gray-800 mb-3">ご利用状況</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+            <p className="text-xs text-gray-500">平均満足度（Googleへ進んだ人）</p>
+            <p className="mt-1 text-2xl font-extrabold text-gray-900">
+              {usageStats?.mapsSatisfactionAvg != null ? usageStats.mapsSatisfactionAvg.toFixed(1) : "—"}
+              <span className="ml-1 text-sm font-semibold text-gray-600">/ 5</span>
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              n={usageStats?.mapsSatisfactionCount ?? 0}
+            </p>
+          </div>
+          <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
+            <p className="text-xs text-gray-500">投稿数（Googleマップへ行く）</p>
+            <p className="mt-1 text-2xl font-extrabold text-gray-900">
+              {usageStats?.mapsClickCount ?? 0}
+              <span className="ml-1 text-sm font-semibold text-gray-600">件</span>
+            </p>
+            {isDental && (
+              <p className="mt-2 text-xs text-gray-600">
+                院内フィードバック：{usageStats?.feedbackClickCount ?? 0}件
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+
       {success && (
         <div className="mb-6 p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-sm font-medium">
           決済が完了しました。サブスクリプションが有効になりました。
@@ -252,68 +308,6 @@ export default function OwnerPage() {
       )}
 
       <section className="flex-1 space-y-6">
-        {/* 操作方法動画 */}
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-          <h2 className="font-semibold text-gray-800 mb-4">
-            操作方法動画
-          </h2>
-          <p className="text-sm text-gray-600 mb-4">
-            以下の動画で使い方をご確認いただけます。
-          </p>
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-medium text-gray-800 text-sm mb-2">クチコミ作成AIの流れを説明した動画</h3>
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
-                <iframe
-                  src="https://www.youtube.com/embed/nb5kaQUmy4Q"
-                  title="クチコミ作成AIの流れを説明した動画"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full"
-                />
-              </div>
-            </div>
-            <div>
-              <h3 className="font-medium text-gray-800 text-sm mb-2">オリジナルの選択肢の追加・削除方法</h3>
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
-                <iframe
-                  src="https://www.youtube.com/embed/PcRkGMbkoJ0"
-                  title="オリジナルの選択肢の追加・削除方法"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full"
-                />
-              </div>
-            </div>
-            {isDental && (
-              <div>
-                <h3 className="font-medium text-gray-800 text-sm mb-2">ネガティブな感想の扱い方（サービス改善のヒントとして活用）</h3>
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
-                  <iframe
-                    src="https://www.youtube.com/embed/Zh7udblCZek"
-                    title="ネガティブな感想の扱い方"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                  />
-                </div>
-              </div>
-            )}
-            <div>
-              <h3 className="font-medium text-gray-800 text-sm mb-2">クチコミ返信ヘルプ AI の使い方</h3>
-              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
-                <iframe
-                  src="https://www.youtube.com/embed/SSW514dPT70"
-                  title="クチコミ返信ヘルプ AI の使い方"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
         {canUsePaidFeatures ? (
           <Link
             href={`/${tenantId}/reply-helper`}
@@ -346,70 +340,28 @@ export default function OwnerPage() {
         )}
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-primary" />
-            💰 サブスクリプション
+          <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <QrCode className="w-5 h-5 text-primary" />
+            お客様用URL
           </h2>
-          {canUsePaidFeatures ? (
-            <>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                <p className="text-green-700 font-semibold">✅ 月額プラン利用中</p>
-                <p className="text-sm text-gray-600 mt-2">
-                  ご利用ありがとうございます。
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handlePortal}
-                disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    処理中…
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    プランを管理
-                  </>
-                )}
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <p className="text-blue-800 font-semibold">🎉 先行特別キャンペーン実施中！</p>
-                <ul className="mt-2 space-y-1 text-sm text-gray-700">
-                  <li>✨ 初月完全無料</li>
-                  <li>💰 2〜3ヶ月目は半額の2,490円</li>
-                  <li>🚀 4ヶ月目から通常価格4,980円</li>
-                </ul>
-                <p className="mt-2 text-xs text-gray-600">
-                  今なら3ヶ月で4,980円（通常14,940円の66%OFF）！
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCheckout}
-                disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    処理中…
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    月額プランに加入する
-                  </>
-                )}
-              </button>
-            </>
-          )}
+          <p className="text-sm text-gray-600 mb-3">
+            QRコードやリンクでお客様に共有してください。
+          </p>
+          <div className="p-3 rounded-xl bg-gray-50 text-sm text-gray-700 font-mono break-all">
+            {customerUrl}
+          </div>
+          <div className="mt-4 flex justify-center">
+            <QRCodeSVG value={customerUrl} size={180} level="M" className="rounded-lg border border-gray-200 bg-white p-2" />
+          </div>
+          <a
+            href={customerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-3 flex items-center gap-2 text-primary-dark font-medium text-sm"
+          >
+            <ExternalLink className="w-4 h-4" />
+            ページを開く
+          </a>
         </div>
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
@@ -482,28 +434,132 @@ export default function OwnerPage() {
         </div>
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-          <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-            <QrCode className="w-5 h-5 text-primary" />
-            お客様用URL
+          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-primary" />
+            💰 サブスクリプション
           </h2>
-          <p className="text-sm text-gray-600 mb-3">
-            QRコードやリンクでお客様に共有してください。
+          {canUsePaidFeatures ? (
+            <>
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                <p className="text-green-700 font-semibold">✅ 月額プラン利用中</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  ご利用ありがとうございます。
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handlePortal}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    処理中…
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    プランを管理
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <p className="text-blue-800 font-semibold">🎉 先行特別キャンペーン実施中！</p>
+                <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                  <li>✨ 初月完全無料</li>
+                  <li>💰 2〜3ヶ月目は半額の2,490円</li>
+                  <li>🚀 4ヶ月目から通常価格4,980円</li>
+                </ul>
+                <p className="mt-2 text-xs text-gray-600">
+                  今なら3ヶ月で4,980円（通常14,940円の66%OFF）！
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    処理中…
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    月額プランに加入する
+                  </>
+                )}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* 操作方法動画 */}
+        <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
+          <h2 className="font-semibold text-gray-800 mb-4">
+            操作方法動画
+          </h2>
+          <p className="text-sm text-gray-600 mb-4">
+            以下の動画で使い方をご確認いただけます。
           </p>
-          <div className="p-3 rounded-xl bg-gray-50 text-sm text-gray-700 font-mono break-all">
-            {customerUrl}
+          <div className="space-y-6">
+            <div>
+              <h3 className="font-medium text-gray-800 text-sm mb-2">クチコミ作成AIの流れを説明した動画</h3>
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
+                <iframe
+                  src="https://www.youtube.com/embed/nb5kaQUmy4Q"
+                  title="クチコミ作成AIの流れを説明した動画"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
+            <div>
+              <h3 className="font-medium text-gray-800 text-sm mb-2">オリジナルの選択肢の追加・削除方法</h3>
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
+                <iframe
+                  src="https://www.youtube.com/embed/PcRkGMbkoJ0"
+                  title="オリジナルの選択肢の追加・削除方法"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
+            {isDental && (
+              <div>
+                <h3 className="font-medium text-gray-800 text-sm mb-2">ネガティブな感想の扱い方（サービス改善のヒントとして活用）</h3>
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
+                  <iframe
+                    src="https://www.youtube.com/embed/Zh7udblCZek"
+                    title="ネガティブな感想の扱い方"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+              </div>
+            )}
+            <div>
+              <h3 className="font-medium text-gray-800 text-sm mb-2">クチコミ返信ヘルプ AI の使い方</h3>
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
+                <iframe
+                  src="https://www.youtube.com/embed/SSW514dPT70"
+                  title="クチコミ返信ヘルプ AI の使い方"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+            </div>
           </div>
-          <div className="mt-4 flex justify-center">
-            <QRCodeSVG value={customerUrl} size={180} level="M" className="rounded-lg border border-gray-200 bg-white p-2" />
-          </div>
-          <a
-            href={customerUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-3 flex items-center gap-2 text-primary-dark font-medium text-sm"
-          >
-            <ExternalLink className="w-4 h-4" />
-            ページを開く
-          </a>
         </div>
       </section>
 

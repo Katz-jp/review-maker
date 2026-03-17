@@ -8,6 +8,7 @@ import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industrie
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
+import { MultiSelectBadge } from "@/components/MultiSelectBadge";
 
 type Answers = Record<string, string[]>;
 type OtherInputs = Record<string, string>;
@@ -137,15 +138,15 @@ export default function TenantQuestionnairePage() {
     | { type: "rating" };
 
   const steps: Step[] = useMemo(() => {
-    // 歯医者(dental)だけ、2ページ目に自由記入（悩み）を移動し、最後に満足度(星)を置く
-    if (industryKey === "dental") {
+    // 歯医者(dental)・整骨院(seikotsu)・小売(retail)は
+    // 「星評価 → 設問 → 自由記入」
+    if (industryKey === "dental" || industryKey === "seikotsu" || industryKey === "retail") {
       const base: Step[] = [];
-      if (questions.length > 0) base.push({ type: "question", questionIndex: 0 });
-      base.push({ type: "freeText" });
-      for (let i = 1; i < questions.length; i += 1) {
+      base.push({ type: "rating" });
+      for (let i = 0; i < questions.length; i += 1) {
         base.push({ type: "question", questionIndex: i });
       }
-      base.push({ type: "rating" });
+      base.push({ type: "freeText" });
       return base;
     }
 
@@ -285,7 +286,7 @@ export default function TenantQuestionnairePage() {
       <section className="flex-1">
         {currentQuestion ? (
           <div>
-            <h3 className="font-semibold text-gray-800 mb-2 text-base">
+            <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
               {currentQuestion.label}
             </h3>
             {currentQuestion.id === "treatment" && industryKey === "dental" ? (
@@ -293,9 +294,9 @@ export default function TenantQuestionnairePage() {
                 今回ご来院された理由を教えてください
               </p>
             ) : currentQuestion.id === "recommend" && industryKey === "dental" ? null : currentQuestion.multiSelect === false ? null : (
-              <p className="text-sm text-primary-dark font-medium mb-4">
-                複数選択OK
-              </p>
+              <div className="mb-4">
+                <MultiSelectBadge />
+              </div>
             )}
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {currentQuestion.options.map((opt) => (
@@ -342,11 +343,13 @@ export default function TenantQuestionnairePage() {
           </div>
         ) : isRatingStep ? (
           <div>
-            <h3 className="font-semibold text-gray-800 mb-2 text-base">
+            <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
               満足度
             </h3>
             <p className="text-sm text-gray-500 mb-4">
-              今回のご来院の満足度を教えてください（必須）
+              {industryKey === "retail"
+                ? "今回のご来店の満足度を教えてください（必須）"
+                : "今回のご来院の満足度を教えてください（必須）"}
             </p>
             <div className="flex items-center justify-center gap-2">
               {[1, 2, 3, 4, 5].map((score) => (
@@ -375,17 +378,17 @@ export default function TenantQuestionnairePage() {
           <div>
             {industryKey === "dental" ? (
               <>
-                <h3 className="font-semibold text-gray-800 mb-2 text-base">
-                  来院前、どんなことで困っていましたか？
+                <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
+                  よろしければご感想を一言お願いします（任意）
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
-                  例）歯が痛かった／銀歯が気になっていた／歯医者が苦手だった など
+                  来院前に困っていたことや、実際に治療を受けてみて感じたことなど、自由にご記入ください。（１行でもOKです）
                 </p>
               </>
             ) : (
               <>
-                <h3 className="font-semibold text-gray-800 mb-2 text-base">
-                  よかったらひとこと（任意）
+                <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
+                  よろしければご感想を一言お願いします（任意）
                 </h3>
                 <p className="text-sm text-gray-500 mb-4">
                   その他 印象に残ったこと、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
@@ -397,7 +400,7 @@ export default function TenantQuestionnairePage() {
               onChange={(e) => setFreeText(e.target.value)}
               placeholder={
                 industryKey === "dental"
-                  ? "例）\n歯が痛くて寝つけなかった\n銀歯が目立つのが気になっていた\n久しぶりの歯医者で少し不安だった など"
+                  ? ""
                   : '「LINEで予約や連絡ができて便利」\n「また利用したい」\n「思っていたよりよかった」'
               }
               rows={5}

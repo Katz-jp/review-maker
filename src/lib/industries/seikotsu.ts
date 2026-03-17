@@ -3,7 +3,8 @@ import {
   getCommonRulesForUserPrompt,
   buildSummaryWithMax3Categories,
   getClosingReminder,
-  COMMON_OUTPUT_FORMAT,
+  getCommonOutputFormat,
+  parseSatisfactionFromOtherInputs,
 } from "@/lib/prompts/common";
 import type { IndustryConfig } from "./types";
 
@@ -19,6 +20,19 @@ const SEIKOTSU_NOTICE = `■ 整骨院特有の注意
 
 export const seikotsuConfig: IndustryConfig = {
   questions: [
+    {
+      id: "change",
+      label: "施術後の感想",
+      options: [
+        "楽になった",
+        "軽く感じた",
+        "動きやすくなった",
+        "姿勢が整った",
+        "すっきり・リラックス",
+        "安心できた",
+        "その他",
+      ],
+    },
     {
       id: "symptom",
       label: "悩み・症状",
@@ -48,17 +62,9 @@ export const seikotsuConfig: IndustryConfig = {
       ],
     },
     {
-      id: "change",
-      label: "施術後の感想",
-      options: [
-        "楽になった",
-        "軽く感じた",
-        "動きやすくなった",
-        "姿勢が整った",
-        "すっきり・リラックス",
-        "安心できた",
-        "その他",
-      ],
+      id: "visitCount",
+      label: "今回が初めての来院ですか？",
+      options: ["初めて来院した", "2〜3回目", "何度も通っている"],
     },
     {
       id: "atmosphere",
@@ -69,7 +75,7 @@ export const seikotsuConfig: IndustryConfig = {
         "安心感がある",
         "落ち着く",
         "予約しやすい",
-        "駐車場がある",
+        "スタッフが親切",
         "その他",
       ],
     },
@@ -87,33 +93,23 @@ export const seikotsuConfig: IndustryConfig = {
         "その他",
       ],
     },
-    {
-      id: "safety",
-      label: "この施設は安心して通えると感じましたか？",
-      multiSelect: false,
-      options: [
-        "とても感じた",
-        "感じた",
-        "どちらとも言えない",
-        "あまり感じなかった",
-        "感じなかった",
-      ],
-    },
   ],
   buildPrompt(answers, otherInputs, freeText) {
+    const satisfaction = parseSatisfactionFromOtherInputs(otherInputs);
     const labels: Record<string, string> = {
+      change: "施術後の感想",
       symptom: "悩み・症状",
       menu: "受けたメニュー",
-      change: "施術後の感想",
+      visitCount: "今回が初めての来院ですか？",
       atmosphere: "雰囲気や対応",
       recommend: "おすすめしたい人",
-      safety: "この施設は安心して通えると感じましたか？",
     };
 
     const summary = buildSummaryWithMax3Categories(answers, otherInputs, labels, freeText);
     const { styleType, closingType } = pickStyleAndClosing();
-    const commonRules = getCommonRulesForUserPrompt(styleType, closingType);
-    const closingReminder = getClosingReminder(closingType);
+    const commonRules = getCommonRulesForUserPrompt(styleType, closingType, satisfaction);
+    const closingReminder = getClosingReminder(closingType, satisfaction);
+    const outputFormat = getCommonOutputFormat(satisfaction);
 
     return `${SEIKOTSU_ROLE}
 
@@ -128,8 +124,8 @@ ${summary}
 
 【最終確認】文体は「${styleType}」、締めは「${closingType}」で書くこと。
 
-${COMMON_OUTPUT_FORMAT}`;
+${outputFormat}`;
   },
   systemMessage:
-    "あなたは整骨院・接骨院のGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。口コミ本文のみ出力します。出力には絵文字（😊など）か「！」を必ず1つ以上含め、1〜2箇所改行すること。",
+    "あなたは整骨院・接骨院のGoogleマップ口コミを書くお客様をサポートするAIです。選択肢は最大3つまで使用、自由記入はすべて含める。記載のない内容の追加・誇張は禁止。口コミ本文のみ出力します。原則として絵文字（😊など）か「！」を1つ以上含め、1〜2箇所改行すること（※満足度が星1〜3の場合は、絵文字や「！」を使わず、トーンはニュートラルにし、再来や通院継続に触れない）。",
 };
