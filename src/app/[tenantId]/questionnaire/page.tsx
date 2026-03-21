@@ -138,24 +138,14 @@ export default function TenantQuestionnairePage() {
     | { type: "rating" };
 
   const steps: Step[] = useMemo(() => {
-    // 歯医者(dental)・整骨院(seikotsu)・小売(retail)は
-    // 「星評価 → 設問 → 自由記入」
-    if (industryKey === "dental" || industryKey === "seikotsu" || industryKey === "retail") {
-      const base: Step[] = [];
-      base.push({ type: "rating" });
-      for (let i = 0; i < questions.length; i += 1) {
-        base.push({ type: "question", questionIndex: i });
-      }
-      base.push({ type: "freeText" });
-      return base;
+    // 全業種「星評価（必須）→ 設問 → 自由記入」
+    const base: Step[] = [{ type: "rating" as const }];
+    for (let i = 0; i < questions.length; i += 1) {
+      base.push({ type: "question" as const, questionIndex: i });
     }
-
-    // その他業種は「設問 → 自由記入（任意）」の順を維持
-    return [
-      ...questions.map((_, i) => ({ type: "question" as const, questionIndex: i })),
-      { type: "freeText" as const },
-    ];
-  }, [industryKey, questions]);
+    base.push({ type: "freeText" as const });
+    return base;
+  }, [questions]);
 
   const TOTAL_STEPS = steps.length;
   const current = steps[currentStep];
@@ -206,6 +196,7 @@ export default function TenantQuestionnairePage() {
       if (tenantId === "trial" && !canGenerate(tenantId, "generate")) {
         return; // ボタンは無効化されているのでここには来ないはずだが念のため
       }
+      if (satisfaction === null) return;
       const payload = {
         answers,
         otherInputs,

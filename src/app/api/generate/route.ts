@@ -80,8 +80,8 @@ function containsBang(text: string): boolean {
   return text.includes("!") || text.includes("！");
 }
 
-function satisfiesHighScorePolicy(text: string, satisfaction: number | null): boolean {
-  if (satisfaction === null || satisfaction < 4) return true;
+function satisfiesHighScorePolicy(text: string, satisfaction: number): boolean {
+  if (satisfaction < 4) return true;
   if (NEGATIVE_PHRASES_FOR_HIGH_SCORE.some((p) => text.includes(p))) return false;
   const hasEmojiOrBang = containsEmoji(text) || containsBang(text);
   const hasRecommend = RECOMMEND_TOKENS_FOR_HIGH_SCORE.some((t) => text.includes(t));
@@ -89,8 +89,8 @@ function satisfiesHighScorePolicy(text: string, satisfaction: number | null): bo
   return hasEmojiOrBang && hasRecommend && hasRevisit;
 }
 
-function violatesPolicy(text: string, satisfaction: number | null): boolean {
-  if (satisfaction === null || satisfaction >= 4) return false;
+function violatesPolicy(text: string, satisfaction: number): boolean {
+  if (satisfaction >= 4) return false;
   if (containsEmoji(text)) return true;
   return BANNED_WORDS_FOR_LOW_SCORE.some((word) => text.includes(word));
 }
@@ -112,8 +112,21 @@ export async function POST(req: NextRequest) {
       freeText = "",
       industry = DEFAULT_INDUSTRY,
       retailPreset,
-      satisfaction = null,
     } = body;
+
+    const rawSatisfaction = body?.satisfaction;
+    if (
+      typeof rawSatisfaction !== "number" ||
+      !Number.isInteger(rawSatisfaction) ||
+      rawSatisfaction < 1 ||
+      rawSatisfaction > 5
+    ) {
+      return NextResponse.json(
+        { error: "満足度（1〜5の整数）が必要です" },
+        { status: 400 }
+      );
+    }
+    const satisfaction = rawSatisfaction;
 
     const industryKey = Object.hasOwn(industries, industry)
       ? (industry as IndustryKey)
@@ -125,10 +138,12 @@ export async function POST(req: NextRequest) {
       answers,
       {
         ...otherInputs,
-        ...(satisfaction !== null && { __satisfaction: String(satisfaction) }),
+        __satisfaction: String(satisfaction),
       },
       freeText
     );
+
+    const firstTemperature = satisfaction <= 3 ? 0.45 : 0.75;
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -136,7 +151,7 @@ export async function POST(req: NextRequest) {
         { role: "system", content: config.systemMessage },
         { role: "user", content: prompt },
       ],
-      temperature: 0.75,
+      temperature: firstTemperature,
       presence_penalty: 0.5,
       frequency_penalty: 0.45,
       max_tokens: 500,
@@ -168,7 +183,7 @@ export async function POST(req: NextRequest) {
         satisfiesHighScorePolicy(retryText, satisfaction)
       ) {
         text = retryText;
-      } else if (satisfaction !== null && satisfaction <= 3) {
+      } else if (satisfaction <= 3) {
         // 低評価でも、違反が残る場合はもう一段強めにリライトして“総評テンプレ”を潰す
         const bannedList = FORBIDDEN_SUMMARY_PHRASES_FOR_LOW_SCORE.map((p) => `- ${p}`).join(
           "\n"
@@ -191,7 +206,7 @@ export async function POST(req: NextRequest) {
         if (!violatesPolicy(retryLow2Text, satisfaction)) {
           text = retryLow2Text;
         }
-      } else if (satisfaction !== null && satisfaction >= 4) {
+      } else if (satisfaction >= 4) {
         // もう一段強めに“必須語句”を指定して再生成（高評価の安定化）
         // 固定文だと同じ文章が続きやすいので、候補からランダムに選ぶ。
         const emojiOrBang = pickOne(["😊", "！"]);

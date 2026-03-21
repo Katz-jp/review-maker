@@ -14,7 +14,8 @@ type Payload = {
   tenantId?: string;
   industry?: string;
   retailPreset?: string;
-  satisfaction?: number;
+  /** アンケートで必須（1〜5） */
+  satisfaction: number;
 };
 
 const DENTAL_FEEDBACK_FORM_ENTRY_ID = "683328231";
@@ -82,6 +83,14 @@ export default function TenantGeneratePage() {
     } catch {
       throw new Error("回答データの形式が不正です。");
     }
+    if (
+      typeof payload.satisfaction !== "number" ||
+      !Number.isInteger(payload.satisfaction) ||
+      payload.satisfaction < 1 ||
+      payload.satisfaction > 5
+    ) {
+      throw new Error("満足度のデータがありません。アンケートからやり直してください。");
+    }
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -90,7 +99,7 @@ export default function TenantGeneratePage() {
         otherInputs: payload.otherInputs,
         freeText: payload.freeText,
         industry: payload.industry ?? "seikotsu",
-        satisfaction: payload.satisfaction ?? null,
+        satisfaction: payload.satisfaction,
         ...(payload.industry === "retail" && { retailPreset: payload.retailPreset ?? "meat" }),
       }),
     });
@@ -118,7 +127,11 @@ export default function TenantGeneratePage() {
     if (raw) {
       try {
         const payload = JSON.parse(raw) as Payload;
-        if (typeof payload.satisfaction === "number") {
+        if (
+          typeof payload.satisfaction === "number" &&
+          payload.satisfaction >= 1 &&
+          payload.satisfaction <= 5
+        ) {
           setSatisfaction(payload.satisfaction);
         }
         if (payload.industry) {
