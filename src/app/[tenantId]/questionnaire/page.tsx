@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
+import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
 import { RESTAURANT_ORDERED_MENU_QUESTION_ID } from "@/lib/industries/restaurant";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
@@ -33,12 +34,12 @@ function mergeOptions(
   baseOptions: string[],
   customOptions: string[] = []
 ): string[] {
-  const hasOther = baseOptions.includes("その他");
+  const hasOther = baseOptions.includes(OTHER_OPTION_LABEL);
   const withoutOther = hasOther
-    ? baseOptions.filter((o) => o !== "その他")
+    ? baseOptions.filter((o) => o !== OTHER_OPTION_LABEL)
     : baseOptions;
   const merged = hasOther
-    ? [...customOptions, ...withoutOther, "その他"]
+    ? [...customOptions, ...withoutOther, OTHER_OPTION_LABEL]
     : [...customOptions, ...withoutOther];
   return merged.filter((o) => !HIDDEN_OPTIONS.includes(o));
 }
@@ -166,9 +167,9 @@ export default function TenantQuestionnairePage() {
         industryKey === "restaurant" &&
         q.id === RESTAURANT_ORDERED_MENU_QUESTION_ID &&
         tenantId === "trial" &&
-        opts.filter((o) => o !== "その他").length === 0
+        opts.filter((o) => o !== OTHER_OPTION_LABEL).length === 0
       ) {
-        opts = [...TRIAL_DEMO_MENU_ITEMS, "その他"];
+        opts = [...TRIAL_DEMO_MENU_ITEMS, OTHER_OPTION_LABEL];
       }
       return {
         ...q,
@@ -218,7 +219,7 @@ export default function TenantQuestionnairePage() {
     if (industryKey === "restaurant") {
       if (qid === RESTAURANT_ORDERED_MENU_QUESTION_ID) {
         const onlyOther =
-          currentQuestion.options.length === 1 && currentQuestion.options[0] === "その他";
+          currentQuestion.options.length === 1 && currentQuestion.options[0] === OTHER_OPTION_LABEL;
         if (onlyOther && tenantId !== "trial") {
           setStepError("店舗にメニューが登録されていません。お店にご確認ください。");
           return false;
@@ -227,8 +228,8 @@ export default function TenantQuestionnairePage() {
           setStepError("メニューを1つ以上選んでください");
           return false;
         }
-        if (selected.includes("その他") && !(otherInputs[qid]?.trim())) {
-          setStepError("「その他」を選んだ場合は内容を入力してください");
+        if (selected.includes(OTHER_OPTION_LABEL) && !(otherInputs[qid]?.trim())) {
+          setStepError(`「${OTHER_OPTION_LABEL}」を選んだ場合は内容を入力してください`);
           return false;
         }
         return true;
@@ -238,8 +239,8 @@ export default function TenantQuestionnairePage() {
           setStepError("ご利用シーンを選んでください");
           return false;
         }
-        if (selected.includes("その他") && !(otherInputs[qid]?.trim())) {
-          setStepError("「その他」を選んだ場合は内容を入力してください");
+        if (selected.includes(OTHER_OPTION_LABEL) && !(otherInputs[qid]?.trim())) {
+          setStepError(`「${OTHER_OPTION_LABEL}」を選んだ場合は内容を入力してください`);
           return false;
         }
         return true;
@@ -249,8 +250,8 @@ export default function TenantQuestionnairePage() {
           setStepError("1つ以上選んでください");
           return false;
         }
-        if (selected.includes("その他") && !(otherInputs[qid]?.trim())) {
-          setStepError("「その他」を選んだ場合は内容を入力してください");
+        if (selected.includes(OTHER_OPTION_LABEL) && !(otherInputs[qid]?.trim())) {
+          setStepError(`「${OTHER_OPTION_LABEL}」を選んだ場合は内容を入力してください`);
           return false;
         }
         return true;
@@ -284,7 +285,7 @@ export default function TenantQuestionnairePage() {
         [questionId]: next,
       };
     });
-    if (option !== "その他") {
+    if (option !== OTHER_OPTION_LABEL) {
       setOtherInputs((prev) => {
         const next = { ...prev };
         delete next[questionId];
@@ -405,14 +406,7 @@ export default function TenantQuestionnairePage() {
                 <MultiSelectBadge />
               </div>
             )}
-            <div
-              className={`grid gap-2 sm:gap-3 ${
-                industryKey === "restaurant" &&
-                currentQuestion.id === RESTAURANT_ORDERED_MENU_QUESTION_ID
-                  ? "grid-cols-1"
-                  : "grid-cols-2"
-              }`}
-            >
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               {currentQuestion.options.map((opt) => (
                 <button
                   key={opt}
@@ -444,7 +438,7 @@ export default function TenantQuestionnairePage() {
               ))}
             </div>
 
-            {isSelected(currentQuestion.id, "その他") && (
+            {isSelected(currentQuestion.id, OTHER_OPTION_LABEL) && (
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   ご記入ください

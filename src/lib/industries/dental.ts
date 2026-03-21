@@ -6,6 +6,7 @@ import {
   getCommonOutputFormat,
   parseSatisfactionFromOtherInputs,
 } from "@/lib/prompts/common";
+import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
 import type { IndustryConfig } from "./types";
 
 const DENTAL_ROLE =
@@ -30,7 +31,7 @@ export const dentalConfig: IndustryConfig = {
         "気になっていたところが改善した",
         "不安が減った・安心できた",
         "通院しやすくなった",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -45,7 +46,7 @@ export const dentalConfig: IndustryConfig = {
         "歯ぐきからの出血・腫れ",
         "口臭が気になる",
         "定期検診・メンテナンス",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -61,7 +62,7 @@ export const dentalConfig: IndustryConfig = {
         "小児歯科",
         "ホワイトニング",
         "入れ歯",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -83,7 +84,7 @@ export const dentalConfig: IndustryConfig = {
         "落ち着く雰囲気",
         "予約が取りやすい・待ち時間が少ない",
         "通いやすい場所",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -97,7 +98,7 @@ export const dentalConfig: IndustryConfig = {
         "見た目（白い歯・歯並び）をきれいにしたい人",
         "仕事や育児で忙しい人",
         "近くに通いやすい歯医者を探している人",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
   ],

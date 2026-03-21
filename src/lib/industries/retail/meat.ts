@@ -6,6 +6,7 @@ import {
   getCommonOutputFormat,
   parseSatisfactionFromOtherInputs,
 } from "@/lib/prompts/common";
+import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
 import type { IndustryConfig } from "../types";
 
 const MEAT_ROLE =
@@ -31,7 +32,7 @@ export const retailMeatConfig: IndustryConfig = {
         "焼肉用",
         "鶏肉",
         "味付け肉",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -44,7 +45,7 @@ export const retailMeatConfig: IndustryConfig = {
         "品揃えが豊富",
         "量が多い",
         "カットが丁寧",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -57,7 +58,7 @@ export const retailMeatConfig: IndustryConfig = {
         "店内が見やすい",
         "入りやすい雰囲気",
         "アットホームな雰囲気",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -70,7 +71,7 @@ export const retailMeatConfig: IndustryConfig = {
         "お中元",
         "お歳暮",
         "贈り物",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -84,7 +85,7 @@ export const retailMeatConfig: IndustryConfig = {
         "料理好きの人",
         "日々の献立に迷っている人",
         "忙しい人",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
   ],

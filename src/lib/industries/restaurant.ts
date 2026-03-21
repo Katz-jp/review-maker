@@ -6,6 +6,7 @@ import {
   parseSatisfactionFromOtherInputs,
   buildRestaurantSurveySummary,
 } from "@/lib/prompts/common";
+import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
 import type { IndustryConfig } from "./types";
 
 const RESTAURANT_ROLE =
@@ -16,7 +17,7 @@ const RESTAURANT_NOTICE = `■ 飲食店向けの注意
 * 味・効果の断定や誇張は避ける
 * 一般的な店の特徴を勝手に補完してはいけない`;
 
-/** 店舗が customOptions でメニュー一覧を登録する（ベースは「その他」のみ） */
+/** 店舗が customOptions でメニュー一覧を登録する（ベースは OTHER_OPTION_LABEL のみ） */
 export const RESTAURANT_ORDERED_MENU_QUESTION_ID = "orderedMenu";
 
 /** オーナー画面・API で保存できるメニュー行数の上限 */
@@ -27,7 +28,7 @@ export const restaurantConfig: IndustryConfig = {
     {
       id: RESTAURANT_ORDERED_MENU_QUESTION_ID,
       label: "ご注文されたメニューを教えてください（複数選択可）",
-      options: ["その他"],
+      options: [OTHER_OPTION_LABEL],
     },
     {
       id: "scene",
@@ -38,7 +39,7 @@ export const restaurantConfig: IndustryConfig = {
         "家族で",
         "デート",
         "仕事（会食・接待）",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -54,7 +55,7 @@ export const restaurantConfig: IndustryConfig = {
         "清潔感がある店内",
         "立地・アクセスが良い",
         "メニューが豊富",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -70,7 +71,7 @@ export const restaurantConfig: IndustryConfig = {
         "価格",
         "量（多い／少ない）",
         "メニューの分かりやすさ",
-        "その他",
+        OTHER_OPTION_LABEL,
         "特にない",
       ],
     },

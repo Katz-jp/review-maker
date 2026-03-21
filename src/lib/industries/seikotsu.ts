@@ -6,6 +6,7 @@ import {
   getCommonOutputFormat,
   parseSatisfactionFromOtherInputs,
 } from "@/lib/prompts/common";
+import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
 import type { IndustryConfig } from "./types";
 
 const SEIKOTSU_ROLE =
@@ -30,7 +31,7 @@ export const seikotsuConfig: IndustryConfig = {
         "姿勢が整った",
         "すっきり・リラックス",
         "安心できた",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -45,7 +46,7 @@ export const seikotsuConfig: IndustryConfig = {
         "産後の不調",
         "交通事故後のむちうち",
         "スポーツによる痛み",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -58,7 +59,7 @@ export const seikotsuConfig: IndustryConfig = {
         "交通事故対応",
         "筋肉調整",
         "ストレッチ",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -76,7 +77,7 @@ export const seikotsuConfig: IndustryConfig = {
         "落ち着く",
         "予約しやすい",
         "スタッフが親切",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
     {
@@ -90,7 +91,7 @@ export const seikotsuConfig: IndustryConfig = {
         "姿勢が気になる人",
         "慢性的な痛みのある人",
         "初めて整骨院に行く人",
-        "その他",
+        OTHER_OPTION_LABEL,
       ],
     },
   ],

@@ -73,7 +73,6 @@ function CustomOptionsEditor({
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="例：ラジオ波"
               className="flex-1 px-3 py-2 rounded-lg border border-gray-200 bg-white text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
             />
             <button
@@ -387,14 +386,16 @@ export default function OwnerPage() {
           <div className="text-sm text-gray-600 mb-4">
             <p>
               {effectiveIndustry === "restaurant"
-                ? "飲食店の場合は「ご注文メニュー」に、店で提供するメニュー名をすべて登録してください（最大40件）。その他の設問への追加は最大3件までです。"
+                ? "飲食店の場合は「ご注文されたメニュー」に、40件まで登録できます。それ以外の設問の選択肢の追加は、最大3件までです。"
                 : "各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。"}
             </p>
-            <span className="text-xs text-gray-500 mt-1 block">※ 注意：</span>
-            <ul className="text-xs text-gray-500 mt-1 ml-4 list-disc space-y-0.5">
-              <li>１つずつ追加すること</li>
-              <li>必ず「選択肢を保存する」ボタンを押すこと（これを押さないと反映されません）</li>
-            </ul>
+            <div className="text-red-600 mt-2">
+              <span className="text-xs block font-medium">※追加・削除するときの注意点</span>
+              <ul className="text-xs mt-1 ml-4 list-disc space-y-0.5">
+                <li>１つずつ追加すること</li>
+                <li>必ず「選択肢を保存する」ボタンを押すこと（これを押さないと反映されません）</li>
+              </ul>
+            </div>
           </div>
           {customOptionsLoading ? (
             <div className="flex items-center justify-center py-8 gap-2 text-gray-500">

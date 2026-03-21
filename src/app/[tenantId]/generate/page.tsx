@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { ArrowLeft, Copy, Loader2, RotateCcw, Undo2 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
+import { getReviewOrMapUrl } from "@/lib/review-link";
 
 type Payload = {
   answers: Record<string, string[]>;
@@ -29,7 +30,17 @@ function getDentalFeedbackFormUrl(tenantId: string): string {
   return `${DENTAL_FEEDBACK_FORM_BASE}?usp=pp_url&${params.toString()}`;
 }
 
-import { getReviewOrMapUrl } from "@/lib/review-link";
+/** 飲食店：ご意見フォーム（「店舗 ID」に tenantId を事前入力） */
+const RESTAURANT_FEEDBACK_FORM_ENTRY_ID = "365259658";
+const RESTAURANT_FEEDBACK_FORM_BASE =
+  "https://docs.google.com/forms/d/e/1FAIpQLSeEj0YIvWZhAxjhF7qZ4Rne-NpQc3veGIQx5RVtoUjvYDTugg/viewform";
+
+function getRestaurantFeedbackFormUrl(tenantId: string): string {
+  const params = new URLSearchParams({
+    [`entry.${RESTAURANT_FEEDBACK_FORM_ENTRY_ID}`]: tenantId,
+  });
+  return `${RESTAURANT_FEEDBACK_FORM_BASE}?usp=pp_url&${params.toString()}`;
+}
 
 export default function TenantGeneratePage() {
   const params = useParams();
@@ -202,9 +213,13 @@ export default function TenantGeneratePage() {
     window.open(getReviewOrMapUrl(tenant, tenantId), "_blank", "noopener,noreferrer");
   };
 
-  const handleOpenDentalFeedback = () => {
+  const handleOpenInhouseFeedback = () => {
     trackEvent("open_inhouse_feedback");
-    window.open(getDentalFeedbackFormUrl(tenantId), "_blank", "noopener,noreferrer");
+    const url =
+      industry === "restaurant"
+        ? getRestaurantFeedbackFormUrl(tenantId)
+        : getDentalFeedbackFormUrl(tenantId);
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -239,7 +254,12 @@ export default function TenantGeneratePage() {
     );
   }
 
-  const isDental = industry === "dental";
+  /** 星評価に応じて「ご意見」「Googleマップ」のボタン順を切り替える業種 */
+  const showFeedbackAndMaps = industry === "dental" || industry === "restaurant";
+  const feedbackButtonLabel =
+    industry === "restaurant"
+      ? "ご意見を送る（直接当店へ届きます）"
+      : "ご意見を送る（直接当院へ届きます）";
 
   return (
     <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
@@ -380,17 +400,17 @@ export default function TenantGeneratePage() {
               </p>
             </div>
           )}
-          {isDental ? (
+          {showFeedbackAndMaps ? (
             <div className="space-y-3">
               {/* 星1〜3: ご意見を送るを上、星4〜5 or null: Googleマップを上 */}
               {satisfaction !== null && satisfaction <= 3 ? (
                 <>
                   <button
                     type="button"
-                    onClick={handleOpenDentalFeedback}
+                    onClick={handleOpenInhouseFeedback}
                     className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
                   >
-                    ご意見を送る（直接当院へ届きます）
+                    {feedbackButtonLabel}
                   </button>
                   <button
                     type="button"
@@ -431,10 +451,10 @@ export default function TenantGeneratePage() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleOpenDentalFeedback}
+                    onClick={handleOpenInhouseFeedback}
                     className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
                   >
-                    ご意見を送る（直接当院へ届きます）
+                    {feedbackButtonLabel}
                   </button>
                 </>
               )}
