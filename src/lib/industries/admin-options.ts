@@ -11,6 +11,7 @@ export const INDUSTRY_OPTIONS: Array<SelectOption<"" | IndustryKey>> = [
   { value: "seikotsu", label: "整骨院" },
   { value: "dental", label: "歯医者・クリニック" },
   { value: "retail", label: "小売店" },
+  { value: "restaurant", label: "飲食店" },
 ];
 
 /** 管理画面用：小売プリセットの選択肢（増える前提でここに集約） */

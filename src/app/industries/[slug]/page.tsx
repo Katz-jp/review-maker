@@ -12,6 +12,7 @@ const SLUG_TO_TRIAL_ID: Record<string, string> = {
   seikotsu: "seikotsuin",
   retail: "kouri",
   dentist: "haisha",
+  restaurant: "inshoku",
 };
 
 export default function IndustryLandingPage({
@@ -418,6 +419,113 @@ export default function IndustryLandingPage({
           </section>
 
           {/* 料金 + CTA */}
+          <PricingSection />
+
+          <section className="px-4 sm:px-6 py-12 sm:py-16 bg-green-50 border-t border-green-100">
+            <div className="max-w-2xl mx-auto text-center">
+              <p className="text-lg font-semibold text-gray-800 mb-6">
+                まずは1ヶ月、無料で体験してください。
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href={trialId ? `/trial?industry=${trialId}` : "/trial"}
+                  className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+                >
+                  無料でデモを試す
+                </Link>
+                <a
+                  href={TRIAL_FORM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block py-4 px-6 rounded-xl bg-white border-2 border-primary text-primary hover:bg-primary/10 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+                >
+                  1ヶ月無料トライアル
+                </a>
+              </div>
+            </div>
+          </section>
+        </main>
+        <footer className="py-6 text-center text-sm text-gray-500 border-t border-green-100">
+          ©2026 くーままAIラボ
+        </footer>
+      </div>
+    );
+  }
+
+  if (slug === "restaurant") {
+    return (
+      <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
+        <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-green-100 shadow-sm">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+            <Link
+              href="/industries"
+              className="inline-flex items-center gap-1 text-gray-600 hover:text-primary-dark text-sm font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              対応業種一覧
+            </Link>
+            <Link
+              href="/"
+              className="text-sm font-medium text-gray-600 hover:text-primary-dark transition-colors"
+            >
+              口コミ投稿サポートAI
+            </Link>
+          </div>
+        </header>
+
+        <main className="flex-1">
+          <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto text-center">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+              飲食店のための
+              <br />
+              口コミ作成支援
+            </h1>
+            <p className="mt-6 text-xl sm:text-2xl font-semibold text-gray-800">
+              来店後のアンケートから、
+              <br />
+              Googleマップ向けの自然な口コミ下書きをつくります。
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href={trialId ? `/trial?industry=${trialId}` : "/trial"}
+                className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+              >
+                無料でデモを試す
+              </Link>
+              <a
+                href={TRIAL_FORM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block py-4 px-6 rounded-xl bg-white border-2 border-primary text-primary hover:bg-primary/10 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+              >
+                1ヶ月無料トライアル
+              </a>
+            </div>
+            <div className="mt-8 flex justify-center overflow-hidden">
+              <Image
+                src="/industry-hero-retail.png"
+                alt="生成された口コミの画面"
+                width={320}
+                height={480}
+                className="w-full max-w-[320px] h-auto rounded-xl drop-shadow-lg object-contain"
+                unoptimized
+              />
+            </div>
+          </section>
+
+          <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
+                こんなことができます
+              </h2>
+              <ul className="space-y-3 text-base sm:text-lg text-gray-700">
+                <li>・満足度に合わせた質問（良かった点／気になった点）で、体験を整理</li>
+                <li>・店ごとにメニュー一覧を登録し、注文内容を口コミに反映</li>
+                <li>・利用シーンや再来意向まで、自然な文章に</li>
+              </ul>
+            </div>
+          </section>
+
           <PricingSection />
 
           <section className="px-4 sm:px-6 py-12 sm:py-16 bg-green-50 border-t border-green-100">

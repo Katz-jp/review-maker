@@ -1,10 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
+import {
+  MAX_RESTAURANT_MENU_OPTIONS,
+  RESTAURANT_ORDERED_MENU_QUESTION_ID,
+} from "@/lib/industries/restaurant";
 
 export type CustomOptionsByQuestion = Record<string, string[]>;
 
 const MAX_CUSTOM_OPTIONS_PER_QUESTION = 3;
+
+function maxOptionsForQuestion(questionId: string, industry: string | undefined): number {
+  if (industry === "restaurant" && questionId === RESTAURANT_ORDERED_MENU_QUESTION_ID) {
+    return MAX_RESTAURANT_MENU_OPTIONS;
+  }
+  return MAX_CUSTOM_OPTIONS_PER_QUESTION;
+}
 
 function getQuestionIds(industry: string | undefined, retailPreset: string | undefined): string[] {
   const key: IndustryKey = Object.hasOwn(industries, industry ?? "")
@@ -96,13 +107,15 @@ export async function POST(
     }
 
     const validated: CustomOptionsByQuestion = {};
+    const industry = tenantData?.industry as string | undefined;
     for (const [questionId, options] of Object.entries(customOptions)) {
       if (!validateQuestionId(questionId, questionIds)) continue;
       if (!Array.isArray(options)) continue;
+      const cap = maxOptionsForQuestion(questionId, industry);
       const filtered = options
         .filter((o): o is string => typeof o === "string" && o.trim() !== "")
         .map((o) => o.trim())
-        .slice(0, MAX_CUSTOM_OPTIONS_PER_QUESTION);
+        .slice(0, cap);
       if (filtered.length > 0) {
         validated[questionId] = filtered;
       }

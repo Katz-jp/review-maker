@@ -6,10 +6,21 @@ import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import { CreditCard, QrCode, ExternalLink, Loader2, Plus, Trash2, Settings2, MessageSquare } from "lucide-react";
 import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
+import {
+  MAX_RESTAURANT_MENU_OPTIONS,
+  RESTAURANT_ORDERED_MENU_QUESTION_ID,
+} from "@/lib/industries/restaurant";
 
 type CustomOptionsByQuestion = Record<string, string[]>;
 
 const MAX_CUSTOM_OPTIONS = 3;
+
+function maxCustomOptionsForQuestion(questionId: string, industryKey: IndustryKey): number {
+  if (industryKey === "restaurant" && questionId === RESTAURANT_ORDERED_MENU_QUESTION_ID) {
+    return MAX_RESTAURANT_MENU_OPTIONS;
+  }
+  return MAX_CUSTOM_OPTIONS;
+}
 
 function CustomOptionsEditor({
   questionId,
@@ -174,7 +185,11 @@ export default function OwnerPage() {
 
   const handleAddOption = (questionId: string, value: string) => {
     const current = customOptions[questionId] ?? [];
-    if (current.length >= MAX_CUSTOM_OPTIONS) return;
+    const industryKey: IndustryKey = Object.hasOwn(industries, effectiveIndustry)
+      ? (effectiveIndustry as IndustryKey)
+      : "seikotsu";
+    const cap = maxCustomOptionsForQuestion(questionId, industryKey);
+    if (current.length >= cap) return;
     const trimmed = value.trim();
     if (!trimmed || current.includes(trimmed)) return;
     setCustomOptions((prev) => ({
@@ -371,7 +386,9 @@ export default function OwnerPage() {
           </h2>
           <div className="text-sm text-gray-600 mb-4">
             <p>
-              各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。
+              {effectiveIndustry === "restaurant"
+                ? "飲食店の場合は「ご注文メニュー」に、店で提供するメニュー名をすべて登録してください（最大40件）。その他の設問への追加は最大3件までです。"
+                : "各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。"}
             </p>
             <span className="text-xs text-gray-500 mt-1 block">※ 注意：</span>
             <ul className="text-xs text-gray-500 mt-1 ml-4 list-disc space-y-0.5">
@@ -406,7 +423,7 @@ export default function OwnerPage() {
                   options={customOptions[q.id] ?? []}
                   onAdd={handleAddOption}
                   onRemove={handleRemoveOption}
-                  maxOptions={MAX_CUSTOM_OPTIONS}
+                  maxOptions={maxCustomOptionsForQuestion(q.id, industryKey)}
                 />
               ));
               })()}

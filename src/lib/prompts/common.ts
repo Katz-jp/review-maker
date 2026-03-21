@@ -58,6 +58,36 @@ export function buildSummaryWithMax3Categories(
   return summary;
 }
 
+const RESTAURANT_ALWAYS_IDS = ["orderedMenu", "scene", "returnIntent"] as const;
+
+/** 飲食店：注文メニュー・利用シーン・再来意向は毎回必ず要約に含める。④は満足度で分岐 */
+export function buildRestaurantSurveySummary(
+  answers: Record<string, string[]>,
+  otherInputs: Record<string, string>,
+  labels: Record<string, string>,
+  freeText: string,
+  satisfaction: Satisfaction
+): string {
+  let summary = "";
+
+  for (const id of RESTAURANT_ALWAYS_IDS) {
+    const vals = answers[id] ?? [];
+    const parts = [...vals];
+    if (otherInputs[id]) parts.push(otherInputs[id]);
+    if (parts.length) summary += `【${labels[id] || id}】${parts.join("、")}\n`;
+  }
+
+  const branchId =
+    satisfaction !== null && satisfaction >= 4 ? "goodPoints" : "concerns";
+  const bVals = answers[branchId] ?? [];
+  const bParts = [...bVals];
+  if (otherInputs[branchId]) bParts.push(otherInputs[branchId]);
+  if (bParts.length) summary += `【${labels[branchId] || branchId}】${bParts.join("、")}\n`;
+
+  if (freeText) summary += `【補足】${freeText}\n`;
+  return summary;
+}
+
 /** 締めの指示をアンケート直前で強調（「おすすめしたい」禁止・今回の締めタイプを明示） */
 export function getClosingReminder(
   closingType: string,

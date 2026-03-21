@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft, Building2, Store, Stethoscope } from "lucide-react";
+import { ArrowLeft, Building2, Store, Stethoscope, UtensilsCrossed } from "lucide-react";
 
 const INDUSTRIES = [
   {
@@ -16,6 +16,13 @@ const INDUSTRIES = [
     label: "小売店",
     description: "お店の体験をもとに口コミ文を生成します。",
     icon: Store,
+    available: true,
+  },
+  {
+    slug: "restaurant",
+    label: "飲食店",
+    description: "来店の体験をもとに口コミ文を生成します。",
+    icon: UtensilsCrossed,
     available: true,
   },
   {

@@ -3,10 +3,10 @@
 import { useEffect } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Building2, Store, Stethoscope } from "lucide-react";
+import { ArrowLeft, Building2, Store, Stethoscope, UtensilsCrossed } from "lucide-react";
 import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
 
-const INDUSTRY_IDS = ["seikotsuin", "kouri", "haisha"] as const;
+const INDUSTRY_IDS = ["seikotsuin", "kouri", "haisha", "inshoku"] as const;
 
 const INDUSTRIES = [
   {
@@ -28,6 +28,13 @@ const INDUSTRIES = [
     label: "歯医者・クリニック",
     description: "診療体験をもとに口コミの下書きを作成します。",
     icon: Building2,
+    available: true,
+  },
+  {
+    id: "inshoku",
+    label: "飲食店",
+    description: "来店の感想をアンケートでお聞きして、口コミの下書きを作成します。",
+    icon: UtensilsCrossed,
     available: true,
   },
 ] as const;

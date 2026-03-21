@@ -210,18 +210,34 @@ export async function POST(req: NextRequest) {
         // もう一段強めに“必須語句”を指定して再生成（高評価の安定化）
         // 固定文だと同じ文章が続きやすいので、候補からランダムに選ぶ。
         const emojiOrBang = pickOne(["😊", "！"]);
-        const recommendPhrase = pickOne([
-          "個人的にはおすすめです。",
-          "安心しておすすめできます。",
-          "同じように歯医者が苦手な方にはおすすめです。",
-          "またお願いしたいと思えるのでおすすめです。",
-        ]);
-        const revisitPhrase = pickOne([
-          "また行きたいです。",
-          "次回もお願いしたいです。",
-          "今後も通いたいです。",
-          "これからもお世話になりたいです。",
-        ]);
+        const recommendPhrase =
+          industryKey === "restaurant"
+            ? pickOne([
+                "個人的にはおすすめです。",
+                "料理の味も雰囲気も気に入りました。",
+                "友人にも勧めたいお店です。",
+                "コスパも含めておすすめです。",
+              ])
+            : pickOne([
+                "個人的にはおすすめです。",
+                "安心しておすすめできます。",
+                "同じように歯医者が苦手な方にはおすすめです。",
+                "またお願いしたいと思えるのでおすすめです。",
+              ]);
+        const revisitPhrase =
+          industryKey === "restaurant"
+            ? pickOne([
+                "また行きたいです。",
+                "次の来店も楽しみです。",
+                "機会があればまた来たいです。",
+                "今度は別のメニューも試したいです。",
+              ])
+            : pickOne([
+                "また行きたいです。",
+                "次回もお願いしたいです。",
+                "今後も通いたいです。",
+                "これからもお世話になりたいです。",
+              ]);
 
         const retry2 = await openai.chat.completions.create({
           model: "gpt-4o-mini",

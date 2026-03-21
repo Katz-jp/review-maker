@@ -36,6 +36,13 @@ const REPLY_TERMS: Record<IndustryKey, ReplyIndustryTerms> = {
     visitAgain: "再来店",
     hasMedicalNotice: false,
   },
+  restaurant: {
+    roleLabel: "飲食店",
+    selfRef: "当店",
+    instructionSelf: "自店",
+    visitAgain: "再来店",
+    hasMedicalNotice: false,
+  },
 };
 
 /**

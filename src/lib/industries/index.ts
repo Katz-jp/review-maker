@@ -1,5 +1,6 @@
 import { seikotsuConfig } from "./seikotsu";
 import { dentalConfig } from "./dental";
+import { restaurantConfig } from "./restaurant";
 import { getRetailConfig, defaultRetailPreset, retailPresets } from "./retail";
 import type { IndustryConfig } from "./types";
 
@@ -7,6 +8,7 @@ import type { IndustryConfig } from "./types";
 export const industries = {
   seikotsu: seikotsuConfig,
   dental: dentalConfig,
+  restaurant: restaurantConfig,
   retail: {
     presets: retailPresets,
     defaultPreset: defaultRetailPreset,
@@ -28,6 +30,9 @@ export function getIndustryConfig(industryKey: IndustryKey, retailPreset?: strin
   }
   if (industryKey === "dental") {
     return dentalConfig;
+  }
+  if (industryKey === "restaurant") {
+    return restaurantConfig;
   }
   return industries.retail.getConfig(retailPreset);
 }
