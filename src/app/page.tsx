@@ -542,7 +542,6 @@ export default function LandingPage() {
             ))}
           </div>
           <div className="mt-6 text-center text-sm text-gray-500 space-y-1">
-            <p>運営者: くーママAI labo</p>
             <p>
               お問い合わせ:{" "}
               <a
