@@ -16,9 +16,9 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
 
       <section className="text-center mb-10">
         <h1 className="text-2xl font-extrabold text-gray-800 leading-tight">
-          アンケートと
+          アンケート・口コミ投稿に
           <br />
-          クチコミ投稿にご協力お願いします
+          ご協力お願いします
         </h1>
         <p className="text-2xl mt-2 tracking-widest">⭐️⭐️⭐️⭐️⭐️</p>
         <p className="text-base text-gray-600 mt-3">
@@ -26,7 +26,7 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
           <br />
           これからご利用される方の参考のため、
           <br />
-          ご感想を教えていただけると嬉しいです😊
+          ご感想をお聞かせいただけると嬉しいです😊
         </p>
       </section>
 
@@ -35,10 +35,14 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
           href={getReviewOrMapUrl(tenant, tenantId)}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md active:scale-[0.98] transition-transform"
+          className="flex items-start justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md active:scale-[0.98] transition-transform"
         >
-          <MapPin className="w-5 h-5" />
-          Googleに口コミを投稿する（30秒）
+          <MapPin className="w-5 h-5 shrink-0 mt-0.5" aria-hidden />
+          <span className="leading-snug text-left">
+            Googleに口コミを投稿する
+            <br />
+            （30秒）
+          </span>
         </a>
 
         <Link
@@ -47,7 +51,7 @@ export function WelcomeContent({ tenantId }: { tenantId: string }) {
         >
           <span className="flex items-center justify-center gap-2">
             <Sparkles className="w-5 h-5" />
-            質問に答えて口コミを作る
+            アンケートに答えて口コミを作る（１分）
           </span>
           <span className="block text-sm font-normal text-gray-500 mt-1">
             かんたんな質問に答えるだけで

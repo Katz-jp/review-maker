@@ -31,7 +31,7 @@ function getDentalFeedbackFormUrl(tenantId: string): string {
 }
 
 /** 飲食店：ご意見フォーム（「店舗 ID」に tenantId を事前入力） */
-const RESTAURANT_FEEDBACK_FORM_ENTRY_ID = "365259658";
+const RESTAURANT_FEEDBACK_FORM_ENTRY_ID = "683328231";
 const RESTAURANT_FEEDBACK_FORM_BASE =
   "https://docs.google.com/forms/d/e/1FAIpQLSeEj0YIvWZhAxjhF7qZ4Rne-NpQc3veGIQx5RVtoUjvYDTugg/viewform";
 
@@ -55,6 +55,7 @@ export default function TenantGeneratePage() {
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedFeedback, setCopiedFeedback] = useState(false);
   const [copiedTextOnly, setCopiedTextOnly] = useState(false);
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
   const [satisfaction, setSatisfaction] = useState<number | null>(null);
@@ -213,7 +214,11 @@ export default function TenantGeneratePage() {
     window.open(getReviewOrMapUrl(tenant, tenantId), "_blank", "noopener,noreferrer");
   };
 
-  const handleOpenInhouseFeedback = () => {
+  const handleCopyAndOpenInhouseFeedback = async () => {
+    if (!generatedText) return;
+    await navigator.clipboard.writeText(generatedText);
+    setCopiedFeedback(true);
+    setTimeout(() => setCopiedFeedback(false), 2000);
     trackEvent("open_inhouse_feedback");
     const url =
       industry === "restaurant"
@@ -256,10 +261,19 @@ export default function TenantGeneratePage() {
 
   /** 星評価に応じて「ご意見」「Googleマップ」のボタン順を切り替える業種 */
   const showFeedbackAndMaps = industry === "dental" || industry === "restaurant";
-  const feedbackButtonLabel =
-    industry === "restaurant"
-      ? "ご意見を送る（直接当店へ届きます）"
-      : "ご意見を送る（直接当院へ届きます）";
+  const feedbackButtonContent =
+    industry === "restaurant" ? (
+      <span className="leading-snug text-left">
+        コピーしてご意見を送る
+        <br />
+        （直接当店へ届きます）
+      </span>
+    ) : (
+      "ご意見を送る（直接当院へ届きます）"
+    );
+
+  const feedbackInhouseButtonClassName =
+    "flex items-start justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-white border-2 border-primary text-primary-dark hover:bg-primary/5 font-semibold text-base shadow-md active:scale-[0.98] transition-transform";
 
   return (
     <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
@@ -407,10 +421,20 @@ export default function TenantGeneratePage() {
                 <>
                   <button
                     type="button"
-                    onClick={handleOpenInhouseFeedback}
-                    className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+                    onClick={handleCopyAndOpenInhouseFeedback}
+                    className={feedbackInhouseButtonClassName}
                   >
-                    {feedbackButtonLabel}
+                    {copiedFeedback ? (
+                      <>
+                        <Copy className="w-5 h-5 shrink-0 mt-0.5" />
+                        コピーしました！
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-5 h-5 shrink-0 mt-0.5" />
+                        {feedbackButtonContent}
+                      </>
+                    )}
                   </button>
                   <button
                     type="button"
@@ -451,10 +475,20 @@ export default function TenantGeneratePage() {
                   </button>
                   <button
                     type="button"
-                    onClick={handleOpenInhouseFeedback}
-                    className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+                    onClick={handleCopyAndOpenInhouseFeedback}
+                    className={feedbackInhouseButtonClassName}
                   >
-                    {feedbackButtonLabel}
+                    {copiedFeedback ? (
+                      <>
+                        <Copy className="w-5 h-5 shrink-0 mt-0.5" />
+                        コピーしました！
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-5 h-5 shrink-0 mt-0.5" />
+                        {feedbackButtonContent}
+                      </>
+                    )}
                   </button>
                 </>
               )}
