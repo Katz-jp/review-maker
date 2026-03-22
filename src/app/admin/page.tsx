@@ -369,7 +369,7 @@ export default function AdminPage() {
               placeholder="例: ChIJ..."
               className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
-            <p className="text-xs text-gray-500 mt-0.5">設定時は「Googleマップに進む」が口コミ投稿ページへ直リンクします</p>
+            <p className="text-xs text-gray-500 mt-0.5">設定時は「Googleに口コミを投稿する」が口コミ投稿ページへ直リンクします</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">契約状態</label>

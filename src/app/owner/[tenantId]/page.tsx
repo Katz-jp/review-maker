@@ -123,6 +123,7 @@ export default function OwnerPage() {
     tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
   const effectiveIndustry = tenantIndustry ?? fromTenantIdForIndustry ?? "seikotsu";
   const isDental = effectiveIndustry === "dental";
+  const isRestaurant = effectiveIndustry === "restaurant";
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -551,7 +552,7 @@ export default function OwnerPage() {
                 />
               </div>
             </div>
-            {isDental && (
+            {(isDental || isRestaurant) && (
               <div>
                 <h3 className="font-medium text-gray-800 text-sm mb-2">ネガティブな感想の扱い方（サービス改善のヒントとして活用）</h3>
                 <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">

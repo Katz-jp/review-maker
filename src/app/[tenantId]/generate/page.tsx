@@ -259,21 +259,12 @@ export default function TenantGeneratePage() {
     );
   }
 
-  /** 星評価に応じて「ご意見」「Googleマップ」のボタン順を切り替える業種 */
+  /** 星評価に応じて「ご意見」「Google投稿」のボタン順を切り替える業種 */
   const showFeedbackAndMaps = industry === "dental" || industry === "restaurant";
-  const feedbackButtonContent =
-    industry === "restaurant" ? (
-      <span className="leading-snug text-left">
-        コピーしてご意見を送る
-        <br />
-        （直接当店へ届きます）
-      </span>
-    ) : (
-      "ご意見を送る（直接当院へ届きます）"
-    );
+  const feedbackButtonLabel = "ご意見を直接お店に送る";
 
   const feedbackInhouseButtonClassName =
-    "flex items-start justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-white border-2 border-primary text-primary-dark hover:bg-primary/5 font-semibold text-base shadow-md active:scale-[0.98] transition-transform";
+    "flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-white border-2 border-primary text-primary-dark hover:bg-primary/5 font-semibold text-base shadow-md active:scale-[0.98] transition-transform";
 
   return (
     <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
@@ -416,7 +407,7 @@ export default function TenantGeneratePage() {
           )}
           {showFeedbackAndMaps ? (
             <div className="space-y-3">
-              {/* 星1〜3: ご意見を送るを上、星4〜5 or null: Googleマップを上 */}
+              {/* 星1〜3: ご意見を上、星4〜5 or null: Googleに口コミを投稿するを上 */}
               {satisfaction !== null && satisfaction <= 3 ? (
                 <>
                   <button
@@ -426,13 +417,13 @@ export default function TenantGeneratePage() {
                   >
                     {copiedFeedback ? (
                       <>
-                        <Copy className="w-5 h-5 shrink-0 mt-0.5" />
+                        <Copy className="w-5 h-5 shrink-0" />
                         コピーしました！
                       </>
                     ) : (
                       <>
-                        <Copy className="w-5 h-5 shrink-0 mt-0.5" />
-                        {feedbackButtonContent}
+                        <Copy className="w-5 h-5 shrink-0" />
+                        {feedbackButtonLabel}
                       </>
                     )}
                   </button>
@@ -449,7 +440,7 @@ export default function TenantGeneratePage() {
                     ) : (
                       <>
                         <Copy className="w-5 h-5" />
-                        コピーしてGoogleマップに進む
+                        Googleに口コミを投稿する
                       </>
                     )}
                   </button>
@@ -469,7 +460,7 @@ export default function TenantGeneratePage() {
                     ) : (
                       <>
                         <Copy className="w-5 h-5" />
-                        コピーしてGoogleマップに進む
+                        Googleに口コミを投稿する
                       </>
                     )}
                   </button>
@@ -480,13 +471,13 @@ export default function TenantGeneratePage() {
                   >
                     {copiedFeedback ? (
                       <>
-                        <Copy className="w-5 h-5 shrink-0 mt-0.5" />
+                        <Copy className="w-5 h-5 shrink-0" />
                         コピーしました！
                       </>
                     ) : (
                       <>
-                        <Copy className="w-5 h-5 shrink-0 mt-0.5" />
-                        {feedbackButtonContent}
+                        <Copy className="w-5 h-5 shrink-0" />
+                        {feedbackButtonLabel}
                       </>
                     )}
                   </button>
@@ -507,7 +498,7 @@ export default function TenantGeneratePage() {
               ) : (
                 <>
                   <Copy className="w-5 h-5" />
-                  コピーしてGoogleマップに進む
+                  Googleに口コミを投稿する
                 </>
               )}
             </button>
