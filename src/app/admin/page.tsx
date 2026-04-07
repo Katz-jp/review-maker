@@ -10,6 +10,8 @@ import {
   LogOut,
   Store,
   ChevronLeft,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 import { INDUSTRY_OPTIONS, RETAIL_PRESET_OPTIONS } from "@/lib/industries/admin-options";
 
@@ -65,6 +67,7 @@ export default function AdminPage() {
   const [editIndustry, setEditIndustry] = useState("");
   const [editRetailPreset, setEditRetailPreset] = useState("");
   const [saving, setSaving] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
 
   const fetchCheck = useCallback(async () => {
     const res = await fetch("/api/admin/check");
@@ -305,6 +308,27 @@ export default function AdminPage() {
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
 
+  const INDUSTRY_LABEL: Record<string, string> = {
+    "": "未設定（整骨院として表示）",
+    seikotsu: "整骨院",
+    dental: "歯医者・クリニック",
+    retail: "小売店",
+    restaurant: "飲食店",
+  };
+
+  // 業種ごとにグループ化（INDUSTRY_OPTIONS の順を保持）
+  const industryOrder = ["", "seikotsu", "dental", "retail", "restaurant"];
+  const grouped = industryOrder
+    .map((key) => ({
+      key,
+      label: INDUSTRY_LABEL[key] ?? key,
+      items: tenants.filter((t) => (t.industry ?? "") === key),
+    }))
+    .filter((g) => g.items.length > 0);
+
+  const toggleGroup = (key: string) =>
+    setCollapsedGroups((prev) => ({ ...prev, [key]: !prev[key] }));
+
   return (
     <main className="min-h-screen flex flex-col px-4 sm:px-5 pt-8 pb-12 max-w-4xl mx-auto">
       <header className="flex flex-wrap items-center justify-between gap-4 mb-6">
@@ -430,156 +454,178 @@ export default function AdminPage() {
         {tenants.length === 0 ? (
           <p className="text-sm text-gray-500">店舗がありません。上記から追加してください。</p>
         ) : (
-          <ul className="space-y-3">
-            {tenants.map((t) => (
-              <li
-                key={t.tenantId}
-                className="p-4 rounded-xl border border-gray-200 bg-gray-50/50"
-              >
-                {editingId === t.tenantId ? (
-                  <div className="space-y-3">
-                    <div>
-                      <span className="text-xs text-gray-500">テナントID</span>
-                      <p className="font-mono text-sm text-gray-800">{t.tenantId}</p>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">店舗名</label>
-                      <input
-                        type="text"
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">GoogleマップURL</label>
-                      <input
-                        type="url"
-                        value={editGoogleMapsUrl}
-                        onChange={(e) => setEditGoogleMapsUrl(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">Place ID（口コミ投稿リンク用）</label>
-                      <input
-                        type="text"
-                        value={editPlaceId}
-                        onChange={(e) => setEditPlaceId(e.target.value)}
-                        placeholder="例: ChIJ..."
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">契約状態</label>
-                      <select
-                        value={editStatus}
-                        onChange={(e) => setEditStatus(e.target.value)}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                      >
-                        {Object.entries(STATUS_LABELS).map(([v, l]) => (
-                          <option key={v} value={v}>{l}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-500 mb-1">業種</label>
-                      <select
-                        value={editIndustry}
-                        onChange={(e) => {
-                          setEditIndustry(e.target.value);
-                          if (e.target.value !== "retail") setEditRetailPreset("");
-                        }}
-                        className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                      >
-                        {INDUSTRY_OPTIONS.map((opt) => (
-                          <option key={opt.value || "unset"} value={opt.value}>{opt.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                    {editIndustry === "retail" && (
-                      <div>
-                        <label className="block text-xs text-gray-500 mb-1">小売プリセット</label>
-                        <select
-                          value={editRetailPreset}
-                          onChange={(e) => setEditRetailPreset(e.target.value)}
-                          className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                        >
-                          {RETAIL_PRESET_OPTIONS.map((opt) => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={saveEdit}
-                        disabled={saving}
-                        className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium disabled:opacity-50"
-                      >
-                        {saving ? "保存中…" : "保存"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={cancelEdit}
-                        className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm"
-                      >
-                        キャンセル
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <p className="font-medium text-gray-800">{t.name || t.tenantId}</p>
-                        <p className="text-xs text-gray-500 font-mono">{t.tenantId}</p>
-                      </div>
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${
-                          t.subscriptionStatus === "active" || t.subscriptionStatus === "trialing"
-                            ? "bg-green-100 text-green-800"
-                            : t.subscriptionStatus === "canceled" || t.subscriptionStatus === "past_due"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-gray-100 text-gray-700"
-                        }`}
-                      >
-                        {STATUS_LABELS[t.subscriptionStatus] ?? t.subscriptionStatus}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      <button
-                        type="button"
-                        onClick={() => startEdit(t)}
-                        className="flex items-center gap-1 text-sm text-gray-600 hover:text-primary"
-                      >
-                        <Pencil className="w-4 h-4" />
-                        編集
-                      </button>
-                      <a
-                        href={`${baseUrl}/owner/${t.tenantId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-sm text-primary hover:underline"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        管理画面
-                      </a>
-                      <a
-                        href={`${baseUrl}/${t.tenantId}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-sm text-gray-600 hover:underline"
-                      >
-                        お客様用
-                      </a>
-                    </div>
-                  </>
-                )}
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-3">
+            {grouped.map((group) => {
+              const isCollapsed = collapsedGroups[group.key] ?? false;
+              return (
+                <div key={group.key} className="rounded-xl border border-gray-200 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(group.key)}
+                    className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 text-left"
+                  >
+                    <span className="font-medium text-gray-700 text-sm">
+                      {group.label}
+                      <span className="ml-2 text-xs text-gray-400">（{group.items.length} 件）</span>
+                    </span>
+                    {isCollapsed
+                      ? <ChevronRight className="w-4 h-4 text-gray-400" />
+                      : <ChevronDown className="w-4 h-4 text-gray-400" />
+                    }
+                  </button>
+                  {!isCollapsed && (
+                    <ul className="divide-y divide-gray-100">
+                      {group.items.map((t) => (
+                        <li key={t.tenantId} className="p-4 bg-gray-50/30">
+                          {editingId === t.tenantId ? (
+                            <div className="space-y-3">
+                              <div>
+                                <span className="text-xs text-gray-500">テナントID</span>
+                                <p className="font-mono text-sm text-gray-800">{t.tenantId}</p>
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">店舗名</label>
+                                <input
+                                  type="text"
+                                  value={editName}
+                                  onChange={(e) => setEditName(e.target.value)}
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">GoogleマップURL</label>
+                                <input
+                                  type="url"
+                                  value={editGoogleMapsUrl}
+                                  onChange={(e) => setEditGoogleMapsUrl(e.target.value)}
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">Place ID（口コミ投稿リンク用）</label>
+                                <input
+                                  type="text"
+                                  value={editPlaceId}
+                                  onChange={(e) => setEditPlaceId(e.target.value)}
+                                  placeholder="例: ChIJ..."
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">契約状態</label>
+                                <select
+                                  value={editStatus}
+                                  onChange={(e) => setEditStatus(e.target.value)}
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                >
+                                  {Object.entries(STATUS_LABELS).map(([v, l]) => (
+                                    <option key={v} value={v}>{l}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">業種</label>
+                                <select
+                                  value={editIndustry}
+                                  onChange={(e) => {
+                                    setEditIndustry(e.target.value);
+                                    if (e.target.value !== "retail") setEditRetailPreset("");
+                                  }}
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                >
+                                  {INDUSTRY_OPTIONS.map((opt) => (
+                                    <option key={opt.value || "unset"} value={opt.value}>{opt.label}</option>
+                                  ))}
+                                </select>
+                              </div>
+                              {editIndustry === "retail" && (
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">小売プリセット</label>
+                                  <select
+                                    value={editRetailPreset}
+                                    onChange={(e) => setEditRetailPreset(e.target.value)}
+                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                  >
+                                    {RETAIL_PRESET_OPTIONS.map((opt) => (
+                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
+                                  </select>
+                                </div>
+                              )}
+                              <div className="flex gap-2">
+                                <button
+                                  type="button"
+                                  onClick={saveEdit}
+                                  disabled={saving}
+                                  className="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary-dark text-white text-sm font-medium disabled:opacity-50"
+                                >
+                                  {saving ? "保存中…" : "保存"}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={cancelEdit}
+                                  className="px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 text-sm"
+                                >
+                                  キャンセル
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                  <p className="font-medium text-gray-800">{t.name || t.tenantId}</p>
+                                  <p className="text-xs text-gray-500 font-mono">{t.tenantId}</p>
+                                </div>
+                                <span
+                                  className={`text-xs px-2 py-1 rounded-full ${
+                                    t.subscriptionStatus === "active" || t.subscriptionStatus === "trialing"
+                                      ? "bg-green-100 text-green-800"
+                                      : t.subscriptionStatus === "canceled" || t.subscriptionStatus === "past_due"
+                                      ? "bg-red-100 text-red-800"
+                                      : "bg-gray-100 text-gray-700"
+                                  }`}
+                                >
+                                  {STATUS_LABELS[t.subscriptionStatus] ?? t.subscriptionStatus}
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-3">
+                                <button
+                                  type="button"
+                                  onClick={() => startEdit(t)}
+                                  className="flex items-center gap-1 text-sm text-gray-600 hover:text-primary"
+                                >
+                                  <Pencil className="w-4 h-4" />
+                                  編集
+                                </button>
+                                <a
+                                  href={`${baseUrl}/owner/${t.tenantId}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-sm text-primary hover:underline"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                  管理画面
+                                </a>
+                                <a
+                                  href={`${baseUrl}/${t.tenantId}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex items-center gap-1 text-sm text-gray-600 hover:underline"
+                                >
+                                  お客様用
+                                </a>
+                              </div>
+                            </>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
       </section>
 
