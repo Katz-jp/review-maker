@@ -19,29 +19,6 @@ type Payload = {
   satisfaction: number;
 };
 
-const DENTAL_FEEDBACK_FORM_ENTRY_ID = "683328231";
-const DENTAL_FEEDBACK_FORM_BASE =
-  "https://docs.google.com/forms/d/e/1FAIpQLSesqu-iZkjsXaIiIOUqEh2fiyUsIk2TZ9AONvHTbK3LeTZEgw/viewform";
-
-function getDentalFeedbackFormUrl(tenantId: string): string {
-  const params = new URLSearchParams({
-    [`entry.${DENTAL_FEEDBACK_FORM_ENTRY_ID}`]: tenantId,
-  });
-  return `${DENTAL_FEEDBACK_FORM_BASE}?usp=pp_url&${params.toString()}`;
-}
-
-/** 飲食店：ご意見フォーム（「店舗 ID」に tenantId を事前入力） */
-const RESTAURANT_FEEDBACK_FORM_ENTRY_ID = "683328231";
-const RESTAURANT_FEEDBACK_FORM_BASE =
-  "https://docs.google.com/forms/d/e/1FAIpQLSeEj0YIvWZhAxjhF7qZ4Rne-NpQc3veGIQx5RVtoUjvYDTugg/viewform";
-
-function getRestaurantFeedbackFormUrl(tenantId: string): string {
-  const params = new URLSearchParams({
-    [`entry.${RESTAURANT_FEEDBACK_FORM_ENTRY_ID}`]: tenantId,
-  });
-  return `${RESTAURANT_FEEDBACK_FORM_BASE}?usp=pp_url&${params.toString()}`;
-}
-
 export default function TenantGeneratePage() {
   const params = useParams();
   const tenantId = (params.tenantId as string) || "demo";
@@ -55,19 +32,15 @@ export default function TenantGeneratePage() {
   const [regenerating, setRegenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [copiedFeedback, setCopiedFeedback] = useState(false);
   const [copiedTextOnly, setCopiedTextOnly] = useState(false);
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
   const [satisfaction, setSatisfaction] = useState<number | null>(null);
-  const [industry, setIndustry] = useState<string | null>(null);
 
-  const trackEvent = (event: "open_google_maps" | "open_inhouse_feedback") => {
+  const trackOpenGoogleMaps = () => {
     const url = `/api/tenant/${tenantId}/stats/events`;
     const body = JSON.stringify({
-      event,
-      ...(event === "open_google_maps" && typeof satisfaction === "number"
-        ? { satisfaction }
-        : {}),
+      event: "open_google_maps" as const,
+      ...(typeof satisfaction === "number" ? { satisfaction } : {}),
     });
     try {
       if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
@@ -134,7 +107,7 @@ export default function TenantGeneratePage() {
       return;
     }
 
-    // アンケート回答から業種と満足度を取得
+    // アンケート回答から満足度を取得
     const raw = sessionStorage.getItem("questionnaireAnswers");
     if (raw) {
       try {
@@ -145,9 +118,6 @@ export default function TenantGeneratePage() {
           payload.satisfaction <= 5
         ) {
           setSatisfaction(payload.satisfaction);
-        }
-        if (payload.industry) {
-          setIndustry(payload.industry);
         }
       } catch {
         // noop
@@ -191,13 +161,6 @@ export default function TenantGeneratePage() {
     }
   };
 
-  const handleCopy = async () => {
-    if (!generatedText) return;
-    await navigator.clipboard.writeText(generatedText);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleCopyTextOnly = async () => {
     if (!generatedText) return;
     await navigator.clipboard.writeText(generatedText);
@@ -210,21 +173,8 @@ export default function TenantGeneratePage() {
     await navigator.clipboard.writeText(generatedText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-    trackEvent("open_google_maps");
+    trackOpenGoogleMaps();
     window.open(getReviewOrMapUrl(tenant, tenantId), "_blank", "noopener,noreferrer");
-  };
-
-  const handleCopyAndOpenInhouseFeedback = async () => {
-    if (!generatedText) return;
-    await navigator.clipboard.writeText(generatedText);
-    setCopiedFeedback(true);
-    setTimeout(() => setCopiedFeedback(false), 2000);
-    trackEvent("open_inhouse_feedback");
-    const url =
-      industry === "restaurant"
-        ? getRestaurantFeedbackFormUrl(tenantId)
-        : getDentalFeedbackFormUrl(tenantId);
-    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -258,13 +208,6 @@ export default function TenantGeneratePage() {
       </main>
     );
   }
-
-  /** 星評価に応じて「ご意見」「Google投稿」のボタン順を切り替える業種 */
-  const showFeedbackAndMaps = industry === "dental" || industry === "restaurant";
-  const feedbackButtonLabel = "ご意見を直接お店に送る";
-
-  const feedbackInhouseButtonClassName =
-    "flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-white border-2 border-primary text-primary-dark hover:bg-primary/5 font-semibold text-base shadow-md active:scale-[0.98] transition-transform";
 
   return (
     <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
@@ -315,9 +258,9 @@ export default function TenantGeneratePage() {
               </div>
             )}
             <p className="text-sm font-semibold text-amber-900/90 mb-4">
-              参考用の口コミ文を作成しました
+              アンケートの回答をもとに文章を作成しました。
               <br />
-              自由に修正してから投稿できます
+              ご自由に修正してお使いください。
             </p>
             <textarea
               value={generatedText}
@@ -355,11 +298,11 @@ export default function TenantGeneratePage() {
 
       <div className="mt-6 space-y-3">
           <div className="rounded-2xl p-4 mb-4 bg-amber-50/80 border border-amber-200/60">
-            <p className="text-sm font-semibold text-amber-900/90 mb-3">【投稿はかんたん3ステップ】</p>
+            <p className="text-sm font-semibold text-amber-900/90 mb-3">【Googleの口コミ投稿はかんたん３ステップ】</p>
             <ol className="text-sm text-amber-900/90 space-y-2 list-none">
-              <li>① ↓のボタンから口コミ文をコピー<br />（文章は自動でコピーされます）</li>
-              <li>② ☆をタップして評価（星が⭐️黄色になります）</li>
-              <li>③ 文章を貼り付けて「投稿」！</li>
+              <li>①下の「Googleに口コミを投稿する」ボタンを押す</li>
+              <li>②Googleの画面の☆マークを押して評価する（5が最高評価）</li>
+              <li>③⭐️の下の枠に作成した文章を「ペースト（貼り付け）」し、下にある「投稿」ボタンを押す</li>
             </ol>
           </div>
 
@@ -405,104 +348,23 @@ export default function TenantGeneratePage() {
               </p>
             </div>
           )}
-          {showFeedbackAndMaps ? (
-            <div className="space-y-3">
-              {/* 星1〜3: ご意見を上、星4〜5 or null: Googleに口コミを投稿するを上 */}
-              {satisfaction !== null && satisfaction <= 3 ? (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleCopyAndOpenInhouseFeedback}
-                    className={feedbackInhouseButtonClassName}
-                  >
-                    {copiedFeedback ? (
-                      <>
-                        <Copy className="w-5 h-5 shrink-0" />
-                        コピーしました！
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-5 h-5 shrink-0" />
-                        {feedbackButtonLabel}
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCopyAndOpenMaps}
-                    className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
-                  >
-                    {copied ? (
-                      <>
-                        <Copy className="w-5 h-5" />
-                        コピーしました！
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-5 h-5" />
-                        Googleに口コミを投稿する
-                      </>
-                    )}
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button
-                    type="button"
-                    onClick={handleCopyAndOpenMaps}
-                    className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
-                  >
-                    {copied ? (
-                      <>
-                        <Copy className="w-5 h-5" />
-                        コピーしました！
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-5 h-5" />
-                        Googleに口コミを投稿する
-                      </>
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleCopyAndOpenInhouseFeedback}
-                    className={feedbackInhouseButtonClassName}
-                  >
-                    {copiedFeedback ? (
-                      <>
-                        <Copy className="w-5 h-5 shrink-0" />
-                        コピーしました！
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-5 h-5 shrink-0" />
-                        {feedbackButtonLabel}
-                      </>
-                    )}
-                  </button>
-                </>
-              )}
-            </div>
-          ) : (
-            <button
-              type="button"
-              onClick={handleCopyAndOpenMaps}
-              className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
-            >
-              {copied ? (
-                <>
-                  <Copy className="w-5 h-5" />
-                  コピーしました！
-                </>
-              ) : (
-                <>
-                  <Copy className="w-5 h-5" />
-                  Googleに口コミを投稿する
-                </>
-              )}
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={handleCopyAndOpenMaps}
+            className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+          >
+            {copied ? (
+              <>
+                <Copy className="w-5 h-5" />
+                コピーしました！
+              </>
+            ) : (
+              <>
+                <Copy className="w-5 h-5" />
+                Googleに口コミを投稿する
+              </>
+            )}
+          </button>
           <div className="mt-14 text-center text-sm text-gray-600">
             他のサイトに使う場合はこちら
             <br />

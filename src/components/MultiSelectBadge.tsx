@@ -1,7 +1,7 @@
 import { CheckSquare2 } from "lucide-react";
 
 export function MultiSelectBadge({
-  children = "複数選択OK",
+  children = "いくつ選んでもOK",
 }: {
   children?: string;
 }) {
