@@ -314,7 +314,7 @@ export default function ReplyHelperPage() {
 
             {/* 口コミ本文（最重要 → 一番上） */}
             <div className="mb-4">
-              <label className="block text-base font-semibold text-gray-700 mb-1.5">
+              <label className="block text-base font-semibold text-gray-700 mb-1.5 border-[3px] border-transparent">
                 口コミ本文 <span className="text-red-500">*</span>
               </label>
               <textarea
