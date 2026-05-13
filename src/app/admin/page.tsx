@@ -317,7 +317,7 @@ export default function AdminPage() {
   };
 
   // 業種ごとにグループ化（INDUSTRY_OPTIONS の順を保持）
-  const industryOrder = ["", "seikotsu", "dental", "retail", "restaurant"];
+  const industryOrder = ["dental", "", "seikotsu", "retail", "restaurant"];
   const grouped = industryOrder
     .map((key) => ({
       key,

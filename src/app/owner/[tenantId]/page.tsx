@@ -49,7 +49,7 @@ function CustomOptionsEditor({
 
   return (
     <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
-      <h3 className="font-medium text-gray-800 text-sm mb-2">{questionLabel}</h3>
+      <h3 className="font-medium text-gray-800 text-base mb-2">{questionLabel}</h3>
       <div className="space-y-2">
         {options.map((opt, i) => (
           <div
@@ -86,7 +86,7 @@ function CustomOptionsEditor({
           </form>
         )}
         {options.length > 0 && (
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-gray-800 font-medium">
             {options.length} / {maxOptions} 件
           </p>
         )}
@@ -271,7 +271,7 @@ export default function OwnerPage() {
   return (
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
       <header className="text-center mb-8">
-        <h1 className="text-xl font-bold text-gray-800">口コミ作成AIアプリ 店舗管理画面</h1>
+        <h1 className="text-xl font-bold text-gray-800">口コミヘルプAI - 店舗管理画面</h1>
         <p className="text-sm text-gray-500 mt-1">テナントID: {tenantId}</p>
       </header>
 
@@ -279,26 +279,21 @@ export default function OwnerPage() {
         <h2 className="font-semibold text-gray-800 mb-3">ご利用状況</h2>
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
-            <p className="text-xs text-gray-500">平均満足度（Googleへ進んだ人）</p>
+            <p className="text-xs text-gray-800 font-medium">平均満足度</p>
             <p className="mt-1 text-2xl font-extrabold text-gray-900">
               {usageStats?.mapsSatisfactionAvg != null ? usageStats.mapsSatisfactionAvg.toFixed(1) : "—"}
               <span className="ml-1 text-sm font-semibold text-gray-600">/ 5</span>
             </p>
-            <p className="mt-1 text-xs text-gray-500">
+            <p className="mt-1 text-xs text-gray-800 font-medium">
               n={usageStats?.mapsSatisfactionCount ?? 0}
             </p>
           </div>
           <div className="rounded-xl border border-gray-200 bg-gray-50/50 p-4">
-            <p className="text-xs text-gray-500">投稿数（Googleマップへ行く）</p>
+            <p className="text-xs text-gray-800 font-medium">Googleへの口コミ投稿数</p>
             <p className="mt-1 text-2xl font-extrabold text-gray-900">
               {usageStats?.mapsClickCount ?? 0}
               <span className="ml-1 text-sm font-semibold text-gray-600">件</span>
             </p>
-            {isDental && (
-              <p className="mt-2 text-xs text-gray-600">
-                院内フィードバック：{usageStats?.feedbackClickCount ?? 0}件
-              </p>
-            )}
           </div>
         </div>
       </div>
@@ -326,16 +321,16 @@ export default function OwnerPage() {
         {canUsePaidFeatures ? (
           <Link
             href={`/${tenantId}/reply-helper`}
-            className="block bg-white rounded-2xl p-5 shadow-sm border border-green-100 hover:border-primary/50 transition-colors"
+            className="block bg-white rounded-2xl p-5 shadow-sm border border-green-100 hover:border-primary/50 transition-colors text-green-700"
           >
-            <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+            <h2 className="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-primary" />
               クチコミ返信ヘルプAI
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-[15px] text-gray-800">
               お客様の口コミに合わせた返信文をAIで生成できます。
             </p>
-            <span className="mt-2 inline-block text-sm text-primary font-medium">
+            <span className="mt-2 inline-block text-base text-green-700 font-bold">
               使ってみる →
             </span>
           </Link>
@@ -372,7 +367,7 @@ export default function OwnerPage() {
             href={customerUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="mt-3 flex items-center gap-2 text-primary-dark font-medium text-sm"
+            className="mt-3 flex items-center gap-2 text-primary-dark font-medium text-base"
           >
             <ExternalLink className="w-4 h-4" />
             ページを開く
@@ -385,14 +380,14 @@ export default function OwnerPage() {
             オリジナル選択肢の設定
           </h2>
           <div className="text-sm text-gray-600 mb-4">
-            <p>
+            <p className="text-base font-medium">
               {effectiveIndustry === "restaurant"
                 ? "飲食店の場合は「ご注文されたメニュー」に、40件まで登録できます。それ以外の設問の選択肢の追加は、最大3件までです。"
                 : "各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。"}
             </p>
             <div className="text-red-600 mt-2">
-              <span className="text-xs block font-medium">※追加・削除するときの注意点</span>
-              <ul className="text-xs mt-1 ml-4 list-disc space-y-0.5">
+              <span className="text-[15px] block font-bold">※追加・削除するときの注意点</span>
+              <ul className="text-[13px] mt-1 ml-4 list-disc space-y-0.5">
                 <li>１つずつ追加すること</li>
                 <li>必ず「選択肢を保存する」ボタンを押すこと（これを押さないと反映されません）</li>
               </ul>
@@ -433,7 +428,7 @@ export default function OwnerPage() {
                 type="button"
                 onClick={handleSaveCustomOptions}
                 disabled={customOptionsSaving || !canUsePaidFeatures}
-                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white text-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {customOptionsSaving ? (
                   <>
@@ -453,7 +448,7 @@ export default function OwnerPage() {
         </div>
 
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-          <h2 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <h2 className="font-semibold text-gray-800 text-lg mb-4 flex items-center gap-2">
             <CreditCard className="w-5 h-5 text-primary" />
             💰 サブスクリプション
           </h2>
@@ -529,7 +524,7 @@ export default function OwnerPage() {
           </p>
           <div className="space-y-6">
             <div>
-              <h3 className="font-medium text-gray-800 text-sm mb-2">クチコミ作成AIの流れを説明した動画</h3>
+              <h3 className="font-medium text-gray-800 text-base mb-2">クチコミ作成AIの流れを説明した動画</h3>
               <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
                 <iframe
                   src="https://www.youtube.com/embed/nb5kaQUmy4Q"
@@ -541,7 +536,7 @@ export default function OwnerPage() {
               </div>
             </div>
             <div>
-              <h3 className="font-medium text-gray-800 text-sm mb-2">オリジナルの選択肢の追加・削除方法</h3>
+              <h3 className="font-medium text-gray-800 text-base mb-2">オリジナルの選択肢の追加・削除方法</h3>
               <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
                 <iframe
                   src="https://www.youtube.com/embed/PcRkGMbkoJ0"
@@ -552,22 +547,8 @@ export default function OwnerPage() {
                 />
               </div>
             </div>
-            {(isDental || isRestaurant) && (
-              <div>
-                <h3 className="font-medium text-gray-800 text-sm mb-2">ネガティブな感想の扱い方（サービス改善のヒントとして活用）</h3>
-                <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
-                  <iframe
-                    src="https://www.youtube.com/embed/Zh7udblCZek"
-                    title="ネガティブな感想の扱い方"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                  />
-                </div>
-              </div>
-            )}
             <div>
-              <h3 className="font-medium text-gray-800 text-sm mb-2">クチコミ返信ヘルプ AI の使い方</h3>
+              <h3 className="font-medium text-gray-800 text-base mb-2">クチコミ返信ヘルプ AI の使い方</h3>
               <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
                 <iframe
                   src="https://www.youtube.com/embed/SSW514dPT70"
@@ -588,17 +569,17 @@ export default function OwnerPage() {
             href="https://docs.google.com/forms/d/e/1FAIpQLScL6qaicGvP-__HBsraAXicZuXPe8Je1eclgAGUNDAdklZTiQ/viewform?usp=header"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+            className="inline-flex items-center gap-2 text-base text-gray-600 hover:text-gray-800 transition-colors"
           >
             <MessageSquare className="w-4 h-4" />
             要望や不具合を報告する
             <ExternalLink className="w-3 h-3" />
           </a>
-          <p className="text-xs text-gray-500 mt-1 ml-6">
+          <p className="text-sm text-gray-500 font-medium mt-1 ml-6">
             ご意見・不具合報告はこちらからお願いします
           </p>
         </div>
-        <Link href="/" className="block mt-8 text-sm text-gray-500 hover:text-gray-700">
+        <Link href="/" className="block mt-8 text-lg text-gray-500 hover:text-gray-700">
           ← アプリのトップ画面へ
         </Link>
       </div>

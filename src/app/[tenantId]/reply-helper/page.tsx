@@ -274,8 +274,8 @@ export default function ReplyHelperPage() {
               <MessageSquare className="w-6 h-6 text-primary" />
               オーナー様用口コミ返信ヘルプAI
             </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              口コミを貼り付けるだけで、返信文をAIが自動作成します
+            <p className="text-base text-gray-500 mt-1">
+              届いた口コミの文章を貼り付けるだけで、かんたんに返信文が作れます
             </p>
           </div>
           {tenantId === "trial" && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
@@ -307,14 +307,14 @@ export default function ReplyHelperPage() {
 
           {/* STEP 1: 口コミ入力 */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-            <div className="flex items-center gap-2.5 mb-4">
+            <div className="flex items-center gap-2.5 mb-4 text-lg">
               <span className="w-7 h-7 rounded-full bg-primary text-white text-sm font-bold flex items-center justify-center shrink-0">1</span>
               <h2 className="font-bold text-gray-800">口コミを貼り付ける</h2>
             </div>
 
             {/* 口コミ本文（最重要 → 一番上） */}
             <div className="mb-4">
-              <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              <label className="block text-base font-semibold text-gray-700 mb-1.5">
                 口コミ本文 <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -322,14 +322,14 @@ export default function ReplyHelperPage() {
                 onChange={(e) => { setReview(e.target.value); setGenerateError(""); }}
                 placeholder="Googleマップなどに投稿されたお客様の口コミをここにコピー＆ペーストしてください"
                 rows={6}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y"
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-[rgba(31,41,55,1)] resize-y"
               />
               <p className="text-xs text-gray-400 mt-1 text-right">{review.length} 文字</p>
             </div>
 
             {/* 星評価（クリック式★） */}
             <div className="mb-4">
-              <p className="text-sm font-semibold text-gray-700 mb-1.5">
+              <p className="text-base font-semibold text-gray-700 mb-1.5">
                 星評価 <span className="text-gray-400 font-normal text-xs">（任意）</span>
               </p>
               <div className="flex items-center gap-1">
@@ -359,7 +359,7 @@ export default function ReplyHelperPage() {
                 value={authorName}
                 onChange={(e) => setAuthorName(e.target.value)}
                 placeholder="例：猫乃くー"
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-[rgba(31,41,55,1)]"
               />
               <p className="text-xs text-gray-500 mt-1">名前を入れると、より親しみのある返信になります</p>
             </div>
@@ -375,9 +375,9 @@ export default function ReplyHelperPage() {
                 placeholder="例：釣りの話が楽しかった／伝えたストレッチ方法ぜひ試してみて"
                 rows={2}
                 maxLength={80}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary resize-y"
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-[rgba(31,41,55,1)] resize-y"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-sm text-gray-500 mt-1">
                 {memo.length}/80文字 ・ 投稿者とのエピソードを添えると、より温かみのある返信になります
               </p>
             </div>
@@ -526,7 +526,7 @@ export default function ReplyHelperPage() {
               type="button"
               onClick={handleGenerate}
               disabled={generating || (tenantId !== "trial" && !canUsePaidFeatures) || (tenantId === "trial" && remainingGenerations === 0)}
-              className="w-full py-5 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-[2rem] leading-tight disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-primary/20 transition-all active:scale-[0.98]"
+              className="w-full py-5 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-lg leading-tight disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-primary/20 transition-all active:scale-[0.98]"
             >
               {generating ? (
                 <>
@@ -606,7 +606,7 @@ export default function ReplyHelperPage() {
         </div>
       </div>
 
-      <div className="mt-8 pt-4 border-t border-gray-200">
+      <div className="mt-8 pt-4 border-t border-gray-200 text-lg font-semibold">
         <Link href={backHref} className="text-sm text-gray-500 hover:text-gray-700">
           ← {backLabel}
         </Link>
