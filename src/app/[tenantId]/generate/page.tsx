@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Copy, Loader2, RotateCcw, Undo2 } from "lucide-react";
@@ -35,6 +35,26 @@ export default function TenantGeneratePage() {
   const [copiedTextOnly, setCopiedTextOnly] = useState(false);
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
   const [satisfaction, setSatisfaction] = useState<number | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+
+  const updateTextareaScrollHint = useCallback(() => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    const overflow = scrollHeight > clientHeight + 1;
+    const notAtBottom = scrollTop + clientHeight < scrollHeight - 4;
+    setHasMoreBelow(overflow && notAtBottom);
+  }, []);
+
+  useLayoutEffect(() => {
+    updateTextareaScrollHint();
+  }, [generatedText, updateTextareaScrollHint]);
+
+  useEffect(() => {
+    window.addEventListener("resize", updateTextareaScrollHint);
+    return () => window.removeEventListener("resize", updateTextareaScrollHint);
+  }, [updateTextareaScrollHint]);
 
   const trackOpenGoogleMaps = () => {
     const url = `/api/tenant/${tenantId}/stats/events`;
@@ -234,7 +254,7 @@ export default function TenantGeneratePage() {
         <>
             {satisfaction !== null && (
               <div className="mb-4 rounded-2xl bg-yellow-50 border border-yellow-200 px-4 py-3">
-                <p className="text-xs font-semibold text-yellow-900 mb-1">
+                <p className="text-base font-semibold text-yellow-900 mb-1">
                   あなたの評価
                 </p>
                 <div className="flex items-center gap-2">
@@ -257,18 +277,36 @@ export default function TenantGeneratePage() {
                 </div>
               </div>
             )}
-            <p className="text-sm font-semibold text-amber-900/90 mb-4">
+            <p className="text-lg font-semibold text-amber-900/90 mb-4">
               アンケートの回答をもとに文章を作成しました。
               <br />
               ご自由に修正してお使いください。
             </p>
-            <textarea
-              value={generatedText}
-              onChange={(e) => setGeneratedText(e.target.value)}
-              rows={8}
-              className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 text-base resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-              placeholder="口コミが表示されます"
-            />
+            <div className="relative rounded-xl">
+              <textarea
+                ref={textareaRef}
+                value={generatedText}
+                onChange={(e) => {
+                  setGeneratedText(e.target.value);
+                  queueMicrotask(updateTextareaScrollHint);
+                }}
+                onScroll={updateTextareaScrollHint}
+                rows={8}
+                className="w-full overflow-y-auto px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 text-base resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                placeholder="口コミが表示されます"
+              />
+              {hasMoreBelow && (
+                <div
+                  className="pointer-events-none absolute inset-x-0 bottom-0 h-16 rounded-b-xl bg-gradient-to-t from-white from-30% via-white/90 to-transparent pb-2 flex flex-col items-center justify-end"
+                  role="status"
+                  aria-live="polite"
+                >
+                  <span className="text-sm font-medium text-gray-700">
+                    続きがあります。スクロールして全文を表示できます。
+                  </span>
+                </div>
+              )}
+            </div>
             <div className="flex flex-wrap gap-2 mt-3">
               <button
                 type="button"
@@ -298,8 +336,8 @@ export default function TenantGeneratePage() {
 
       <div className="mt-6 space-y-3">
           <div className="rounded-2xl p-4 mb-4 bg-amber-50/80 border border-amber-200/60">
-            <p className="text-sm font-semibold text-amber-900/90 mb-3">【Googleの口コミ投稿はかんたん３ステップ】</p>
-            <ol className="text-sm text-amber-900/90 space-y-2 list-none">
+            <p className="text-lg font-semibold text-amber-900/90 mb-3">【Googleの口コミ投稿はかんたん３ステップ】</p>
+            <ol className="text-lg text-amber-900/90 space-y-2 list-none">
               <li>①下の「Googleに口コミを投稿する」ボタンを押す</li>
               <li>②Googleの画面の☆マークを押して評価する（5が最高評価）</li>
               <li>③⭐️の下の枠に作成した文章を「ペースト（貼り付け）」し、下にある「投稿」ボタンを押す</li>
@@ -351,16 +389,16 @@ export default function TenantGeneratePage() {
           <button
             type="button"
             onClick={handleCopyAndOpenMaps}
-            className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base shadow-md active:scale-[0.98] transition-transform"
+            className="flex items-center justify-center gap-2 w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-xl shadow-md active:scale-[0.98] transition-transform"
           >
             {copied ? (
               <>
-                <Copy className="w-5 h-5" />
+                <Copy className="w-6 h-6" />
                 コピーしました！
               </>
             ) : (
               <>
-                <Copy className="w-5 h-5" />
+                <Copy className="w-6 h-6" />
                 Googleに口コミを投稿する
               </>
             )}

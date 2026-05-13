@@ -14,10 +14,10 @@ export function TrialChoiceContent({ industry }: TrialChoiceContentProps) {
   return (
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
       <header className="text-center mb-8">
-        <h1 className="text-2xl font-extrabold text-gray-800 mb-2">
+        <h1 className="text-4xl font-extrabold text-gray-800 mb-2 leading-snug">
           無料でデモを試す
         </h1>
-        <p className="text-base text-gray-600">
+        <p className="text-[1.75rem] leading-snug text-gray-600">
           それぞれ5回までお試しいただけます
         </p>
       </header>

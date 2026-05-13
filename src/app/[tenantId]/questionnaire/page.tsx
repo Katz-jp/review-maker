@@ -351,7 +351,7 @@ export default function TenantQuestionnairePage() {
           </p>
           <Link
             href={`/${tenantId}`}
-            className="py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold"
+            className="block w-full py-5 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-[2rem] leading-tight text-center shadow-md active:scale-[0.98] transition-transform"
           >
             トップへ戻る
           </Link>
@@ -391,16 +391,16 @@ export default function TenantQuestionnairePage() {
       <section className="flex-1">
         {currentQuestion ? (
           <div>
-            <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
+            <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
               {currentQuestion.label}
             </h3>
             {currentQuestion.id === "treatment" && industryKey === "dental" ? (
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
                 今回ご来院された理由を教えてください
               </p>
             ) : currentQuestion.id === RESTAURANT_ORDERED_MENU_QUESTION_ID &&
               industryKey === "restaurant" ? (
-              <p className="text-sm text-gray-500 mb-4">複数選べます</p>
+              <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">複数選べます</p>
             ) : currentQuestion.id === "recommend" && industryKey === "dental" ? null : currentQuestion.multiSelect === false ? null : (
               <div className="mb-4">
                 <MultiSelectBadge />
@@ -457,21 +457,21 @@ export default function TenantQuestionnairePage() {
           </div>
         ) : isRatingStep ? (
           <div>
-            <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
+            <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
               満足度
             </h3>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
               {industryKey === "retail" || industryKey === "restaurant"
                 ? "今回のご来店の満足度を教えてください（必須）"
                 : "今回のご来院の満足度を教えてください（必須）"}
             </p>
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-3">
               {[1, 2, 3, 4, 5].map((score) => (
                 <button
                   key={score}
                   type="button"
                   onClick={() => setSatisfaction(score)}
-                  className={`w-10 h-10 flex items-center justify-center rounded-full border-2 text-xl transition-all active:scale-[0.96] ${
+                  className={`h-12 w-12 flex items-center justify-center rounded-full border-2 text-2xl transition-all active:scale-[0.96] ${
                     satisfaction !== null && satisfaction >= score
                       ? "border-yellow-400 bg-yellow-300/80 text-yellow-900"
                       : "border-gray-200 bg-white text-gray-400 hover:border-yellow-300 hover:bg-yellow-50"
@@ -483,7 +483,7 @@ export default function TenantQuestionnairePage() {
               ))}
             </div>
             {satisfaction === null && (
-              <p className="mt-3 text-xs text-red-500 text-center">
+              <p className="mt-3 text-2xl text-red-500 text-center leading-snug">
                 星をタップして満足度を選んでください。
               </p>
             )}
@@ -492,28 +492,28 @@ export default function TenantQuestionnairePage() {
           <div>
             {industryKey === "dental" ? (
               <>
-                <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
+                <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
                   よろしければご感想を一言お願いします（任意）
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
                   来院前に困っていたことや、実際に治療を受けてみて感じたことなど、自由にご記入ください。（１行でもOKです）
                 </p>
               </>
             ) : industryKey === "restaurant" ? (
               <>
-                <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
+                <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
                   よろしければご感想を一言お願いします（任意）
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
                   料理の感想や、店内のことなど、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
                 </p>
               </>
             ) : (
               <>
-                <h3 className="font-semibold text-gray-800 mb-2 text-lg leading-snug">
+                <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
                   よろしければご感想を一言お願いします（任意）
                 </h3>
-                <p className="text-sm text-gray-500 mb-4">
+                <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
                   その他 印象に残ったこと、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
                 </p>
               </>
@@ -592,7 +592,7 @@ export default function TenantQuestionnairePage() {
             (tenantId === "trial" && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1) ||
             (isRatingStep && satisfaction === null)
           }
-          className="block w-full py-4 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-semibold text-base text-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
+          className="block w-full py-5 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-[2rem] leading-tight text-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
         >
           {currentStep === TOTAL_STEPS - 1
             ? "口コミを生成する"

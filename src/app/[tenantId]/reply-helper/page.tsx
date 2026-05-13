@@ -526,7 +526,7 @@ export default function ReplyHelperPage() {
               type="button"
               onClick={handleGenerate}
               disabled={generating || (tenantId !== "trial" && !canUsePaidFeatures) || (tenantId === "trial" && remainingGenerations === 0)}
-              className="w-full py-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-base disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-primary/20 transition-all"
+              className="w-full py-5 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-[2rem] leading-tight disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md shadow-primary/20 transition-all active:scale-[0.98]"
             >
               {generating ? (
                 <>

@@ -86,10 +86,10 @@ export default function TrialCreatePage() {
       </Link>
 
       <header className="text-center mb-8">
-        <h1 className="text-2xl font-extrabold text-gray-800 mb-2">
+        <h1 className="text-4xl font-extrabold text-gray-800 mb-2 leading-snug">
           業種を選んでください
         </h1>
-        <p className="text-base text-gray-600">
+        <p className="text-[1.75rem] leading-snug text-gray-600">
           クチコミ作成支援AIは業種ごとに最適な質問でお聞きします
         </p>
       </header>
