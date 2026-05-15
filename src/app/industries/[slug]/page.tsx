@@ -1,9 +1,12 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import PricingSection from "@/components/PricingSection";
+import PostingSupportInclusionsSection from "@/components/PostingSupportInclusionsSection";
 
 const TRIAL_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSfilsWAERsNkC6Z_761_i-XPR9wVUAbKE7uByouR5iNng4y_w/viewform?usp=header";
 
@@ -20,7 +23,24 @@ export default function IndustryLandingPage({
 }: {
   params: { slug: string };
 }) {
-  const slug = params.slug;
+  const requestedSlug = params.slug;
+  const router = useRouter();
+
+  useEffect(() => {
+    if (requestedSlug !== "dentist") {
+      router.replace("/industries/dentist");
+    }
+  }, [requestedSlug, router]);
+
+  if (requestedSlug !== "dentist") {
+    return (
+      <div className="min-h-screen flex flex-col bg-green-50 items-center justify-center px-4 text-gray-600">
+        <p>歯医者・クリニック向けページへ移動しています…</p>
+      </div>
+    );
+  }
+
+  const slug: string = requestedSlug;
   const trialId = SLUG_TO_TRIAL_ID[slug];
 
   if (slug === "seikotsu") {
@@ -187,8 +207,8 @@ export default function IndustryLandingPage({
               先生にとっての本当のメリット
             </h2>
             <ul className="space-y-3 text-base sm:text-lg text-gray-700">
-              <li>・月に新規患者が1人増えれば十分回収可能</li>
-              <li>・広告より低コスト</li>
+              <li>・口コミを集める手間と時間が圧倒的に少なくなる</li>
+              <li>・口コミは広告よりも低コスト</li>
               <li>・口コミは消えない&quot;資産&quot;</li>
               <li>・来院前の不安を減らせる</li>
               <li>・「ちゃんと経営している院」に見える</li>
@@ -412,7 +432,7 @@ export default function IndustryLandingPage({
             <ul className="space-y-3 text-base sm:text-lg text-gray-700">
               <li>・SNS→Google→来店の動線を強化できる</li>
               <li>・月に数名の新規増加で十分回収可能</li>
-              <li>・広告より低コスト</li>
+              <li>・口コミは広告よりも低コスト</li>
               <li>・口コミは消えない&quot;資産&quot;</li>
               <li>・星の見た目による不安を減らせる</li>
             </ul>
@@ -565,11 +585,11 @@ export default function IndustryLandingPage({
         <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-green-100 shadow-sm">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
             <Link
-              href="/industries"
+              href="/"
               className="inline-flex items-center gap-1 text-gray-600 hover:text-primary-dark text-sm font-medium transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
-              対応業種一覧
+              トップに戻る
             </Link>
             <Link
               href="/"
@@ -670,28 +690,26 @@ export default function IndustryLandingPage({
               </h2>
               <ul className="space-y-8">
                 <li>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">① 口コミ投稿率を上げる</h3>
-                  <p className="text-gray-700">質問形式で書きやすく。「書こうかな」で終わらせません。</p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">① 口コミの投稿数が増える</h3>
+                  <p className="text-gray-700">
+                    患者さんがやることは、アンケート形式の質問にぽちぽちと答えていくだけ。あとはその回答を元に、AIが口コミに適した自然な文章を作るから「口コミ？何から書いていいか分からない」という患者さんも投稿しやすくなります。
+                  </p>
                 </li>
                 <li>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">② キーワードを自然に増やす</h3>
-                  <p className="text-gray-700">痛くない・丁寧・予約しやすいなど狙ったワードを自然に反映。</p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">② いただいた口コミへの返信文を、かんたんに整えられる</h3>
+                  <p className="text-gray-700">
+                    クチコミ返信ヘルプAIなら、いただいた口コミの内容に合わせた返信文のたたき台を短時間で用意できます。口コミを読み比べて医院を選ぶ患者さんの多くは、本文だけでなく返信の内容やトーンもしっかり確認します。丁寧で誠実な返信は「ちゃんと向き合っている医院」という安心感につながり、医院の強みを自然にアピールできます。
+                  </p>
                 </li>
                 <li>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">③ 返信を自動生成</h3>
-                  <p className="text-gray-700">忙しい診療の合間でも、丁寧な返信を即作成。</p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">③ Googleマップ上で&quot;地域の中で最も活気ある歯科医院&quot;として認知される</h3>
+                  <p className="text-gray-700">口コミの投稿数増加＋口コミに対する返信から、更新頻度がアップ。Googleマップ内での存在感が増すことで、検索でより引っかかりやすくなります。</p>
                 </li>
                 <li>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">④ 低評価（★1〜3）は院内のみでフィードバック</h3>
-                  <p className="text-gray-700">不満の声は院内だけで確認。患者さんの気持ちをすくい取り、改善に繋げられます。ネガティブな口コミをそのまま公開せずに済みます。</p>
-                </li>
-                <li>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">⑤ 回答は即時にメールでお知らせ</h3>
-                  <p className="text-gray-700">新しい口コミやフィードバックが届いたら、すぐメールで通知。見逃しを防ぎ、早めの対応ができます。</p>
-                </li>
-                <li>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">⑥ Googleマップ上で&quot;地域の中で最も活気ある歯科医院&quot;として</h3>
-                  <p className="text-gray-700">口コミの投稿数増加＋口コミに対する返信から、更新頻度がアップ。Googleマップ内での存在感が増すことで、検索で引っかかりやすくなります。</p>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">④ 欲しいキーワードを自然に増やすことができる</h3>
+                  <p className="text-gray-700">
+                    オリジナルの選択肢を追加することで「〇〇市　歯医者」「歯医者　痛くない」など、欲しいキーワードが自然な形で入った口コミを作りやすくなり、検索に好影響を与えます。
+                  </p>
                 </li>
               </ul>
             </div>
@@ -727,14 +745,14 @@ export default function IndustryLandingPage({
               先生・医院にとっての本当のメリット
             </h2>
             <ul className="space-y-3 text-base sm:text-lg text-gray-700">
-              <li>・月に新規患者が1人増えれば十分回収可能</li>
-              <li>・広告より低コスト</li>
+              <li>・口コミを集める手間と時間が圧倒的に少なくなる</li>
+              <li>・口コミは広告よりも低コスト</li>
               <li>・口コミは消えない&quot;資産&quot;</li>
-              <li>・低評価は院内で受け止め、改善に活かせる</li>
-              <li>・回答・フィードバックは即メールで把握できる</li>
               <li>・「ちゃんと患者さんに向き合っている医院」という印象づけに効果抜群</li>
             </ul>
           </section>
+
+          <PostingSupportInclusionsSection />
 
           {/* 料金 + CTA */}
           <PricingSection />
@@ -772,9 +790,9 @@ export default function IndustryLandingPage({
 
   return (
     <div className="min-h-screen flex flex-col bg-green-50 items-center justify-center px-4">
-      <p className="text-gray-600 mb-4">指定の業種が見つかりませんでした。</p>
-      <Link href="/industries" className="text-primary font-semibold hover:underline">
-        対応業種一覧へ
+      <p className="text-gray-600 mb-4">指定のページが見つかりませんでした。</p>
+      <Link href="/" className="text-primary font-semibold hover:underline">
+        トップへ
       </Link>
       <footer className="mt-auto py-6 text-center text-sm text-gray-500">
         ©2026 くーままAIラボ

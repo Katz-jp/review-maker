@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
-
-const DEFAULT_INDUSTRY: IndustryKey = "seikotsu";
+import { getIndustryConfig, type IndustryKey } from "@/lib/industries";
+import { POSTING_SUPPORT_INDUSTRY } from "@/lib/posting-support-constants";
 
 const BANNED_WORDS_FOR_LOW_SCORE = [
   "また来たい",
@@ -110,8 +109,6 @@ export async function POST(req: NextRequest) {
       answers = {},
       otherInputs = {},
       freeText = "",
-      industry = DEFAULT_INDUSTRY,
-      retailPreset,
     } = body;
 
     const rawSatisfaction = body?.satisfaction;
@@ -128,10 +125,8 @@ export async function POST(req: NextRequest) {
     }
     const satisfaction = rawSatisfaction;
 
-    const industryKey = Object.hasOwn(industries, industry)
-      ? (industry as IndustryKey)
-      : DEFAULT_INDUSTRY;
-    const config = getIndustryConfig(industryKey, retailPreset);
+    const industryKey: IndustryKey = POSTING_SUPPORT_INDUSTRY;
+    const config = getIndustryConfig(industryKey);
 
     const openai = new OpenAI({ apiKey });
     const prompt = config.buildPrompt(

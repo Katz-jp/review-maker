@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import PricingSection from "@/components/PricingSection";
+import PostingSupportInclusionsSection from "@/components/PostingSupportInclusionsSection";
 import FaqSection from "@/components/FaqSection";
 import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDevelopment } from "@/lib/demo-limit";
 
@@ -165,10 +166,10 @@ export default function LandingPage() {
             口コミづくりを前提にしています。
           </p>
           <Link
-            href="/industries"
+            href="/industries/dentist"
             className="inline-block mt-8 sm:mt-10 px-10 py-4 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-lg shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
-            対応業種を調べる
+            歯医者・クリニック向けのサービス内容
           </Link>
           <div className="mt-8 sm:mt-10 flex justify-center overflow-hidden">
             <Image
@@ -229,6 +230,8 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        <PostingSupportInclusionsSection />
 
         {/* 口コミ投稿サポートAIを使う理由 */}
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto space-y-12 sm:space-y-16">
@@ -297,10 +300,9 @@ export default function LandingPage() {
             </h3>
             <p className="text-center text-sm sm:text-base md:text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed px-1">
               <span className="inline-flex flex-wrap justify-center gap-x-1.5 gap-y-1">
-                <span className="whitespace-nowrap">「交通事故＋整体」</span>
-                <span className="whitespace-nowrap">「馬肉＋熊本」</span>
-                <span className="whitespace-nowrap">「美容室＋近所」</span>
-                <span className="whitespace-nowrap">「歯医者＋痛くない」</span>
+                <span className="whitespace-nowrap">「地域名＋歯医者／痛くない」</span>
+                <span className="whitespace-nowrap">「矯正＋駅近」</span>
+                <span className="whitespace-nowrap">「ホワイトニング＋予約しやすい」</span>
               </span>
               など、
               <br className="sm:hidden" />
@@ -334,13 +336,13 @@ export default function LandingPage() {
               </h2>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch gap-0 relative">
+            <div className="flex flex-col sm:flex-row items-stretch gap-0 sm:gap-2 relative">
               {/* Step 1 */}
               <div className="flex-1 bg-white rounded-2xl p-6 sm:p-8 flex flex-col items-center text-center relative shadow-sm border-2 border-primary/12 hover:-translate-y-1 hover:shadow-md transition-all animate-fadeUp" style={{ animationDelay: "0.1s" }}>
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-black w-7 h-7 rounded-full flex items-center justify-center shadow-md">
                   1
                 </div>
-                <div className="w-18 h-18 bg-green-50 rounded-xl flex items-center justify-center my-2 mb-5 text-3xl">
+                <div className="w-20 h-20 bg-green-50 rounded-xl flex items-center justify-center my-2 mb-5 text-3xl shrink-0">
                   <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="2" y="2" width="14" height="14" rx="2.5" fill="#22c55e"/>
                     <rect x="5" y="5" width="8" height="8" rx="1" fill="white"/>
@@ -370,9 +372,9 @@ export default function LandingPage() {
               </div>
 
               {/* Arrow 1 */}
-              <div className="flex items-center justify-center w-9 h-8 shrink-0 relative z-10 sm:h-0">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary opacity-70 sm:rotate-0 rotate-90">
-                  <polyline points="7 4 13 10 7 16"/>
+              <div className="flex items-center justify-center w-10 h-10 sm:w-10 sm:h-auto sm:self-center shrink-0 relative z-10 py-1 sm:py-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary opacity-70 sm:rotate-0 rotate-90 shrink-0">
+                  <polyline points="7 4 13 10 7 16" />
                 </svg>
               </div>
 
@@ -381,7 +383,7 @@ export default function LandingPage() {
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-black w-7 h-7 rounded-full flex items-center justify-center shadow-md">
                   2
                 </div>
-                <div className="w-18 h-18 bg-green-50 rounded-xl flex items-center justify-center my-2 mb-5 text-3xl">
+                <div className="w-20 h-20 bg-green-50 rounded-xl flex items-center justify-center my-2 mb-5 text-3xl shrink-0">
                   👆
                 </div>
                 <div className="text-lg font-black text-gray-900 mb-2.5">
@@ -396,9 +398,9 @@ export default function LandingPage() {
               </div>
 
               {/* Arrow 2 */}
-              <div className="flex items-center justify-center w-9 h-8 shrink-0 relative z-10 sm:h-0">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary opacity-70 sm:rotate-0 rotate-90">
-                  <polyline points="7 4 13 10 7 16"/>
+              <div className="flex items-center justify-center w-10 h-10 sm:w-10 sm:h-auto sm:self-center shrink-0 relative z-10 py-1 sm:py-0">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-primary opacity-70 sm:rotate-0 rotate-90 shrink-0">
+                  <polyline points="7 4 13 10 7 16" />
                 </svg>
               </div>
 
@@ -407,7 +409,7 @@ export default function LandingPage() {
                 <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-primary text-white text-xs font-black w-7 h-7 rounded-full flex items-center justify-center shadow-md">
                   3
                 </div>
-                <div className="w-18 h-18 bg-green-50 rounded-xl flex items-center justify-center my-2 mb-5 text-3xl">
+                <div className="w-20 h-20 bg-green-50 rounded-xl flex items-center justify-center my-2 mb-5 text-3xl shrink-0">
                   ⭐
                 </div>
                 <div className="text-lg font-black text-gray-900 mb-2.5">
@@ -488,13 +490,13 @@ export default function LandingPage() {
               ) : (
                 <div className="space-y-4">
                   <Link
-                    href="/industries"
+                    href="/industries/dentist"
                     className="block w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
                   >
-                    対応業種を選ぶ →
+                    無料デモを試す（歯科・クリニック向け） →
                   </Link>
                   <p className="text-xs text-gray-600 text-center">
-                    ※ 各デモは最大5回までお試しいただけます
+                    ※ 無料お試しは最大5回までです
                   </p>
                 </div>
               )}
@@ -514,7 +516,7 @@ export default function LandingPage() {
             ご質問・ご要望はお気軽にどうぞ！
           </h2>
           <p className="text-center text-sm sm:text-base text-gray-600 mb-8 max-w-xl mx-auto">
-            「対応業種に自分の業種がなかった」「自分の店舗ならどの業種がぴったりかな？」など、ご質問やご要望はこちらからお寄せください。
+            歯医者・クリニック向けのご利用についてのご質問やご要望は、こちらからお寄せください。
           </p>
           <div className="max-w-lg mx-auto flex justify-center">
             <Link

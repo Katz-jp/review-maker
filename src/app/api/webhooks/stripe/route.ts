@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { FieldValue } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 
 function getStripe() {
@@ -39,11 +40,12 @@ export async function POST(req: NextRequest) {
           const tenantSnap = await tenantRef.get();
           if (tenantSnap.exists) {
             const tenantData = tenantSnap.data();
-            const updates: Record<string, string | boolean> = {
+            const updates: Record<string, unknown> = {
               subscriptionStatus: "active",
               stripeCustomerId: (session.customer as string) ?? "",
               stripeSubscriptionId: (session.subscription as string) ?? "",
               updatedAt: new Date().toISOString(),
+              accessPinHash: FieldValue.delete(),
             };
             if (!tenantData?.couponUsed) {
               updates.couponUsed = true;

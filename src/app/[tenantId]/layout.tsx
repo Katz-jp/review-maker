@@ -1,4 +1,5 @@
 import { TenantProvider } from "@/components/TenantProvider";
+import { TenantAccessGuard } from "@/components/TenantAccessGuard";
 
 export default function TenantLayout({
   children,
@@ -7,5 +8,9 @@ export default function TenantLayout({
   children: React.ReactNode;
   params: { tenantId: string };
 }) {
-  return <TenantProvider tenantId={params.tenantId}>{children}</TenantProvider>;
+  return (
+    <TenantProvider tenantId={params.tenantId}>
+      <TenantAccessGuard tenantId={params.tenantId}>{children}</TenantAccessGuard>
+    </TenantProvider>
+  );
 }

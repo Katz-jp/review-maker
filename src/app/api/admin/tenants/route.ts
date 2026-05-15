@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { requireAdminSecret } from "@/lib/admin-auth";
+import { hashAccessPin, isValidAccessPinFormat } from "@/lib/access-pin";
 
-const VALID_STATUSES = ["active", "canceled", "past_due", "trialing", "inactive"] as const;
+const VALID_STATUSES = ["active", "canceled", "past_due", "trialing", "inactive", "app_trial"] as const;
 
 export type TenantListItem = {
   tenantId: string;
@@ -64,7 +65,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { tenantId, name, googleMapsUrl, placeId, subscriptionStatus, industry, retailPreset } = body as {
+    const {
+      tenantId,
+      name,
+      googleMapsUrl,
+      placeId,
+      subscriptionStatus,
+      industry,
+      retailPreset,
+      accessPin,
+    } = body as {
       tenantId?: string;
       name?: string;
       googleMapsUrl?: string;
@@ -72,6 +82,7 @@ export async function POST(req: NextRequest) {
       subscriptionStatus?: string;
       industry?: string;
       retailPreset?: string;
+      accessPin?: string;
     };
 
     if (!tenantId || typeof tenantId !== "string" || !/^[a-zA-Z0-9_-]+$/.test(tenantId.trim())) {
@@ -104,6 +115,28 @@ export async function POST(req: NextRequest) {
       VALID_STATUSES.includes(subscriptionStatus as (typeof VALID_STATUSES)[number])
         ? subscriptionStatus
         : "inactive";
+
+    if (status === "app_trial") {
+      const pin = typeof accessPin === "string" ? accessPin.trim() : "";
+      if (!isValidAccessPinFormat(pin)) {
+        return NextResponse.json(
+          { error: "app_trial では店舗用 PIN（4〜8桁の数字）が必要です" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const pinToHash = typeof accessPin === "string" ? accessPin.trim() : "";
+    let accessPinHash: string | undefined;
+    if (pinToHash) {
+      if (!isValidAccessPinFormat(pinToHash)) {
+        return NextResponse.json(
+          { error: "PIN は 4〜8 桁の数字で指定してください" },
+          { status: 400 }
+        );
+      }
+      accessPinHash = hashAccessPin(pinToHash);
+    }
     const nextIndustry = industry === "" ? null : industry;
     const nextRetailPreset =
       nextIndustry === "retail" ? (retailPreset === "" ? null : retailPreset) : null;
@@ -117,6 +150,7 @@ export async function POST(req: NextRequest) {
         subscriptionStatus: status,
         industry: nextIndustry,
         retailPreset: nextRetailPreset,
+        ...(accessPinHash !== undefined && { accessPinHash }),
         updatedAt: new Date().toISOString(),
       },
       { merge: true }

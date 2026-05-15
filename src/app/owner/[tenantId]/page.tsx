@@ -102,7 +102,11 @@ export default function OwnerPage() {
   const [success, setSuccess] = useState(false);
   const [canceled, setCanceled] = useState(false);
 
-  const [tenantStatus, setTenantStatus] = useState<"active" | "trialing" | "inactive" | "canceled" | "past_due" | null>(null);
+  const [tenantStatus, setTenantStatus] = useState<
+    "active" | "trialing" | "inactive" | "canceled" | "past_due" | "app_trial" | null
+  >(null);
+  const [tenantPaidAccess, setTenantPaidAccess] = useState(false);
+  const [appTrialEndsAtIso, setAppTrialEndsAtIso] = useState<string | undefined>(undefined);
   const [tenantIndustry, setTenantIndustry] = useState<string | undefined>(undefined);
   const [tenantRetailPreset, setTenantRetailPreset] = useState<string | undefined>(undefined);
   const [usageStats, setUsageStats] = useState<{
@@ -117,7 +121,9 @@ export default function OwnerPage() {
   const [customOptionsSaved, setCustomOptionsSaved] = useState(false);
   const [customerUrl, setCustomerUrl] = useState(`/${tenantId}`);
 
-  const canUsePaidFeatures = tenantStatus === "active" || tenantStatus === "trialing";
+  const canUsePaidFeatures = tenantPaidAccess;
+  const stripeSubscribed = tenantStatus === "active" || tenantStatus === "trialing";
+  const appTrialLive = tenantStatus === "app_trial" && tenantPaidAccess;
   const isRestricted = tenantStatus === "canceled" || tenantStatus === "past_due";
   const fromTenantIdForIndustry =
     tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
@@ -144,10 +150,15 @@ export default function OwnerPage() {
       .then((res) => res.json())
       .then((data) => {
         setTenantStatus(data.subscriptionStatus ?? "inactive");
+        setTenantPaidAccess(data.paidAccess === true);
+        setAppTrialEndsAtIso(typeof data.appTrialEndsAt === "string" ? data.appTrialEndsAt : undefined);
         setTenantIndustry(data.industry);
         setTenantRetailPreset(data.retailPreset);
       })
-      .catch(() => setTenantStatus("inactive"));
+      .catch(() => {
+        setTenantStatus("inactive");
+        setTenantPaidAccess(false);
+      });
   }, [tenantId]);
 
   useEffect(() => {
@@ -452,7 +463,7 @@ export default function OwnerPage() {
             <CreditCard className="w-5 h-5 text-primary" />
             💰 サブスクリプション
           </h2>
-          {canUsePaidFeatures ? (
+          {stripeSubscribed ? (
             <>
               <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                 <p className="text-green-700 font-semibold">✅ 月額プラン利用中</p>
@@ -479,17 +490,55 @@ export default function OwnerPage() {
                 )}
               </button>
             </>
+          ) : appTrialLive ? (
+            <>
+              <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
+                <p className="text-teal-800 font-semibold">🎁 アプリ無料体験中（Stripe 登録前）</p>
+                <p className="text-sm text-gray-700 mt-2">
+                  お店用 URL と PIN で体験中です。気に入ったら下から正式に Stripe でお手続きください（初回は Stripe 側でも無料トライアルが付きます）。
+                </p>
+                {appTrialEndsAtIso && (
+                  <p className="text-xs text-gray-600 mt-2">
+                    体験終了予定:{" "}
+                    <time dateTime={appTrialEndsAtIso}>
+                      {new Date(appTrialEndsAtIso).toLocaleString("ja-JP", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })}
+                    </time>
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleCheckout}
+                disabled={loading}
+                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    処理中…
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-5 h-5" />
+                    Stripe で正式登録する
+                  </>
+                )}
+              </button>
+            </>
           ) : (
             <>
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                 <p className="text-blue-800 font-semibold">🎉 先行特別キャンペーン実施中！</p>
                 <ul className="mt-2 space-y-1 text-sm text-gray-700">
                   <li>✨ 初月完全無料</li>
-                  <li>💰 2〜3ヶ月目は半額の2,490円</li>
-                  <li>🚀 4ヶ月目から通常価格4,980円</li>
+                  <li>💰 2〜3ヶ月目は半額の4,990円</li>
+                  <li>🚀 4ヶ月目から月額9,980円</li>
                 </ul>
                 <p className="mt-2 text-xs text-gray-600">
-                  今なら3ヶ月で4,980円（通常14,940円の66%OFF）！
+                  初月無料に加え、2〜3ヶ月目は月額9,980円の50%OFF（各4,990円）。4ヶ月目以降は月額9,980円（税込）です。
                 </p>
               </div>
               <button

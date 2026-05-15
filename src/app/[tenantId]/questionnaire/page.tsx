@@ -4,31 +4,20 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ChevronRight, AlertCircle } from "lucide-react";
-import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
+import { getIndustryConfig } from "@/lib/industries";
 import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
-import { RESTAURANT_ORDERED_MENU_QUESTION_ID } from "@/lib/industries/restaurant";
 import { useTenant } from "@/components/TenantProvider";
-import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
+import { getRemainingGenerations, canGenerate, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
+import { POSTING_SUPPORT_INDUSTRY, TRIAL_POSTING_SESSION_INDUSTRY_ID } from "@/lib/posting-support-constants";
 import { MultiSelectBadge } from "@/components/MultiSelectBadge";
+import { clientTenantAllowsPaidFeatures } from "@/lib/tenant-subscription";
 
 type Answers = Record<string, string[]>;
 type OtherInputs = Record<string, string>;
 type CustomOptionsByQuestion = Record<string, string[]>;
 
 const HIDDEN_OPTIONS = ["パーソナルトレーニング"];
-
-/** trial かつメニュー未登録のときのデモ用（店舗はオーナー画面で実メニューを登録） */
-const TRIAL_DEMO_MENU_ITEMS = [
-  "日替わりランチ",
-  "季節のパスタ",
-  "カフェラテ",
-  "本日のスープ",
-  "デザートプレート",
-  "おつまみ盛り合わせ",
-  "コース料理",
-  "単品ドリンク",
-];
 
 function mergeOptions(
   baseOptions: string[],
@@ -50,15 +39,9 @@ export default function TenantQuestionnairePage() {
   const tenantId = (params.tenantId as string) || "demo";
   const tenant = useTenant();
   // trialの場合は契約チェックをスキップ（制限のみ適用）
-  const canUseQuestionnaire = tenantId === "trial" || tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
+  const canUseQuestionnaire = clientTenantAllowsPaidFeatures(tenantId, tenant);
 
-  // hydration mismatch 回避のため、初回描画はサーバーと同じ値に揃え、マウント後に sessionStorage を反映する
-  const [industryKey, setIndustryKey] = useState<IndustryKey>(() => {
-    const fromTenant = tenant?.industry;
-    const fromTenantId = tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
-    const raw = fromTenant ?? fromTenantId ?? "seikotsu";
-    return Object.hasOwn(industries, raw) ? (raw as IndustryKey) : "seikotsu";
-  });
+  const industryKey = POSTING_SUPPORT_INDUSTRY;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
@@ -80,10 +63,8 @@ export default function TenantQuestionnairePage() {
   }, [tenantId]);
 
   useEffect(() => {
-    // trial で業種未選択の場合は業種選択へ
-    if (tenantId === "trial" && typeof window !== "undefined" && !sessionStorage.getItem(TRIAL_INDUSTRY_KEY)) {
-      router.replace("/trial/create");
-      return;
+    if (tenantId === "trial" && typeof window !== "undefined") {
+      sessionStorage.setItem(TRIAL_INDUSTRY_KEY, TRIAL_POSTING_SESSION_INDUSTRY_ID);
     }
     // デモ制限チェック（trialのみ）
     if (tenantId === "trial") {
@@ -114,69 +95,18 @@ export default function TenantQuestionnairePage() {
     };
   }, [tenantId, fetchCustomOptions, router]);
 
-  useEffect(() => {
-    // trial の場合のみ sessionStorage の業種を反映（マウント後）
-    if (tenantId !== "trial") {
-      const fromTenant = tenant?.industry;
-      const fromTenantId = tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
-      const raw = fromTenant ?? fromTenantId ?? "seikotsu";
-      setIndustryKey(Object.hasOwn(industries, raw) ? (raw as IndustryKey) : "seikotsu");
-      return;
-    }
-    if (typeof window === "undefined") return;
-    const v = sessionStorage.getItem(TRIAL_INDUSTRY_KEY);
-    const next =
-      v === "kouri" ? "retail" :
-      v === "seikotsuin" ? "seikotsu" :
-      v === "haisha" ? "dental" :
-      v === "inshoku" ? "restaurant" :
-      undefined;
-    if (next && Object.hasOwn(industries, next)) setIndustryKey(next as IndustryKey);
-  }, [tenantId, tenant?.industry]);
-
-  const retailPreset =
-    industryKey === "retail"
-      ? tenant?.retailPreset ??
-        (tenantId === "retail-demo" || tenantId === "trial" ? "meat" : undefined)
-      : undefined;
-  const industryConfig = getIndustryConfig(industryKey, retailPreset);
-  const baseQuestions = useMemo(() => {
-    const all = industryConfig.questions;
-    if (industryKey !== "restaurant") return all;
-    return all.filter((q) => {
-      if (q.id === "goodPoints") return satisfaction !== null && satisfaction >= 4;
-      if (q.id === "concerns") return satisfaction !== null && satisfaction <= 3;
-      return true;
-    });
-  }, [industryConfig.questions, industryKey, satisfaction]);
-
-  useEffect(() => {
-    if (industryKey !== "restaurant" || satisfaction === null) return;
-    setAnswers((prev) => {
-      const next = { ...prev };
-      if (satisfaction >= 4) delete next.concerns;
-      else delete next.goodPoints;
-      return next;
-    });
-  }, [industryKey, satisfaction]);
+  const industryConfig = getIndustryConfig(industryKey);
+  const baseQuestions = useMemo(() => industryConfig.questions, [industryConfig.questions]);
 
   const questions = useMemo(() => {
     return baseQuestions.map((q) => {
-      let opts = mergeOptions(q.options, customOptions[q.id]);
-      if (
-        industryKey === "restaurant" &&
-        q.id === RESTAURANT_ORDERED_MENU_QUESTION_ID &&
-        tenantId === "trial" &&
-        opts.filter((o) => o !== OTHER_OPTION_LABEL).length === 0
-      ) {
-        opts = [...TRIAL_DEMO_MENU_ITEMS, OTHER_OPTION_LABEL];
-      }
+      const opts = mergeOptions(q.options, customOptions[q.id]);
       return {
         ...q,
         options: opts,
       };
     });
-  }, [baseQuestions, customOptions, industryKey, tenantId]);
+  }, [baseQuestions, customOptions]);
   type Step =
     | { type: "question"; questionIndex: number }
     | { type: "freeText" }
@@ -214,56 +144,6 @@ export default function TenantQuestionnairePage() {
     }
     if (isFreeTextStep) return true;
     if (!currentQuestion) return true;
-    const qid = currentQuestion.id;
-    const selected = answers[qid] || [];
-    if (industryKey === "restaurant") {
-      if (qid === RESTAURANT_ORDERED_MENU_QUESTION_ID) {
-        const onlyOther =
-          currentQuestion.options.length === 1 && currentQuestion.options[0] === OTHER_OPTION_LABEL;
-        if (onlyOther && tenantId !== "trial") {
-          setStepError("店舗にメニューが登録されていません。お店にご確認ください。");
-          return false;
-        }
-        if (selected.length === 0) {
-          setStepError("メニューを1つ以上選んでください");
-          return false;
-        }
-        if (selected.includes(OTHER_OPTION_LABEL) && !(otherInputs[qid]?.trim())) {
-          setStepError(`「${OTHER_OPTION_LABEL}」を選んだ場合は内容を入力してください`);
-          return false;
-        }
-        return true;
-      }
-      if (qid === "scene") {
-        if (selected.length === 0) {
-          setStepError("ご利用シーンを選んでください");
-          return false;
-        }
-        if (selected.includes(OTHER_OPTION_LABEL) && !(otherInputs[qid]?.trim())) {
-          setStepError(`「${OTHER_OPTION_LABEL}」を選んだ場合は内容を入力してください`);
-          return false;
-        }
-        return true;
-      }
-      if (qid === "goodPoints" || qid === "concerns") {
-        if (selected.length === 0) {
-          setStepError("1つ以上選んでください");
-          return false;
-        }
-        if (selected.includes(OTHER_OPTION_LABEL) && !(otherInputs[qid]?.trim())) {
-          setStepError(`「${OTHER_OPTION_LABEL}」を選んだ場合は内容を入力してください`);
-          return false;
-        }
-        return true;
-      }
-      if (qid === "returnIntent") {
-        if (selected.length !== 1) {
-          setStepError("いずれか1つを選んでください");
-          return false;
-        }
-        return true;
-      }
-    }
     return true;
   };
 
@@ -318,7 +198,6 @@ export default function TenantQuestionnairePage() {
         tenantId,
         industry: industryKey,
         satisfaction,
-        ...(industryKey === "retail" && { retailPreset: retailPreset ?? "meat" }),
         answeredAt: new Date().toISOString(),
       };
       sessionStorage.setItem("questionnaireAnswers", JSON.stringify(payload));
@@ -335,7 +214,7 @@ export default function TenantQuestionnairePage() {
       if (typeof window !== "undefined" && window.history.length > 1) {
         router.back();
       } else {
-        router.push(tenantId === "trial" ? "/trial/create" : `/${tenantId}`);
+        router.push(tenantId === "trial" ? "/trial" : `/${tenantId}`);
       }
     }
   };
@@ -394,14 +273,11 @@ export default function TenantQuestionnairePage() {
             <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
               {currentQuestion.label}
             </h3>
-            {currentQuestion.id === "treatment" && industryKey === "dental" ? (
+            {currentQuestion.id === "treatment" ? (
               <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
                 今回ご来院された理由を教えてください
               </p>
-            ) : currentQuestion.id === RESTAURANT_ORDERED_MENU_QUESTION_ID &&
-              industryKey === "restaurant" ? (
-              <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">複数選べます</p>
-            ) : currentQuestion.id === "recommend" && industryKey === "dental" ? null : currentQuestion.multiSelect === false ? null : (
+            ) : currentQuestion.id === "recommend" ? null : currentQuestion.multiSelect === false ? null : (
               <div className="mb-4">
                 <MultiSelectBadge />
               </div>
@@ -413,12 +289,7 @@ export default function TenantQuestionnairePage() {
                   type="button"
                   onClick={() => toggleOption(currentQuestion.id, opt)}
                   className={`
-                    ${
-                      industryKey === "restaurant" &&
-                      currentQuestion.id === RESTAURANT_ORDERED_MENU_QUESTION_ID
-                        ? "min-h-[52px] px-3 py-2.5 text-sm"
-                        : "min-h-[56px] px-4 py-3 text-2xl"
-                    }
+                    min-h-[56px] px-4 py-3 text-2xl
                     rounded-xl text-center font-medium
                     border-2 transition-all active:scale-[0.98]
                     ${
@@ -461,9 +332,7 @@ export default function TenantQuestionnairePage() {
               満足度
             </h3>
             <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
-              {industryKey === "retail" || industryKey === "restaurant"
-                ? "今回のご来店の満足度を教えてください（必須）"
-                : "今回のご来院の満足度を教えてください（必須）"}
+              今回のご来院の満足度を教えてください（必須）
             </p>
             <div className="flex items-center justify-center gap-3">
               {[1, 2, 3, 4, 5].map((score) => (
@@ -490,44 +359,16 @@ export default function TenantQuestionnairePage() {
           </div>
         ) : (
           <div>
-            {industryKey === "dental" ? (
-              <>
-                <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
-                  よろしければご感想を一言お願いします（任意）
-                </h3>
-                <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
-                  来院前に困っていたことや、実際に治療を受けてみて感じたことなど、自由にご記入ください。（１行でもOKです）
-                </p>
-              </>
-            ) : industryKey === "restaurant" ? (
-              <>
-                <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
-                  よろしければご感想を一言お願いします（任意）
-                </h3>
-                <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
-                  料理の感想や、店内のことなど、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
-                </p>
-              </>
-            ) : (
-              <>
-                <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
-                  よろしければご感想を一言お願いします（任意）
-                </h3>
-                <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
-                  その他 印象に残ったこと、伝えたいことがあれば自由にご記入ください。（１行でもOKです）
-                </p>
-              </>
-            )}
+            <h3 className="font-semibold text-gray-800 mb-2 text-4xl leading-snug">
+              よろしければご感想を一言お願いします（任意）
+            </h3>
+            <p className="text-[1.75rem] leading-snug text-gray-500 mb-4">
+              来院前に困っていたことや、実際に治療を受けてみて感じたことなど、自由にご記入ください。（１行でもOKです）
+            </p>
             <textarea
               value={freeText}
               onChange={(e) => setFreeText(e.target.value)}
-              placeholder={
-                industryKey === "dental"
-                  ? ""
-                  : industryKey === "restaurant"
-                    ? "「パスタの塩加減がちょうどよかった」\n「ランチの提供が早くて助かった」\n「カフェでゆっくりできた」"
-                    : '「LINEで予約や連絡ができて便利」\n「また利用したい」\n「思っていたよりよかった」'
-              }
+              placeholder=""
               rows={5}
               className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 bg-white text-gray-800 placeholder-gray-400 text-sm resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
             />
@@ -556,10 +397,10 @@ export default function TenantQuestionnairePage() {
             </p>
             <div className="space-y-2 mb-4">
               <p className="text-sm text-gray-700">
-                「もっと多くのメニューで試したい」
+                「もっと院内のシナリオで試したい」
               </p>
               <p className="text-sm text-gray-700">
-                「実際に店舗で運用してみたい」
+                「実際にクリニックで運用してみたい」
               </p>
             </div>
             <p className="text-sm text-gray-700 mb-4 leading-relaxed">
@@ -603,28 +444,10 @@ export default function TenantQuestionnairePage() {
         {tenantId === "trial" && (
           <div className="pt-2 text-left">
             <Link
-              href={
-                industryKey === "seikotsu"
-                  ? "/industries/seikotsu"
-                  : industryKey === "retail"
-                    ? "/industries/retail"
-                    : industryKey === "dental"
-                      ? "/industries/dentist"
-                      : industryKey === "restaurant"
-                        ? "/industries/restaurant"
-                        : "/industries"
-              }
+              href="/industries/dentist"
               className="text-sm text-gray-500 hover:text-primary-dark transition-colors"
             >
-              {industryKey === "seikotsu"
-                ? "整骨院のページに戻る"
-                : industryKey === "retail"
-                  ? "小売店のページに戻る"
-                  : industryKey === "dental"
-                    ? "歯医者・クリニックのページに戻る"
-                    : industryKey === "restaurant"
-                      ? "飲食店のページに戻る"
-                      : "対応業種一覧に戻る"}
+              サービス紹介ページに戻る
             </Link>
           </div>
         )}

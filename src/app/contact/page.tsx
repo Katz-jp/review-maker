@@ -5,9 +5,7 @@ import Link from "next/link";
 
 const industryOptions = [
   { value: "", label: "選択してください" },
-  { value: "seikotsuin", label: "整骨院" },
-  { value: "biyoshi", label: "美容室" },
-  { value: "inshokuten", label: "飲食店" },
+  { value: "haisha", label: "歯医者・クリニック" },
   { value: "other", label: "その他" },
 ];
 

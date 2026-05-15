@@ -60,7 +60,7 @@ export default function TermsPage() {
                   第4条（サブスクリプション）
                 </h2>
                 <ul className="list-disc list-inside text-sm text-gray-700 leading-relaxed space-y-1">
-                  <li>月額4,980円（税込）で自動更新されます</li>
+                  <li>月額9,980円（税込）で自動更新されます</li>
                   <li>いつでも解約可能です</li>
                   <li>解約後、次回請求日以降はサービスを利用できません</li>
                 </ul>

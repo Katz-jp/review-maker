@@ -1,8 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
+import type { CollectionReference, Firestore } from "firebase-admin/firestore";
 import { getAdminDb } from "@/lib/firebase-admin";
 import { requireAdminSecret } from "@/lib/admin-auth";
+import { hashAccessPin, isValidAccessPinFormat } from "@/lib/access-pin";
 
-const VALID_STATUSES = ["active", "canceled", "past_due", "trialing", "inactive"] as const;
+const VALID_STATUSES = ["active", "canceled", "past_due", "trialing", "inactive", "app_trial"] as const;
+
+const TENANT_SUBCOLLECTIONS = ["replyHistory", "replySettings", "stats"] as const;
+
+async function deleteCollectionInBatches(db: Firestore, colRef: CollectionReference): Promise<void> {
+  let snap = await colRef.limit(500).get();
+  while (!snap.empty) {
+    const batch = db.batch();
+    for (const d of snap.docs) {
+      batch.delete(d.ref);
+    }
+    await batch.commit();
+    snap = await colRef.limit(500).get();
+  }
+}
 
 export async function PATCH(
   req: NextRequest,
@@ -22,13 +39,24 @@ export async function PATCH(
     }
 
     const body = await req.json();
-    const { name, googleMapsUrl, placeId, subscriptionStatus, industry, retailPreset } = body as {
+    const {
+      name,
+      googleMapsUrl,
+      placeId,
+      subscriptionStatus,
+      industry,
+      retailPreset,
+      accessPin,
+      clearAccessPin,
+    } = body as {
       name?: string;
       googleMapsUrl?: string;
       placeId?: string;
       subscriptionStatus?: string;
       industry?: string;
       retailPreset?: string;
+      accessPin?: string;
+      clearAccessPin?: boolean;
     };
 
     const updates: Record<string, unknown> = {
@@ -43,6 +71,19 @@ export async function PATCH(
     }
     if (industry !== undefined) updates.industry = industry === "" ? null : industry;
     if (retailPreset !== undefined) updates.retailPreset = retailPreset === "" ? null : retailPreset;
+
+    if (clearAccessPin === true) {
+      updates.accessPinHash = FieldValue.delete();
+    } else if (typeof accessPin === "string" && accessPin.trim()) {
+      const pin = accessPin.trim();
+      if (!isValidAccessPinFormat(pin)) {
+        return NextResponse.json(
+          { error: "PIN は 4〜8 桁の数字で指定してください" },
+          { status: 400 }
+        );
+      }
+      updates.accessPinHash = hashAccessPin(pin);
+    }
 
     const db = getAdminDb();
     if (!db) {
@@ -79,6 +120,63 @@ export async function PATCH(
     console.error("[admin/tenants PATCH]", err);
     return NextResponse.json(
       { error: "店舗の更新に失敗しました" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { tenantId: string } }
+) {
+  if (!requireAdminSecret(req)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const { tenantId } = params;
+  if (!tenantId) {
+    return NextResponse.json({ error: "tenantIdが必要です" }, { status: 400 });
+  }
+
+  const body = (await req.json().catch(() => ({}))) as { confirmTenantId?: unknown };
+  const confirm =
+    typeof body.confirmTenantId === "string" ? body.confirmTenantId.trim() : "";
+  if (confirm !== tenantId) {
+    return NextResponse.json(
+      {
+        error:
+          "確認のため、JSON 本文に confirmTenantId（削除する店舗のテナントIDと完全一致）を含めてください",
+      },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const db = getAdminDb();
+    if (!db) {
+      return NextResponse.json(
+        { error: "データベース接続が利用できません" },
+        { status: 500 }
+      );
+    }
+
+    const ref = db.collection("tenants").doc(tenantId);
+    const existing = await ref.get();
+    if (!existing.exists) {
+      return NextResponse.json({ error: "店舗が見つかりません" }, { status: 404 });
+    }
+
+    for (const sub of TENANT_SUBCOLLECTIONS) {
+      await deleteCollectionInBatches(db, ref.collection(sub));
+    }
+
+    await ref.delete();
+
+    return NextResponse.json({ ok: true, tenantId });
+  } catch (err) {
+    console.error("[admin/tenants DELETE]", err);
+    return NextResponse.json(
+      { error: "店舗の削除に失敗しました" },
       { status: 500 }
     );
   }

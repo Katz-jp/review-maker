@@ -7,10 +7,8 @@ interface TrialChoiceContentProps {
   industry?: string;
 }
 
-export function TrialChoiceContent({ industry }: TrialChoiceContentProps) {
-  const createHref = industry
-    ? `/trial/create?industry=${industry}`
-    : "/trial/create";
+export function TrialChoiceContent(_props: TrialChoiceContentProps) {
+  const questionnaireHref = "/trial/questionnaire";
   return (
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
       <header className="text-center mb-8">
@@ -24,7 +22,7 @@ export function TrialChoiceContent({ industry }: TrialChoiceContentProps) {
 
       <section className="flex-1 space-y-5">
         <Link
-          href={createHref}
+          href={questionnaireHref}
           className="block bg-white rounded-2xl p-6 shadow-sm border-2 border-green-100 hover:border-primary/50 hover:shadow-md transition-all"
         >
           <div className="flex items-start gap-4">
@@ -36,7 +34,7 @@ export function TrialChoiceContent({ industry }: TrialChoiceContentProps) {
                 クチコミ作成支援AI
               </h2>
               <p className="text-sm text-gray-600 mb-3">
-                施術の感想をアンケートでお聞きして、AIが口コミの下書きを作成します。
+                歯医者・クリニック向けに最適化したアンケートで、診療の感想をお聞きし、AIが口コミの下書きを作成します。
               </p>
               <span className="text-sm font-semibold text-primary">
                 5回までお試し可能 →

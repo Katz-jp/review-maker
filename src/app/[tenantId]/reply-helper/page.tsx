@@ -17,6 +17,7 @@ import {
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS, TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
 import { industries, type IndustryKey } from "@/lib/industries";
+import { clientTenantAllowsPaidFeatures } from "@/lib/tenant-subscription";
 
 type Tone = "friendly" | "polite" | "professional";
 
@@ -40,7 +41,7 @@ export default function ReplyHelperPage() {
   const tenantId = (params.tenantId as string) || "demo";
   const tenant = useTenant();
   // trialの場合は契約チェックをスキップ（制限のみ適用）
-  const canUsePaidFeatures = tenantId === "trial" || tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
+  const canUsePaidFeatures = clientTenantAllowsPaidFeatures(tenantId, tenant);
 
   const [authorName, setAuthorName] = useState("");
   const [review, setReview] = useState("");

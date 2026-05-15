@@ -7,6 +7,8 @@ import { ArrowLeft, Copy, Loader2, RotateCcw, Undo2 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 import { getReviewOrMapUrl } from "@/lib/review-link";
+import { POSTING_SUPPORT_INDUSTRY } from "@/lib/posting-support-constants";
+import { clientTenantAllowsPaidFeatures } from "@/lib/tenant-subscription";
 
 type Payload = {
   answers: Record<string, string[]>;
@@ -24,7 +26,7 @@ export default function TenantGeneratePage() {
   const tenantId = (params.tenantId as string) || "demo";
   const tenant = useTenant();
   // trialの場合は契約チェックをスキップ（制限のみ適用）
-  const canUsePaidFeatures = tenantId === "trial" || tenant.subscriptionStatus === "active" || tenant.subscriptionStatus === "trialing";
+  const canUsePaidFeatures = clientTenantAllowsPaidFeatures(tenantId, tenant);
 
   const [generatedText, setGeneratedText] = useState("");
   const [previousText, setPreviousText] = useState<string | null>(null);
@@ -103,9 +105,8 @@ export default function TenantGeneratePage() {
         answers: payload.answers,
         otherInputs: payload.otherInputs,
         freeText: payload.freeText,
-        industry: payload.industry ?? "seikotsu",
+        industry: POSTING_SUPPORT_INDUSTRY,
         satisfaction: payload.satisfaction,
-        ...(payload.industry === "retail" && { retailPreset: payload.retailPreset ?? "meat" }),
       }),
     });
     const data = await res.json();

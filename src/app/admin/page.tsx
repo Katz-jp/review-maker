@@ -12,6 +12,8 @@ import {
   ChevronLeft,
   ChevronDown,
   ChevronRight,
+  Trash2,
+  AlertTriangle,
 } from "lucide-react";
 import { INDUSTRY_OPTIONS, RETAIL_PRESET_OPTIONS } from "@/lib/industries/admin-options";
 
@@ -38,6 +40,7 @@ function getAuthHeaders(): HeadersInit {
 const STATUS_LABELS: Record<string, string> = {
   active: "有効",
   trialing: "トライアル",
+  app_trial: "アプリ体験（Stripe前）",
   inactive: "未契約",
   canceled: "解約済み",
   past_due: "支払遅延",
@@ -58,6 +61,7 @@ export default function AdminPage() {
   const [newStatus, setNewStatus] = useState("inactive");
   const [newIndustry, setNewIndustry] = useState("");
   const [newRetailPreset, setNewRetailPreset] = useState("meat");
+  const [newAccessPin, setNewAccessPin] = useState("");
   const [addError, setAddError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -66,8 +70,15 @@ export default function AdminPage() {
   const [editStatus, setEditStatus] = useState("");
   const [editIndustry, setEditIndustry] = useState("");
   const [editRetailPreset, setEditRetailPreset] = useState("");
+  const [editAccessPin, setEditAccessPin] = useState("");
+  const [editClearAccessPin, setEditClearAccessPin] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editSaveError, setEditSaveError] = useState("");
   const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({});
+  const [deleteTarget, setDeleteTarget] = useState<TenantListItem | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
 
   const fetchCheck = useCallback(async () => {
     const res = await fetch("/api/admin/check");
@@ -168,6 +179,13 @@ export default function AdminPage() {
   const handleAddTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddError("");
+    if (newStatus === "app_trial") {
+      const pin = newAccessPin.trim();
+      if (!/^\d{4,8}$/.test(pin)) {
+        setAddError("アプリ体験（Stripe前）では 4〜8 桁の店舗用 PIN が必要です");
+        return;
+      }
+    }
     if (!newTenantId.trim()) {
       setAddError("テナントIDを入力してください");
       return;
@@ -185,6 +203,7 @@ export default function AdminPage() {
           subscriptionStatus: newStatus,
           industry: newIndustry.trim() || "",
           retailPreset: newIndustry === "retail" ? (newRetailPreset.trim() || "meat") : "",
+          ...(newAccessPin.trim() ? { accessPin: newAccessPin.trim() } : {}),
         }),
       });
       const data = await res.json();
@@ -200,6 +219,7 @@ export default function AdminPage() {
       setNewStatus("inactive");
       setNewIndustry("");
       setNewRetailPreset("meat");
+      setNewAccessPin("");
     } finally {
       setAdding(false);
     }
@@ -207,20 +227,25 @@ export default function AdminPage() {
 
   const startEdit = (t: TenantListItem) => {
     setEditingId(t.tenantId);
+    setEditSaveError("");
     setEditName(t.name);
     setEditGoogleMapsUrl(t.googleMapsUrl);
     setEditPlaceId(t.placeId ?? "");
     setEditStatus(t.subscriptionStatus);
     setEditIndustry(t.industry ?? "");
     setEditRetailPreset(t.retailPreset ?? "");
+    setEditAccessPin("");
+    setEditClearAccessPin(false);
   };
 
   const cancelEdit = () => {
     setEditingId(null);
+    setEditSaveError("");
   };
 
   const saveEdit = async () => {
     if (!editingId) return;
+    setEditSaveError("");
     setSaving(true);
     try {
       const res = await fetch(`/api/admin/tenants/${editingId}`, {
@@ -233,16 +258,90 @@ export default function AdminPage() {
           subscriptionStatus: editStatus,
           industry: editIndustry.trim() || "",
           retailPreset: editIndustry === "retail" ? (editRetailPreset.trim() || "meat") : "",
+          ...(editClearAccessPin ? { clearAccessPin: true } : {}),
+          ...(editAccessPin.trim() && !editClearAccessPin ? { accessPin: editAccessPin.trim() } : {}),
         }),
       });
-      const data = await res.json();
-      if (!res.ok) return;
+      const data = (await res.json()) as Record<string, unknown>;
+      if (!res.ok) {
+        setEditSaveError(typeof data.error === "string" ? data.error : "保存に失敗しました");
+        return;
+      }
       setTenants((prev) =>
-        prev.map((x) => (x.tenantId === editingId ? { ...x, ...data } : x))
+        prev.map((x) => {
+          if (x.tenantId !== editingId) return x;
+          return {
+            ...x,
+            name: typeof data.name === "string" ? data.name : x.name,
+            googleMapsUrl: typeof data.googleMapsUrl === "string" ? data.googleMapsUrl : x.googleMapsUrl,
+            subscriptionStatus:
+              typeof data.subscriptionStatus === "string" ? data.subscriptionStatus : x.subscriptionStatus,
+            ...(data.placeId !== undefined
+              ? { placeId: data.placeId === null ? undefined : String(data.placeId) }
+              : {}),
+            ...(data.industry !== undefined
+              ? { industry: data.industry === null ? undefined : String(data.industry) }
+              : {}),
+            ...(data.retailPreset !== undefined
+              ? { retailPreset: data.retailPreset === null ? undefined : String(data.retailPreset) }
+              : {}),
+          };
+        })
       );
       setEditingId(null);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const openDeleteModal = (t: TenantListItem) => {
+    setDeleteTarget(t);
+    setDeleteConfirmText("");
+    setDeleteError("");
+  };
+
+  const closeDeleteModal = () => {
+    if (deleteSubmitting) return;
+    setDeleteTarget(null);
+    setDeleteConfirmText("");
+    setDeleteError("");
+  };
+
+  const executeDelete = async () => {
+    if (!deleteTarget) return;
+    const tid = deleteTarget.tenantId;
+    if (deleteConfirmText.trim() !== tid) {
+      setDeleteError("テナントIDが一致しません。もう一度入力してください。");
+      return;
+    }
+    setDeleteSubmitting(true);
+    setDeleteError("");
+    try {
+      const res = await fetch(`/api/admin/tenants/${encodeURIComponent(tid)}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ confirmTenantId: deleteConfirmText.trim() }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.status === 401) {
+        sessionStorage.removeItem(ADMIN_SESSION_KEY);
+        setIsAuthenticated(false);
+        setTenants([]);
+        setDeleteTarget(null);
+        return;
+      }
+      if (!res.ok) {
+        setDeleteError(
+          typeof data.error === "string" ? data.error : "削除に失敗しました"
+        );
+        return;
+      }
+      setTenants((prev) => prev.filter((x) => x.tenantId !== tid));
+      setEditingId((cur) => (cur === tid ? null : cur));
+      setDeleteTarget(null);
+      setDeleteConfirmText("");
+    } finally {
+      setDeleteSubmitting(false);
     }
   };
 
@@ -316,15 +415,28 @@ export default function AdminPage() {
     restaurant: "飲食店",
   };
 
-  // 業種ごとにグループ化（INDUSTRY_OPTIONS の順を保持）
-  const industryOrder = ["dental", "", "seikotsu", "retail", "restaurant"];
-  const grouped = industryOrder
-    .map((key) => ({
-      key,
-      label: INDUSTRY_LABEL[key] ?? key,
-      items: tenants.filter((t) => (t.industry ?? "") === key),
-    }))
-    .filter((g) => g.items.length > 0);
+  const industryOrder = ["dental", "", "seikotsu", "retail", "restaurant"] as const;
+  const baseGroups = industryOrder.map((key) => ({
+    key,
+    label: INDUSTRY_LABEL[key] ?? key,
+    items: tenants.filter((t) => (t.industry ?? "") === key),
+  }));
+  const assignedIds = new Set(baseGroups.flatMap((g) => g.items.map((t) => t.tenantId)));
+  const orphanTenants = tenants.filter((t) => !assignedIds.has(t.tenantId));
+  const grouped = [
+    ...baseGroups.filter((g) => g.items.length > 0),
+    ...(orphanTenants.length > 0
+      ? [
+          {
+            key: "_other",
+            label: "その他（業種が未分類）",
+            items: orphanTenants,
+          },
+        ]
+      : []),
+  ];
+
+  const industrySelectValues = new Set<string>(INDUSTRY_OPTIONS.map((o) => o.value));
 
   const toggleGroup = (key: string) =>
     setCollapsedGroups((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -337,7 +449,7 @@ export default function AdminPage() {
             <Store className="w-6 h-6 text-primary" />
             店舗管理
           </h1>
-          <p className="text-sm text-gray-500 mt-1">店舗の追加・編集・一覧</p>
+          <p className="text-sm text-gray-500 mt-1">店舗の追加・編集・削除・一覧</p>
         </div>
         <button
           type="button"
@@ -399,7 +511,10 @@ export default function AdminPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">契約状態</label>
             <select
               value={newStatus}
-              onChange={(e) => setNewStatus(e.target.value)}
+              onChange={(e) => {
+                setNewStatus(e.target.value);
+                if (e.target.value !== "app_trial") setNewAccessPin("");
+              }}
               className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
               {Object.entries(STATUS_LABELS).map(([v, l]) => (
@@ -407,6 +522,26 @@ export default function AdminPage() {
               ))}
             </select>
           </div>
+          {newStatus === "app_trial" && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                店舗用 PIN（必須・4〜8桁の数字）
+              </label>
+              <input
+                type="password"
+                inputMode="numeric"
+                autoComplete="new-password"
+                maxLength={8}
+                value={newAccessPin}
+                onChange={(e) => setNewAccessPin(e.target.value.replace(/\D/g, ""))}
+                placeholder="お客様・オーナーが初回アクセス時に入力"
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono tracking-widest"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                お客様用 URL とオーナー画面の両方で、初回にこの PIN を求めます。正しいとブラウザに保存されます。
+              </p>
+            </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">業種</label>
             <select
@@ -536,6 +671,11 @@ export default function AdminPage() {
                                   {INDUSTRY_OPTIONS.map((opt) => (
                                     <option key={opt.value || "unset"} value={opt.value}>{opt.label}</option>
                                   ))}
+                                  {editIndustry !== "" && !industrySelectValues.has(editIndustry) && (
+                                    <option value={editIndustry}>
+                                      {editIndustry}（Firestoreの値）
+                                    </option>
+                                  )}
                                 </select>
                               </div>
                               {editIndustry === "retail" && (
@@ -551,6 +691,35 @@ export default function AdminPage() {
                                     ))}
                                   </select>
                                 </div>
+                              )}
+                              <div>
+                                <label className="block text-xs text-gray-500 mb-1">
+                                  新しい店舗用 PIN（4〜8桁・空欄なら変更なし）
+                                </label>
+                                <input
+                                  type="password"
+                                  inputMode="numeric"
+                                  maxLength={8}
+                                  value={editAccessPin}
+                                  disabled={editClearAccessPin}
+                                  onChange={(e) => setEditAccessPin(e.target.value.replace(/\D/g, ""))}
+                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm font-mono tracking-widest disabled:opacity-50"
+                                />
+                              </div>
+                              <label className="flex items-center gap-2 text-xs text-gray-700 cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={editClearAccessPin}
+                                  onChange={(e) => {
+                                    setEditClearAccessPin(e.target.checked);
+                                    if (e.target.checked) setEditAccessPin("");
+                                  }}
+                                  className="rounded border-gray-300"
+                                />
+                                店舗用 PIN を削除（URL での PIN 入力なし）
+                              </label>
+                              {editSaveError && (
+                                <p className="text-sm text-red-600">{editSaveError}</p>
                               )}
                               <div className="flex gap-2">
                                 <button
@@ -579,7 +748,9 @@ export default function AdminPage() {
                                 </div>
                                 <span
                                   className={`text-xs px-2 py-1 rounded-full ${
-                                    t.subscriptionStatus === "active" || t.subscriptionStatus === "trialing"
+                                    t.subscriptionStatus === "active" ||
+                                    t.subscriptionStatus === "trialing" ||
+                                    t.subscriptionStatus === "app_trial"
                                       ? "bg-green-100 text-green-800"
                                       : t.subscriptionStatus === "canceled" || t.subscriptionStatus === "past_due"
                                       ? "bg-red-100 text-red-800"
@@ -597,6 +768,14 @@ export default function AdminPage() {
                                 >
                                   <Pencil className="w-4 h-4" />
                                   編集
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => openDeleteModal(t)}
+                                  className="flex items-center gap-1 text-sm text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                  削除
                                 </button>
                                 <a
                                   href={`${baseUrl}/owner/${t.tenantId}`}
@@ -628,6 +807,80 @@ export default function AdminPage() {
           </div>
         )}
       </section>
+
+      {deleteTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40"
+          role="presentation"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) closeDeleteModal();
+          }}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-lg max-w-md w-full p-6 border border-red-100"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+          >
+            <div className="flex gap-3 mb-4">
+              <div className="shrink-0 w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600" aria-hidden />
+              </div>
+              <div>
+                <h2 id="delete-dialog-title" className="font-semibold text-gray-900">
+                  店舗を削除しますか？
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  Firestore 上の店舗データと関連する下位データ（返信履歴・設定・統計など）がすべて削除されます。この操作は取り消せません。
+                </p>
+              </div>
+            </div>
+            <div className="rounded-lg bg-gray-50 px-3 py-2 mb-4 text-sm">
+              <p className="text-gray-500 text-xs">削除対象</p>
+              <p className="font-medium text-gray-900">{deleteTarget.name || deleteTarget.tenantId}</p>
+              <p className="font-mono text-xs text-gray-600 mt-0.5">{deleteTarget.tenantId}</p>
+            </div>
+            <div className="mb-4">
+              <label htmlFor="delete-confirm-input" className="block text-sm font-medium text-gray-800 mb-1">
+                確認のため、上記のテナントIDをそのまま入力してください
+              </label>
+              <input
+                id="delete-confirm-input"
+                type="text"
+                autoComplete="off"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder={deleteTarget.tenantId}
+                className="w-full px-3 py-2 rounded-xl border border-gray-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-red-200"
+                disabled={deleteSubmitting}
+              />
+            </div>
+            {deleteError && (
+              <p className="text-sm text-red-600 mb-4">{deleteError}</p>
+            )}
+            <div className="flex flex-wrap gap-2 justify-end">
+              <button
+                type="button"
+                onClick={closeDeleteModal}
+                disabled={deleteSubmitting}
+                className="px-4 py-2 rounded-xl border border-gray-300 text-gray-800 text-sm font-medium disabled:opacity-50"
+              >
+                キャンセル
+              </button>
+              <button
+                type="button"
+                onClick={executeDelete}
+                disabled={
+                  deleteSubmitting || deleteConfirmText.trim() !== deleteTarget.tenantId
+                }
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-medium disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {deleteSubmitting ? "削除中…" : "削除する"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="mt-6">
         <Link href="/" className="text-sm text-gray-500 hover:text-gray-700 flex items-center gap-1">
