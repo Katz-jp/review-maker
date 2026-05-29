@@ -7,9 +7,6 @@ const FROM_EMAIL = process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
 
 const industryLabels: Record<string, string> = {
   haisha: "歯医者・クリニック",
-  seikotsuin: "整骨院",
-  biyoshi: "美容室",
-  inshokuten: "飲食店",
   other: "その他",
 };
 

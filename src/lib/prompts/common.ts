@@ -5,7 +5,7 @@
  */
 
 const STYLE_TYPES = ["A：体験談寄り", "B：説明寄り", "C：淡々型"] as const;
-const CLOSING_TYPES = ["1：断定型", "2：感想型", "3：継続型"] as const;
+const CLOSING_TYPES = ["1：断定型", "2：感想型", "3：余韻型"] as const;
 
 export type Satisfaction = number | null;
 
@@ -58,36 +58,6 @@ export function buildSummaryWithMax3Categories(
   return summary;
 }
 
-const RESTAURANT_ALWAYS_IDS = ["orderedMenu", "scene", "returnIntent"] as const;
-
-/** 飲食店：注文メニュー・利用シーン・再来意向は毎回必ず要約に含める。④は満足度で分岐 */
-export function buildRestaurantSurveySummary(
-  answers: Record<string, string[]>,
-  otherInputs: Record<string, string>,
-  labels: Record<string, string>,
-  freeText: string,
-  satisfaction: Satisfaction
-): string {
-  let summary = "";
-
-  for (const id of RESTAURANT_ALWAYS_IDS) {
-    const vals = answers[id] ?? [];
-    const parts = [...vals];
-    if (otherInputs[id]) parts.push(otherInputs[id]);
-    if (parts.length) summary += `【${labels[id] || id}】${parts.join("、")}\n`;
-  }
-
-  const branchId =
-    satisfaction !== null && satisfaction >= 4 ? "goodPoints" : "concerns";
-  const bVals = answers[branchId] ?? [];
-  const bParts = [...bVals];
-  if (otherInputs[branchId]) bParts.push(otherInputs[branchId]);
-  if (bParts.length) summary += `【${labels[branchId] || branchId}】${bParts.join("、")}\n`;
-
-  if (freeText) summary += `【補足】${freeText}\n`;
-  return summary;
-}
-
 /** 締めの指示をアンケート直前で強調（「おすすめしたい」禁止・今回の締めタイプを明示） */
 export function getClosingReminder(
   closingType: string,
@@ -121,12 +91,12 @@ export function getCommonRulesForUserPrompt(
     : "* 【必須】絵文字（😊など）か「！」を必ず1つ以上含めること。改行を1〜2箇所入れること。\n";
 
   const highScoreBlock = highScore
-    ? `\n■ 追加ルール（満足度が星4〜5のとき：厳守）
+    ? `\n■ 追加ルール（満足度が星4〜5のとき）
 * 全体のトーンは前向き（ポジティブ）にする
-* 文章のどこかに「おすすめ」を必ず含める（例：「おすすめです」「おすすめしたい」など）
-* 文章のどこかに「再来・継続利用」系のコメントを必ず1つ入れる（例：「また行きたい」「今後も通いたい」など）
-* 否定表現（例：「おすすめしない」「また行きたいとは思わない」など）を混ぜない
-※ 上記2つは文末でなくてもOK。ただし不自然な押し付けや宣伝口調にはしない`
+* 「おすすめ」「また行きたい」「今後も通いたい」などの表現は、アンケート回答や【補足】に明示されている場合のみ使用する
+* 明示されていない場合は無理に入れない。体験談として自然に終わってよい
+* 宣伝のような締めにしない。余韻で終わってもよい
+* 否定表現は混ぜない`
     : "";
 
   const lowScoreBlock = lowScore
@@ -168,9 +138,11 @@ export function getCommonRulesForUserPrompt(
 * 「また行きたい」「これからも通いたい」「今後もお願いしたい」などの再来を示す締めは禁止`
     : `\n■ 締めタイプ（内部制御）
 締めは以下のいずれかのタイプにする：${closingType}
-1：断定型（例：おすすめです）
-2：感想型（例：合っている気がします）
-3：継続型（例：もう少し通ってみます）
+1：断定型（例：よかったです）
+2：感想型（例：思っていたより〜でした、〜という印象でした）
+3：余韻型（例：少し安心しました、いい意味で驚きました）
+* 「おすすめです」「また行きたい」「今後も通いたい」は締めの候補から除外する
+* アンケートや【補足】に明示されていない限り、再来・継続通院の意思は書かない
 ※同じ締め表現を毎回使用しないこと`;
 
   return `■ 最重要ルール（厳守）
@@ -206,6 +178,8 @@ ${lowScore ? "* 改行は必須ではない（0〜2箇所で自然な範囲で�
 * 一文をやや短めにする箇所を1つ含めてもよい
 * 多少の曖昧さや主観を残してよい（例：〜かなと思います、〜という印象でした、思っていたより〜）
 * 締めは固定しない。締めがなくてもよい。余韻で終わってもよい
+* 「全体的には〜」「全体として〜」「総合的に〜」「全体的に良い〜」で締める表現は禁止。満足度スコアに関係なく使わない
+* 文章の最後を"まとめ文"で終わらせない。体験の一場面や感想で自然に終わってよい
 
 ■ 文体揺らぎ（内部制御）
 文章は以下の文体傾向で作成する：${styleType}

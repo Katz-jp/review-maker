@@ -7,7 +7,6 @@ import { ArrowLeft, Copy, Loader2, RotateCcw, Undo2 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 import { getReviewOrMapUrl } from "@/lib/review-link";
-import { POSTING_SUPPORT_INDUSTRY } from "@/lib/posting-support-constants";
 import { clientTenantAllowsPaidFeatures } from "@/lib/tenant-subscription";
 
 type Payload = {
@@ -15,8 +14,6 @@ type Payload = {
   otherInputs: Record<string, string>;
   freeText: string;
   tenantId?: string;
-  industry?: string;
-  retailPreset?: string;
   /** アンケートで必須（1〜5） */
   satisfaction: number;
 };
@@ -105,7 +102,6 @@ export default function TenantGeneratePage() {
         answers: payload.answers,
         otherInputs: payload.otherInputs,
         freeText: payload.freeText,
-        industry: POSTING_SUPPORT_INDUSTRY,
         satisfaction: payload.satisfaction,
       }),
     });

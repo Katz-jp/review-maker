@@ -137,9 +137,7 @@ export async function POST(req: NextRequest) {
       }
       accessPinHash = hashAccessPin(pinToHash);
     }
-    const nextIndustry = industry === "" ? null : industry;
-    const nextRetailPreset =
-      nextIndustry === "retail" ? (retailPreset === "" ? null : retailPreset) : null;
+    const nextIndustry = "dental";
 
     const nextPlaceId = typeof placeId === "string" && placeId.trim() ? placeId.trim() : null;
     await ref.set(
@@ -149,7 +147,7 @@ export async function POST(req: NextRequest) {
         ...(nextPlaceId !== null && { placeId: nextPlaceId }),
         subscriptionStatus: status,
         industry: nextIndustry,
-        retailPreset: nextRetailPreset,
+        retailPreset: null,
         ...(accessPinHash !== undefined && { accessPinHash }),
         updatedAt: new Date().toISOString(),
       },
@@ -163,7 +161,7 @@ export async function POST(req: NextRequest) {
       placeId: nextPlaceId ?? undefined,
       subscriptionStatus: status,
       industry: nextIndustry,
-      retailPreset: nextRetailPreset,
+      retailPreset: undefined,
     });
   } catch (err) {
     console.error("[admin/tenants POST]", err);

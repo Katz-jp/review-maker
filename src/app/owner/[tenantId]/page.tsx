@@ -5,22 +5,11 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import { CreditCard, QrCode, ExternalLink, Loader2, Plus, Trash2, Settings2, MessageSquare } from "lucide-react";
-import { industries, getIndustryConfig, type IndustryKey } from "@/lib/industries";
-import {
-  MAX_RESTAURANT_MENU_OPTIONS,
-  RESTAURANT_ORDERED_MENU_QUESTION_ID,
-} from "@/lib/industries/restaurant";
+import { getIndustryConfig } from "@/lib/industries";
 
 type CustomOptionsByQuestion = Record<string, string[]>;
 
 const MAX_CUSTOM_OPTIONS = 3;
-
-function maxCustomOptionsForQuestion(questionId: string, industryKey: IndustryKey): number {
-  if (industryKey === "restaurant" && questionId === RESTAURANT_ORDERED_MENU_QUESTION_ID) {
-    return MAX_RESTAURANT_MENU_OPTIONS;
-  }
-  return MAX_CUSTOM_OPTIONS;
-}
 
 function CustomOptionsEditor({
   questionId,
@@ -108,7 +97,6 @@ export default function OwnerPage() {
   const [tenantPaidAccess, setTenantPaidAccess] = useState(false);
   const [appTrialEndsAtIso, setAppTrialEndsAtIso] = useState<string | undefined>(undefined);
   const [tenantIndustry, setTenantIndustry] = useState<string | undefined>(undefined);
-  const [tenantRetailPreset, setTenantRetailPreset] = useState<string | undefined>(undefined);
   const [usageStats, setUsageStats] = useState<{
     mapsClickCount: number;
     mapsSatisfactionAvg: number | null;
@@ -125,11 +113,8 @@ export default function OwnerPage() {
   const stripeSubscribed = tenantStatus === "active" || tenantStatus === "trialing";
   const appTrialLive = tenantStatus === "app_trial" && tenantPaidAccess;
   const isRestricted = tenantStatus === "canceled" || tenantStatus === "past_due";
-  const fromTenantIdForIndustry =
-    tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
-  const effectiveIndustry = tenantIndustry ?? fromTenantIdForIndustry ?? "seikotsu";
-  const isDental = effectiveIndustry === "dental";
-  const isRestaurant = effectiveIndustry === "restaurant";
+  const effectiveIndustry = tenantIndustry ?? "dental";
+  const isDental = effectiveIndustry === "dental" || effectiveIndustry === "";
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -153,7 +138,6 @@ export default function OwnerPage() {
         setTenantPaidAccess(data.paidAccess === true);
         setAppTrialEndsAtIso(typeof data.appTrialEndsAt === "string" ? data.appTrialEndsAt : undefined);
         setTenantIndustry(data.industry);
-        setTenantRetailPreset(data.retailPreset);
       })
       .catch(() => {
         setTenantStatus("inactive");
@@ -196,10 +180,7 @@ export default function OwnerPage() {
 
   const handleAddOption = (questionId: string, value: string) => {
     const current = customOptions[questionId] ?? [];
-    const industryKey: IndustryKey = Object.hasOwn(industries, effectiveIndustry)
-      ? (effectiveIndustry as IndustryKey)
-      : "seikotsu";
-    const cap = maxCustomOptionsForQuestion(questionId, industryKey);
+    const cap = MAX_CUSTOM_OPTIONS;
     if (current.length >= cap) return;
     const trimmed = value.trim();
     if (!trimmed || current.includes(trimmed)) return;
@@ -392,9 +373,7 @@ export default function OwnerPage() {
           </h2>
           <div className="text-sm text-gray-600 mb-4">
             <p className="text-base font-medium">
-              {effectiveIndustry === "restaurant"
-                ? "飲食店の場合は「ご注文されたメニュー」に、40件まで登録できます。それ以外の設問の選択肢の追加は、最大3件までです。"
-                : "各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。"}
+              各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。
             </p>
             <div className="text-red-600 mt-2">
               <span className="text-[15px] block font-bold">※追加・削除するときの注意点</span>
@@ -411,19 +390,7 @@ export default function OwnerPage() {
             </div>
           ) : (
             <div className="space-y-5">
-              {(() => {
-                const fromTenantId =
-                  tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
-                const raw = tenantIndustry ?? fromTenantId ?? "seikotsu";
-                const industryKey: IndustryKey = Object.hasOwn(industries, raw)
-                  ? (raw as IndustryKey)
-                  : "seikotsu";
-                const retailPreset =
-                  industryKey === "retail"
-                    ? tenantRetailPreset ?? (tenantId === "retail-demo" ? "meat" : undefined)
-                    : undefined;
-                const config = getIndustryConfig(industryKey, retailPreset);
-                return config.questions.map((q) => (
+              {getIndustryConfig().questions.map((q) => (
                 <CustomOptionsEditor
                   key={q.id}
                   questionId={q.id}
@@ -431,10 +398,9 @@ export default function OwnerPage() {
                   options={customOptions[q.id] ?? []}
                   onAdd={handleAddOption}
                   onRemove={handleRemoveOption}
-                  maxOptions={maxCustomOptionsForQuestion(q.id, industryKey)}
+                  maxOptions={MAX_CUSTOM_OPTIONS}
                 />
-              ));
-              })()}
+              ))}
               <button
                 type="button"
                 onClick={handleSaveCustomOptions}

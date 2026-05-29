@@ -16,15 +16,13 @@ export type Tenant = {
   /** アプリ側無料体験の終了時刻（ISO）。Firestore の appTrialEndsAt または開始から30日で算出 */
   appTrialEndsAt?: string;
   appTrialStartedAt?: string;
-  /** "seikotsu" | "retail" など。未設定時は整骨院として扱う */
+  /** 歯科専用。未設定時は dental として扱う */
   industry?: string;
-  /** industry が "retail" のときのプリセット。"meat" | "general" など */
-  retailPreset?: string;
 };
 
 export const DEFAULT_TENANT: Tenant = {
   id: "demo",
-  name: "〇〇整骨院",
+  name: "〇〇歯科クリニック",
   googleMapsUrl: "https://www.google.com/maps",
   subscriptionStatus: "active",
 };
@@ -41,7 +39,7 @@ export async function getTenant(tenantId: string): Promise<Tenant | null> {
     if (!snap.exists()) return null;
 
     const data = snap.data();
-    const co = data?.customOptions as { name?: string; googleMapsUrl?: string; placeId?: string; industry?: string; retailPreset?: string } | undefined;
+    const co = data?.customOptions as { name?: string; googleMapsUrl?: string; placeId?: string; industry?: string } | undefined;
     const rawStatus = data?.subscriptionStatus ?? "inactive";
     const subscriptionStatus: Tenant["subscriptionStatus"] =
       rawStatus === "active" ||
@@ -63,8 +61,7 @@ export async function getTenant(tenantId: string): Promise<Tenant | null> {
       subscriptionStatus,
       ...(endMs != null ? { appTrialEndsAt: new Date(endMs).toISOString() } : {}),
       ...(startMs != null ? { appTrialStartedAt: new Date(startMs).toISOString() } : {}),
-      industry: data?.industry ?? co?.industry,
-      retailPreset: data?.retailPreset ?? co?.retailPreset,
+      industry: data?.industry ?? co?.industry ?? "dental",
     };
   } catch {
     return null;

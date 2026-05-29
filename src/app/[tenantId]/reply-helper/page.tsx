@@ -15,8 +15,7 @@ import {
   Undo2,
 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
-import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS, TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
-import { industries, type IndustryKey } from "@/lib/industries";
+import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 import { clientTenantAllowsPaidFeatures } from "@/lib/tenant-subscription";
 
 type Tone = "friendly" | "polite" | "professional";
@@ -64,28 +63,6 @@ export default function ReplyHelperPage() {
   // 返信で使うフレーズは1つだけ（店舗が選んだもの）
   const selectedPhraseForReply = customPhrases.find((p) => p.enabled && p.text.trim() !== "");
   const phraseForReply = selectedPhraseForReply ? [selectedPhraseForReply.text.trim()] : [];
-
-  // 業種（テナント or trial の sessionStorage）— 返信の「当院」「当店」などに使用
-  const industryKey: IndustryKey = (() => {
-    const fromTrial =
-      tenantId === "trial" && typeof window !== "undefined"
-        ? (() => {
-            const v = sessionStorage.getItem(TRIAL_INDUSTRY_KEY);
-            if (v === "kouri") return "retail";
-            if (v === "seikotsuin") return "seikotsu";
-            return undefined;
-          })()
-        : undefined;
-    const fromTenant = tenant?.industry;
-    const fromTenantId =
-      tenantId === "retail-demo" ? "retail" : tenantId === "demo-test" ? "seikotsu" : undefined;
-    const raw = fromTrial ?? fromTenant ?? fromTenantId ?? "seikotsu";
-    return Object.hasOwn(industries, raw) ? (raw as IndustryKey) : "seikotsu";
-  })();
-  const retailPreset =
-    industryKey === "retail"
-      ? tenant?.retailPreset ?? (tenantId === "retail-demo" || tenantId === "trial" ? "meat" : undefined)
-      : undefined;
 
   const loadSettings = useCallback(async () => {
     if (!tenantId) return;
@@ -179,8 +156,6 @@ export default function ReplyHelperPage() {
           tone,
           starRating: starRating ?? undefined,
           customPhrases: phraseForReply,
-          industry: industryKey,
-          ...(industryKey === "retail" && retailPreset != null && { retailPreset }),
         }),
       });
       const data = await res.json();

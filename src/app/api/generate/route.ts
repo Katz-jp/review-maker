@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
-import { getIndustryConfig, type IndustryKey } from "@/lib/industries";
-import { POSTING_SUPPORT_INDUSTRY } from "@/lib/posting-support-constants";
+import { getIndustryConfig } from "@/lib/industries";
 
 const BANNED_WORDS_FOR_LOW_SCORE = [
   "また来たい",
@@ -41,20 +40,6 @@ const FORBIDDEN_SUMMARY_PHRASES_FOR_LOW_SCORE = [
   "期待したいです",
 ];
 
-const RECOMMEND_TOKENS_FOR_HIGH_SCORE = ["おすすめ"];
-
-const REVISIT_TOKENS_FOR_HIGH_SCORE = [
-  "また行",
-  "また来",
-  "また伺",
-  "次回",
-  "次も",
-  "今後も",
-  "これからも",
-  "通いたい",
-  "お願いしたい",
-];
-
 const NEGATIVE_PHRASES_FOR_HIGH_SCORE = [
   "おすすめしない",
   "おすすめできない",
@@ -82,10 +67,7 @@ function containsBang(text: string): boolean {
 function satisfiesHighScorePolicy(text: string, satisfaction: number): boolean {
   if (satisfaction < 4) return true;
   if (NEGATIVE_PHRASES_FOR_HIGH_SCORE.some((p) => text.includes(p))) return false;
-  const hasEmojiOrBang = containsEmoji(text) || containsBang(text);
-  const hasRecommend = RECOMMEND_TOKENS_FOR_HIGH_SCORE.some((t) => text.includes(t));
-  const hasRevisit = REVISIT_TOKENS_FOR_HIGH_SCORE.some((t) => text.includes(t));
-  return hasEmojiOrBang && hasRecommend && hasRevisit;
+  return containsEmoji(text) || containsBang(text);
 }
 
 function violatesPolicy(text: string, satisfaction: number): boolean {
@@ -125,8 +107,7 @@ export async function POST(req: NextRequest) {
     }
     const satisfaction = rawSatisfaction;
 
-    const industryKey: IndustryKey = POSTING_SUPPORT_INDUSTRY;
-    const config = getIndustryConfig(industryKey);
+    const config = getIndustryConfig();
 
     const openai = new OpenAI({ apiKey });
     const prompt = config.buildPrompt(
@@ -164,7 +145,7 @@ export async function POST(req: NextRequest) {
           { role: "system", content: config.systemMessage },
           {
             role: "user",
-            content: `${prompt}\n\n※ 上記ルールに違反している表現があれば修正したうえで、条件を満たすように書き直してください。\n※ 満足度が星4〜5のときは、以下を「必ず」満たしてください：\n- 絵文字（例：😊）または「！」を1つ以上含める\n- 「おすすめ」を必ず含める（例：「おすすめです」）\n- 再来/継続利用のコメントを必ず含める（例：「また行きたいです」「今後も通いたいです」）\n※ 上の例文をそのまま使ってもOKです。\n最終的な口コミ本文のみを出力してください。`,
+            content: `${prompt}\n\n※ 上記ルールに違反している表現があれば修正したうえで、条件を満たすように書き直してください。\n※ 満足度が星4〜5のときは、絵文字（例：😊）または「！」を1つ以上含めること。\n※ 「おすすめ」「また行きたい」などはアンケートや【補足】にない限り入れないこと。\n最終的な口コミ本文のみを出力してください。`,
           },
         ],
         temperature: 0.4,
@@ -202,45 +183,14 @@ export async function POST(req: NextRequest) {
           text = retryLow2Text;
         }
       } else if (satisfaction >= 4) {
-        // もう一段強めに“必須語句”を指定して再生成（高評価の安定化）
-        // 固定文だと同じ文章が続きやすいので、候補からランダムに選ぶ。
         const emojiOrBang = pickOne(["😊", "！"]);
-        const recommendPhrase =
-          industryKey === "restaurant"
-            ? pickOne([
-                "個人的にはおすすめです。",
-                "料理の味も雰囲気も気に入りました。",
-                "友人にも勧めたいお店です。",
-                "コスパも含めておすすめです。",
-              ])
-            : pickOne([
-                "個人的にはおすすめです。",
-                "安心しておすすめできます。",
-                "同じように歯医者が苦手な方にはおすすめです。",
-                "またお願いしたいと思えるのでおすすめです。",
-              ]);
-        const revisitPhrase =
-          industryKey === "restaurant"
-            ? pickOne([
-                "また行きたいです。",
-                "次の来店も楽しみです。",
-                "機会があればまた来たいです。",
-                "今度は別のメニューも試したいです。",
-              ])
-            : pickOne([
-                "また行きたいです。",
-                "次回もお願いしたいです。",
-                "今後も通いたいです。",
-                "これからもお世話になりたいです。",
-              ]);
-
         const retry2 = await openai.chat.completions.create({
           model: "gpt-4o-mini",
           messages: [
             { role: "system", content: config.systemMessage },
             {
               role: "user",
-              content: `${prompt}\n\n【重要】満足度が星4〜5です。次の3つの“指定フレーズ”を必ず含めて、前向きな文章に書き直してください。\n1) 「${emojiOrBang}」を必ず1つ以上\n2) 「${recommendPhrase}」を必ず1回（文言を変えない）\n3) 「${revisitPhrase}」を必ず1回（文言を変えない）\n※ 事実の追加・誇張は禁止。上の指定フレーズは“感想”として自然に入れる。\n最終的な口コミ本文のみを出力してください。`,
+              content: `${prompt}\n\n【重要】満足度が星4〜5です。絵文字または「！」が足りない場合は「${emojiOrBang}」を自然に1つ含めて書き直してください。\n※ 「おすすめ」「また行きたい」などはアンケートや【補足】にない限り入れないこと。事実の追加・誇張は禁止。\n最終的な口コミ本文のみを出力してください。`,
             },
           ],
           temperature: 0.3,

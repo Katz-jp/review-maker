@@ -15,8 +15,6 @@ import {
   Trash2,
   AlertTriangle,
 } from "lucide-react";
-import { INDUSTRY_OPTIONS, RETAIL_PRESET_OPTIONS } from "@/lib/industries/admin-options";
-
 /** sessionStorage に保存する際のキー（認証済みパスワードを保持） */
 const ADMIN_SESSION_KEY = "adminAuth";
 
@@ -28,7 +26,6 @@ type TenantListItem = {
   subscriptionStatus: string;
   updatedAt?: string;
   industry?: string;
-  retailPreset?: string;
 };
 
 function getAuthHeaders(): HeadersInit {
@@ -59,8 +56,6 @@ export default function AdminPage() {
   const [newGoogleMapsUrl, setNewGoogleMapsUrl] = useState("https://www.google.com/maps");
   const [newPlaceId, setNewPlaceId] = useState("");
   const [newStatus, setNewStatus] = useState("inactive");
-  const [newIndustry, setNewIndustry] = useState("");
-  const [newRetailPreset, setNewRetailPreset] = useState("meat");
   const [newAccessPin, setNewAccessPin] = useState("");
   const [addError, setAddError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -68,8 +63,6 @@ export default function AdminPage() {
   const [editGoogleMapsUrl, setEditGoogleMapsUrl] = useState("");
   const [editPlaceId, setEditPlaceId] = useState("");
   const [editStatus, setEditStatus] = useState("");
-  const [editIndustry, setEditIndustry] = useState("");
-  const [editRetailPreset, setEditRetailPreset] = useState("");
   const [editAccessPin, setEditAccessPin] = useState("");
   const [editClearAccessPin, setEditClearAccessPin] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -201,8 +194,7 @@ export default function AdminPage() {
           googleMapsUrl: newGoogleMapsUrl.trim() || "https://www.google.com/maps",
           placeId: newPlaceId.trim() || undefined,
           subscriptionStatus: newStatus,
-          industry: newIndustry.trim() || "",
-          retailPreset: newIndustry === "retail" ? (newRetailPreset.trim() || "meat") : "",
+          industry: "dental",
           ...(newAccessPin.trim() ? { accessPin: newAccessPin.trim() } : {}),
         }),
       });
@@ -217,8 +209,6 @@ export default function AdminPage() {
       setNewGoogleMapsUrl("https://www.google.com/maps");
       setNewPlaceId("");
       setNewStatus("inactive");
-      setNewIndustry("");
-      setNewRetailPreset("meat");
       setNewAccessPin("");
     } finally {
       setAdding(false);
@@ -232,8 +222,6 @@ export default function AdminPage() {
     setEditGoogleMapsUrl(t.googleMapsUrl);
     setEditPlaceId(t.placeId ?? "");
     setEditStatus(t.subscriptionStatus);
-    setEditIndustry(t.industry ?? "");
-    setEditRetailPreset(t.retailPreset ?? "");
     setEditAccessPin("");
     setEditClearAccessPin(false);
   };
@@ -256,8 +244,7 @@ export default function AdminPage() {
           googleMapsUrl: editGoogleMapsUrl.trim() || "https://www.google.com/maps",
           placeId: editPlaceId.trim() || undefined,
           subscriptionStatus: editStatus,
-          industry: editIndustry.trim() || "",
-          retailPreset: editIndustry === "retail" ? (editRetailPreset.trim() || "meat") : "",
+          industry: "dental",
           ...(editClearAccessPin ? { clearAccessPin: true } : {}),
           ...(editAccessPin.trim() && !editClearAccessPin ? { accessPin: editAccessPin.trim() } : {}),
         }),
@@ -281,10 +268,7 @@ export default function AdminPage() {
               : {}),
             ...(data.industry !== undefined
               ? { industry: data.industry === null ? undefined : String(data.industry) }
-              : {}),
-            ...(data.retailPreset !== undefined
-              ? { retailPreset: data.retailPreset === null ? undefined : String(data.retailPreset) }
-              : {}),
+              : { industry: "dental" }),
           };
         })
       );
@@ -407,36 +391,16 @@ export default function AdminPage() {
 
   const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
 
-  const INDUSTRY_LABEL: Record<string, string> = {
-    "": "未設定（整骨院として表示）",
-    seikotsu: "整骨院",
-    dental: "歯医者・クリニック",
-    retail: "小売店",
-    restaurant: "飲食店",
-  };
-
-  const industryOrder = ["dental", "", "seikotsu", "retail", "restaurant"] as const;
-  const baseGroups = industryOrder.map((key) => ({
-    key,
-    label: INDUSTRY_LABEL[key] ?? key,
-    items: tenants.filter((t) => (t.industry ?? "") === key),
-  }));
-  const assignedIds = new Set(baseGroups.flatMap((g) => g.items.map((t) => t.tenantId)));
-  const orphanTenants = tenants.filter((t) => !assignedIds.has(t.tenantId));
+  const dentalTenants = tenants.filter((t) => !t.industry || t.industry === "dental");
+  const legacyTenants = tenants.filter((t) => t.industry && t.industry !== "dental");
   const grouped = [
-    ...baseGroups.filter((g) => g.items.length > 0),
-    ...(orphanTenants.length > 0
-      ? [
-          {
-            key: "_other",
-            label: "その他（業種が未分類）",
-            items: orphanTenants,
-          },
-        ]
+    ...(dentalTenants.length > 0
+      ? [{ key: "dental", label: "歯医者・クリニック", items: dentalTenants }]
+      : []),
+    ...(legacyTenants.length > 0
+      ? [{ key: "_legacy", label: "旧業種設定（保存時に歯科へ更新）", items: legacyTenants }]
       : []),
   ];
-
-  const industrySelectValues = new Set<string>(INDUSTRY_OPTIONS.map((o) => o.value));
 
   const toggleGroup = (key: string) =>
     setCollapsedGroups((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -473,7 +437,7 @@ export default function AdminPage() {
               type="text"
               value={newTenantId}
               onChange={(e) => setNewTenantId(e.target.value)}
-              placeholder="例: matsudo-seikotsu"
+              placeholder="例: matsudo-dental"
               className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
@@ -483,7 +447,7 @@ export default function AdminPage() {
               type="text"
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
-              placeholder="例: 〇〇整骨院"
+              placeholder="例: 〇〇歯科クリニック"
               className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
@@ -542,36 +506,7 @@ export default function AdminPage() {
               </p>
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">業種</label>
-            <select
-              value={newIndustry}
-              onChange={(e) => {
-                const v = e.target.value;
-                setNewIndustry(v);
-                if (v !== "retail") setNewRetailPreset("meat");
-              }}
-              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
-            >
-              {INDUSTRY_OPTIONS.map((opt) => (
-                <option key={opt.value || "unset"} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          </div>
-          {newIndustry === "retail" && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">小売プリセット</label>
-              <select
-                value={newRetailPreset}
-                onChange={(e) => setNewRetailPreset(e.target.value)}
-                className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
-              >
-                {RETAIL_PRESET_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
-            </div>
-          )}
+          <p className="text-sm text-gray-600">業種は歯医者・クリニック（dental）固定です。</p>
           {addError && <p className="text-sm text-red-600">{addError}</p>}
           <button
             type="submit"
@@ -658,40 +593,12 @@ export default function AdminPage() {
                                   ))}
                                 </select>
                               </div>
-                              <div>
-                                <label className="block text-xs text-gray-500 mb-1">業種</label>
-                                <select
-                                  value={editIndustry}
-                                  onChange={(e) => {
-                                    setEditIndustry(e.target.value);
-                                    if (e.target.value !== "retail") setEditRetailPreset("");
-                                  }}
-                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                                >
-                                  {INDUSTRY_OPTIONS.map((opt) => (
-                                    <option key={opt.value || "unset"} value={opt.value}>{opt.label}</option>
-                                  ))}
-                                  {editIndustry !== "" && !industrySelectValues.has(editIndustry) && (
-                                    <option value={editIndustry}>
-                                      {editIndustry}（Firestoreの値）
-                                    </option>
-                                  )}
-                                </select>
-                              </div>
-                              {editIndustry === "retail" && (
-                                <div>
-                                  <label className="block text-xs text-gray-500 mb-1">小売プリセット</label>
-                                  <select
-                                    value={editRetailPreset}
-                                    onChange={(e) => setEditRetailPreset(e.target.value)}
-                                    className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                                  >
-                                    {RETAIL_PRESET_OPTIONS.map((opt) => (
-                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
+                              <p className="text-xs text-gray-500">
+                                業種: 歯医者・クリニック（保存時に dental に更新）
+                                {t.industry && t.industry !== "dental" ? (
+                                  <span className="text-amber-700"> — 現在 DB: {t.industry}</span>
+                                ) : null}
+                              </p>
                               <div>
                                 <label className="block text-xs text-gray-500 mb-1">
                                   新しい店舗用 PIN（4〜8桁・空欄なら変更なし）

@@ -214,8 +214,6 @@ export async function POST(req: NextRequest) {
       authorName = "",
       memo = "",
       customPhrases = [],
-      industry,
-      retailPreset,
     }: {
       review: string;
       tone: Tone;
@@ -223,11 +221,9 @@ export async function POST(req: NextRequest) {
       authorName?: string;
       memo?: string;
       customPhrases: string[];
-      industry?: string;
-      retailPreset?: string;
     } = body;
 
-    const terms = getReplyIndustryTerms(industry, retailPreset);
+    const terms = getReplyIndustryTerms();
     const systemPrompt = buildSystemPrompt(terms);
 
     const trimmedReview = typeof review === "string" ? review.trim() : "";

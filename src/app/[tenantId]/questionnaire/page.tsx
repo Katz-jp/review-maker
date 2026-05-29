@@ -9,15 +9,13 @@ import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, canGenerate, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
-import { POSTING_SUPPORT_INDUSTRY, TRIAL_POSTING_SESSION_INDUSTRY_ID } from "@/lib/posting-support-constants";
+import { TRIAL_POSTING_SESSION_INDUSTRY_ID } from "@/lib/posting-support-constants";
 import { MultiSelectBadge } from "@/components/MultiSelectBadge";
 import { clientTenantAllowsPaidFeatures } from "@/lib/tenant-subscription";
 
 type Answers = Record<string, string[]>;
 type OtherInputs = Record<string, string>;
 type CustomOptionsByQuestion = Record<string, string[]>;
-
-const HIDDEN_OPTIONS = ["パーソナルトレーニング"];
 
 function mergeOptions(
   baseOptions: string[],
@@ -30,7 +28,7 @@ function mergeOptions(
   const merged = hasOther
     ? [...customOptions, ...withoutOther, OTHER_OPTION_LABEL]
     : [...customOptions, ...withoutOther];
-  return merged.filter((o) => !HIDDEN_OPTIONS.includes(o));
+  return merged;
 }
 
 export default function TenantQuestionnairePage() {
@@ -40,8 +38,6 @@ export default function TenantQuestionnairePage() {
   const tenant = useTenant();
   // trialの場合は契約チェックをスキップ（制限のみ適用）
   const canUseQuestionnaire = clientTenantAllowsPaidFeatures(tenantId, tenant);
-
-  const industryKey = POSTING_SUPPORT_INDUSTRY;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
@@ -95,7 +91,7 @@ export default function TenantQuestionnairePage() {
     };
   }, [tenantId, fetchCustomOptions, router]);
 
-  const industryConfig = getIndustryConfig(industryKey);
+  const industryConfig = getIndustryConfig();
   const baseQuestions = useMemo(() => industryConfig.questions, [industryConfig.questions]);
 
   const questions = useMemo(() => {
@@ -196,7 +192,6 @@ export default function TenantQuestionnairePage() {
         otherInputs,
         freeText,
         tenantId,
-        industry: industryKey,
         satisfaction,
         answeredAt: new Date().toISOString(),
       };

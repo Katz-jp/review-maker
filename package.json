@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -H localhost",
+    "dev:clean": "rm -rf .next && next dev -H localhost",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"

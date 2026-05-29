@@ -22,83 +22,90 @@ const DENTAL_NOTICE = `■ 歯科特有の注意
 export const dentalConfig: IndustryConfig = {
   questions: [
     {
-      id: "change",
-      label: "治療後の印象",
-      options: [
-        "痛みが楽になった",
-        "噛みやすくなった",
-        "見た目がきれいになった",
-        "気になっていたところが改善した",
-        "不安が減った・安心できた",
-        "通院しやすくなった",
-        OTHER_OPTION_LABEL,
-      ],
-    },
-    {
-      id: "symptom",
-      label: "悩み・症状",
-      options: [
-        "歯が痛い・しみる",
-        "噛むと痛い",
-        "詰めもの・被せものが気になる",
-        "歯並び・かみ合わせが気になる",
-        "見た目（色・形）が気になる",
-        "歯ぐきからの出血・腫れ",
-        "口臭が気になる",
-        "定期検診・メンテナンス",
-        OTHER_OPTION_LABEL,
-      ],
-    },
-    {
       id: "treatment",
       label: "受けた治療",
+      multiSelect: true,
       options: [
         "虫歯の治療",
         "定期クリーニング・検診",
         "詰めもの・被せもの（銀歯・セラミック）",
-        "親知らず",
-        "矯正",
+        "親知らずの抜歯",
+        "矯正（インビザライン・ワイヤー）",
         "インプラント",
-        "小児歯科",
         "ホワイトニング",
+        "歯周病・歯ぐきの治療",
+        "小児歯科",
         "入れ歯",
         OTHER_OPTION_LABEL,
       ],
     },
     {
-      id: "visitCount",
-      label: "来院回数",
+      id: "context",
+      label: "来院のきっかけ",
       multiSelect: false,
-      options: ["今回が初めて", "2〜3回目", "4回以上通っている"],
-    },
-    {
-      id: "atmosphere",
-      label: "雰囲気・対応",
       options: [
-        "院内が清潔",
-        "説明がわかりやすい",
-        "痛みに配慮してくれる",
-        "安心できる先生",
-        "スタッフが親切",
-        "受付の対応が良い",
-        "落ち着く雰囲気",
-        "予約が取りやすい・待ち時間が少ない",
-        "通いやすい場所",
+        "急に痛くなって",
+        "以前から気になっていて",
+        "定期的に通っている",
+        "知人・家族に紹介された",
+        "ネット・口コミで見つけた",
+        "他の歯医者でうまくいかなくて",
         OTHER_OPTION_LABEL,
       ],
     },
     {
-      id: "recommend",
-      label: "おすすめしたい人",
+      id: "before",
+      label: "来院前の気持ち",
+      multiSelect: true,
       options: [
-        "歯医者が苦手な人",
-        "丁寧に説明してほしい人",
-        "できるだけ痛みを抑えたい人",
-        "子どもの歯医者さんを探している人",
-        "見た目（白い歯・歯並び）をきれいにしたい人",
-        "仕事や育児で忙しい人",
-        "近くに通いやすい歯医者を探している人",
+        "歯医者が苦手・怖かった",
+        "ずっと放置していた",
+        "初めてで緊張していた",
+        "費用が心配だった",
+        "他院での治療がうまくいかなかった",
+        "特に不安はなかった",
         OTHER_OPTION_LABEL,
+      ],
+    },
+    {
+      id: "experience",
+      label: "実際の体験",
+      multiSelect: true,
+      options: [
+        "痛みがほとんどなかった",
+        "説明がわかりやすかった",
+        "丁寧に対応してもらえた",
+        "院内が清潔・綺麗だった",
+        "不安や疑問に親身に答えてもらえた",
+        "治療の選択肢を提示してもらえた",
+        "予約が取りやすかった・待ち時間が少なかった",
+        "アクセスが良くて通いやすかった",
+        OTHER_OPTION_LABEL,
+      ],
+    },
+    {
+      id: "result",
+      label: "治療後の感想・変化",
+      multiSelect: true,
+      options: [
+        "思っていたより痛くなかった",
+        "思っていたより早く終わった",
+        "見た目・歯並びの気になっていた部分が改善した",
+        "不安や怖さが和らいだ",
+        "歯医者へのイメージが変わった",
+        OTHER_OPTION_LABEL,
+      ],
+    },
+    {
+      id: "visitCount",
+      label: "通院歴",
+      multiSelect: false,
+      options: [
+        "今回が初めて",
+        "数回通っている（治療中）",
+        "半年〜1年ほど通っている",
+        "1年以上通っている",
+        "定期検診で長く通っている",
       ],
     },
   ],
@@ -107,12 +114,12 @@ export const dentalConfig: IndustryConfig = {
     const satisfaction = parseSatisfactionFromOtherInputs(otherInputs);
     const isHighScore = satisfaction !== null && satisfaction >= 4;
     const labels: Record<string, string> = {
-      change: "治療後の印象",
-      symptom: "悩み・症状",
       treatment: "受けた治療",
-      visitCount: "来院回数",
-      atmosphere: "雰囲気・対応",
-      recommend: "おすすめしたい人",
+      context: "来院のきっかけ",
+      before: "来院前の気持ち",
+      experience: "実際の体験",
+      result: "治療後の感想・変化",
+      visitCount: "通院歴",
     };
 
     const answersForSummary =
@@ -158,9 +165,10 @@ export const dentalConfig: IndustryConfig = {
     const outputFormat = getCommonOutputFormat(satisfaction);
 
     const wordingGuards = `■ 文言の制約（厳守）
-* 満足度が星1〜3の場合は、「おすすめ」「おすすめしたい」「人に勧めたい」「他の方にも〜してほしい」等の“おすすめ系”の言い回しを勝手に入れない（自由記入で書かれている場合は可）
+* 満足度が星1〜3の場合は、「おすすめ」「おすすめしたい」「人に勧めたい」「他の方にも〜してほしい」等の"おすすめ系"の言い回しを勝手に入れない（自由記入で書かれている場合は可）
 * アンケート回答と【補足】に書かれていない要素（例：待ち時間、説明の丁寧さ、スタッフの対応、予約の取りやすさ、雰囲気など）について、新しく評価や意見を追加しないこと
 * 特に「もう少し〜であればよかった」「改善されると良い」「期待しています」など、改善提案や期待に関する文は、自由記入に明示的に書かれていない場合は書かないこと
+* 満足度が星4〜5であっても、「おすすめ」「また行きたい」「今後も通いたい」などはアンケートや【補足】に明示されていない限り入れないこと
 ${!isHighScore && !allowOsusume ? "* 今回は「おすすめ」系の表現は一切使わない\n" : ""}`;
 
     return `${DENTAL_ROLE}

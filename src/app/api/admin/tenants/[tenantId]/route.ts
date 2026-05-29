@@ -69,8 +69,8 @@ export async function PATCH(
     if (typeof subscriptionStatus === "string" && VALID_STATUSES.includes(subscriptionStatus as (typeof VALID_STATUSES)[number])) {
       updates.subscriptionStatus = subscriptionStatus;
     }
-    if (industry !== undefined) updates.industry = industry === "" ? null : industry;
-    if (retailPreset !== undefined) updates.retailPreset = retailPreset === "" ? null : retailPreset;
+    updates.industry = "dental";
+    updates.retailPreset = null;
 
     if (clearAccessPin === true) {
       updates.accessPinHash = FieldValue.delete();

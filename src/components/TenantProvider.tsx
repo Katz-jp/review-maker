@@ -32,5 +32,5 @@ export function TenantProvider({
 
 export function useTenant(): Tenant {
   const ctx = useContext(TenantContext);
-  return ctx ?? { id: "demo", name: "〇〇整骨院", googleMapsUrl: "https://www.google.com/maps", subscriptionStatus: "active" as const };
+  return ctx ?? { id: "demo", name: "〇〇歯科クリニック", googleMapsUrl: "https://www.google.com/maps", subscriptionStatus: "active" as const };
 }

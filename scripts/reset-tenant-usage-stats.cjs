@@ -2,7 +2,7 @@
  * Firestore の tenants/{tenantId}/stats/usage を初期化する。
  * 使い方（プロジェクトルート）:
  *   node --env-file=.env.local scripts/reset-tenant-usage-stats.cjs [tenantId]
- * 既定の tenantId は restaurant-002
+ * 既定の tenantId は demo-test
  */
 const { initializeApp, cert, getApps } = require("firebase-admin/app");
 const { getFirestore, FieldValue } = require("firebase-admin/firestore");
@@ -20,7 +20,7 @@ async function main() {
     initializeApp({ credential: cert(JSON.parse(key)), projectId });
   }
   const db = getFirestore();
-  const tenantId = process.argv[2] || "restaurant-002";
+  const tenantId = process.argv[2] || "demo-test";
   const ref = db.collection("tenants").doc(tenantId).collection("stats").doc("usage");
   await ref.set({
     mapsClickCount: 0,
