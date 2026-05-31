@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
+import { BRAND_NAME } from "@/lib/brand";
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const TO_EMAIL = "info@kuhmom-ailabo.com";
@@ -58,7 +59,7 @@ export async function POST(request: NextRequest) {
       from: FROM_EMAIL,
       to: TO_EMAIL,
       replyTo: String(email).trim(),
-      subject: `[口コミ作成AI] お問い合わせ: ${String(storeName).trim()}`,
+      subject: `[${BRAND_NAME}] お問い合わせ: ${String(storeName).trim()}`,
       text,
     });
 

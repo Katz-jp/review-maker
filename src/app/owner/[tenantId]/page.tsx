@@ -6,6 +6,7 @@ import Link from "next/link";
 import { QRCodeSVG } from "qrcode.react";
 import { CreditCard, QrCode, ExternalLink, Loader2, Plus, Trash2, Settings2, MessageSquare } from "lucide-react";
 import { getIndustryConfig } from "@/lib/industries";
+import { BRAND_NAME } from "@/lib/brand";
 
 type CustomOptionsByQuestion = Record<string, string[]>;
 
@@ -263,7 +264,7 @@ export default function OwnerPage() {
   return (
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
       <header className="text-center mb-8">
-        <h1 className="text-xl font-bold text-gray-800">口コミヘルプAI - 店舗管理画面</h1>
+        <h1 className="text-xl font-bold text-gray-800">{BRAND_NAME} - 店舗管理画面</h1>
         <p className="text-sm text-gray-500 mt-1">テナントID: {tenantId}</p>
       </header>
 

@@ -6,6 +6,8 @@ import Image from "next/image";
 import PricingSection from "@/components/PricingSection";
 import PostingSupportInclusionsSection from "@/components/PostingSupportInclusionsSection";
 import FaqSection from "@/components/FaqSection";
+import BrandLogo from "@/components/BrandLogo";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDevelopment } from "@/lib/demo-limit";
 
 const navItems = [
@@ -70,12 +72,7 @@ export default function LandingPage() {
       {/* ヘッダー（スマホ: ハンバーガー / PC: 横並びナビ） */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-green-100 shadow-sm">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
-          <Link
-            href="/"
-            className="text-base sm:text-lg font-bold text-gray-800 hover:text-primary-dark transition-colors shrink-0 min-w-0"
-          >
-            口コミ投稿サポートAI
-          </Link>
+          <BrandLogo />
           {/* 768px以上: 横並びナビ */}
           <nav className="hidden md:flex items-center gap-6 shrink-0" aria-label="メインメニュー">
             {navItems.map((item) =>
@@ -233,7 +230,7 @@ export default function LandingPage() {
 
         <PostingSupportInclusionsSection />
 
-        {/* 口コミ投稿サポートAIを使う理由 */}
+        {/* Review Maker Proを使う理由 */}
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto space-y-12 sm:space-y-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-2 pb-3 border-b-2 border-primary/50">
             口コミが&quot;集客&quot;に変わる理由
@@ -557,6 +554,7 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+      <ScrollToTopButton />
     </div>
   );
 }

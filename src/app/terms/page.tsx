@@ -1,16 +1,13 @@
 import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
+import { BRAND_NAME } from "@/lib/brand";
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
       <header className="bg-white border-b border-green-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
-          <Link
-            href="/"
-            className="text-lg font-bold text-gray-800 hover:text-primary-dark transition-colors"
-          >
-            口コミ作成AIアプリ
-          </Link>
+          <BrandLogo />
         </div>
       </header>
 
@@ -27,7 +24,7 @@ export default function TermsPage() {
                   第1条（適用）
                 </h2>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  本規約は、くーママAI labo（以下「当社」）が提供する口コミ作成AIアプリ（以下「本サービス」）の利用条件を定めるものです。
+                  本規約は、くーままAI labo（以下「当社」）が提供する{BRAND_NAME}（以下「本サービス」）の利用条件を定めるものです。
                 </p>
               </section>
 

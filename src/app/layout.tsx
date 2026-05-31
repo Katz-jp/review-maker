@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import AppFooter from "@/components/AppFooter";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "口コミ投稿サポートAI",
-  description: "Googleマップの口コミをAIがサポート。あなたの体験を伝えやすくします。",
+  title: BRAND_NAME,
+  description: `${BRAND_TAGLINE}。Googleマップの口コミをAIがサポート。あなたの体験を伝えやすくします。`,
 };
 
 export const viewport = {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
 
 const industryOptions = [
   { value: "", label: "選択してください" },
@@ -55,12 +56,7 @@ export default function ContactPage() {
       <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
         <header className="bg-white border-b border-green-100">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
-            <Link
-              href="/"
-              className="text-lg font-bold text-gray-800 hover:text-primary-dark transition-colors"
-            >
-              口コミ作成AIアプリ
-            </Link>
+            <BrandLogo />
           </div>
         </header>
         <main className="flex-1 flex items-center justify-center px-4 py-12">
@@ -85,12 +81,7 @@ export default function ContactPage() {
     <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
       <header className="bg-white border-b border-green-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-lg font-bold text-gray-800 hover:text-primary-dark transition-colors"
-          >
-            口コミ作成AIアプリ
-          </Link>
+          <BrandLogo />
           <Link
             href="/#contact"
             className="text-sm font-medium text-gray-600 hover:text-primary-dark transition-colors"

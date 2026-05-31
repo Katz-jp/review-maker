@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import PricingSection from "@/components/PricingSection";
 import PostingSupportInclusionsSection from "@/components/PostingSupportInclusionsSection";
+import BrandLogo from "@/components/BrandLogo";
+import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { TRIAL_POSTING_SESSION_INDUSTRY_ID } from "@/lib/posting-support-constants";
 
 const TRIAL_FORM_URL =
@@ -46,12 +48,7 @@ export default function IndustryLandingPage({
             <ArrowLeft className="w-4 h-4" />
             トップに戻る
           </Link>
-          <Link
-            href="/"
-            className="text-sm font-medium text-gray-600 hover:text-primary-dark transition-colors"
-          >
-            口コミ投稿サポートAI
-          </Link>
+          <BrandLogo />
         </div>
       </header>
 
@@ -233,6 +230,7 @@ export default function IndustryLandingPage({
       <footer className="py-6 text-center text-sm text-gray-500 border-t border-green-100">
         ©2026 くーままAIラボ
       </footer>
+      <ScrollToTopButton />
     </div>
   );
 }

@@ -1,9 +1,10 @@
 import Link from "next/link";
+import BrandLogo from "@/components/BrandLogo";
 
 const sections = [
   {
     title: "事業者名",
-    content: "くーママAI labo",
+    content: "くーままAI labo",
   },
   {
     title: "運営責任者",
@@ -46,12 +47,7 @@ export default function TokushoPage() {
     <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
       <header className="bg-white border-b border-green-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4">
-          <Link
-            href="/"
-            className="text-lg font-bold text-gray-800 hover:text-primary-dark transition-colors"
-          >
-            口コミ作成AIアプリ
-          </Link>
+          <BrandLogo />
         </div>
       </header>
 

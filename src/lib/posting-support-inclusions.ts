@@ -1,5 +1,7 @@
+import { BRAND_NAME } from "@/lib/brand";
+
 /** 料金に含まれる主な内容（LP・料金周りで共有） */
-export const POSTING_SUPPORT_INCLUSIONS_TITLE = "口コミ投稿サポートAIに含まれているもの" as const;
+export const POSTING_SUPPORT_INCLUSIONS_TITLE = `${BRAND_NAME}に含まれているもの` as const;
 
 export const POSTING_SUPPORT_INCLUSION_ITEMS: readonly string[] = [
   "患者さまに渡す口コミ依頼のQRコード付きカード（100枚〜）",
