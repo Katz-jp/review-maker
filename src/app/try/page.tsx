@@ -50,10 +50,12 @@ export default function TryPage() {
               Try it now!
             </div>
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-              実際に口コミ文を生成してみましょう！
+              実際に口コミ文を作成してみる！
             </h1>
             <p className="text-base text-gray-600">
-              アンケートに答えるだけで、AIが口コミ文を自動作成。
+              アンケートに答えるだけで、
+              <br />
+              AIが口コミ文を自動作成。
               <br />
               登録不要・30秒で体験できます。
             </p>
