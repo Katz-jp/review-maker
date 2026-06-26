@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import AppFooter from "@/components/AppFooter";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 import "./globals.css";
+
+const gaId = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
 export const metadata: Metadata = {
   title: BRAND_NAME,
@@ -28,6 +31,9 @@ export default function RootLayout({
           <div className="flex-1">{children}</div>
           <AppFooter />
         </div>
+        {process.env.NODE_ENV === "production" && gaId ? (
+          <GoogleAnalytics gaId={gaId} />
+        ) : null}
       </body>
     </html>
   );
