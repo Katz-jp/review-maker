@@ -100,7 +100,7 @@ export default function TryPage() {
             ) : (
               <div className="space-y-4">
                 <Link
-                  href="/industries/dentist"
+                  href="/trial/questionnaire"
                   className="block w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
                   onClick={() => {
                     window.gtag?.("event", "try_app_click", {
