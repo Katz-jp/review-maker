@@ -16,12 +16,11 @@ const sections = [
   },
   {
     title: "連絡先",
-    content: "メールアドレス: info@kuhmom-ailabo.com\n電話番号: メールにてお問い合わせください",
+    content: "メールアドレス: info@kuhmom-ailabo.com",
   },
   {
     title: "販売価格",
-    content:
-      "月額9,980円（税込）\n初月無料、2〜3ヶ月目は4,990円（キャンペーン価格・各月）",
+    content: "月額 9,980円",
   },
   {
     title: "支払方法",
