@@ -27,7 +27,7 @@ export default function PrivacyPage() {
                 </p>
                 <ul className="list-disc list-inside text-sm text-gray-700 leading-relaxed space-y-1">
                   <li>店舗名、担当者名、メールアドレス、電話番号</li>
-                  <li>お客様が入力した口コミ内容</li>
+                  <li>患者様が入力した口コミ内容</li>
                   <li>決済情報（Stripe経由、当社では保存しません）</li>
                 </ul>
               </section>

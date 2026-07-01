@@ -498,11 +498,11 @@ export default function AdminPage() {
                 maxLength={8}
                 value={newAccessPin}
                 onChange={(e) => setNewAccessPin(e.target.value.replace(/\D/g, ""))}
-                placeholder="お客様・オーナーが初回アクセス時に入力"
+                placeholder="患者様・オーナーが初回アクセス時に入力"
                 className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30 font-mono tracking-widest"
               />
               <p className="text-xs text-gray-500 mt-1">
-                お客様用 URL とオーナー画面の両方で、初回にこの PIN を求めます。正しいとブラウザに保存されます。
+                患者様用 URL とオーナー画面の両方で、初回にこの PIN を求めます。正しいとブラウザに保存されます。
               </p>
             </div>
           )}
@@ -699,7 +699,7 @@ export default function AdminPage() {
                                   rel="noopener noreferrer"
                                   className="flex items-center gap-1 text-sm text-gray-600 hover:underline"
                                 >
-                                  お客様用
+                                  患者様用
                                 </a>
                               </div>
                             </>

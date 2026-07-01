@@ -56,7 +56,7 @@ export function TrialChoiceContent(_props: TrialChoiceContentProps) {
                 クチコミ返信ヘルプAI
               </h2>
               <p className="text-sm text-gray-600 mb-3">
-                お客様の口コミに合わせた返信文をAIで生成できます。
+                患者様の口コミに合わせた返信文をAIで生成できます。
               </p>
               <span className="text-sm font-semibold text-primary">
                 5回までお試し可能 →

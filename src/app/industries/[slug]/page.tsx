@@ -64,21 +64,22 @@ export default function IndustryLandingPage({
             <br />
             「選ばれるクリニック」の装置に変えませんか？
           </p>
-          <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href={`/trial?industry=${trialId}`}
-              className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
-            >
-              無料でデモを試す
-            </Link>
+          <div className="mt-8 flex flex-col gap-4 justify-center items-center">
             <a
               href={TRIAL_FORM_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block py-4 px-6 rounded-xl bg-white border-2 border-primary text-primary hover:bg-primary/10 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+              className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
             >
-              1ヶ月無料トライアル
+              30日間無料ではじめてみる！
             </a>
+            <Link
+              href={`/trial?industry=${trialId}`}
+              className="inline-block py-2.5 px-8 rounded-xl bg-white border-2 border-gray-900 text-gray-900 font-bold text-base text-center shadow-md hover:shadow-lg transition-all hover:bg-gray-50"
+            >
+              ためしに口コミを作ってみる
+              <span className="block text-xs font-semibold mt-0.5 text-gray-900">（5回まで・登録なし・無料）</span>
+            </Link>
           </div>
           <div className="mt-8 flex justify-center overflow-hidden">
             <Image
@@ -91,40 +92,42 @@ export default function IndustryLandingPage({
             />
           </div>
           <p className="mt-6 text-center text-base sm:text-lg font-semibold text-gray-700">
-            診療の合間に、さくっと使えます。
+            操作時間はたったの30秒程度！
+            <br />
+            診察室での待ち時間、移動の車の中や家でのリラックス時間にさくっと口コミ投稿ができます。
           </p>
         </section>
 
         <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
-              こんなお悩みありませんか？
+              Googleマップの口コミ、こんなお悩みありませんか？
             </h2>
             <ul className="space-y-3 text-base sm:text-lg text-gray-700">
-              <li>・「怖い・痛そう」で敬遠されている</li>
+              <li>・「痛いかも」「怖い先生かも」と敬遠されてしまう</li>
               <li>・Google検索で他院に埋もれている</li>
-              <li>・口コミが少なくて不安</li>
-              <li>・返信が面倒で後回しになっている</li>
-              <li>・痛くない・丁寧・予約しやすいなどの強みが伝わっていない</li>
+              <li>・口コミの数が少なくて不満</li>
+              <li>・もらった口コミへの返信が面倒で後回しになってる</li>
+              <li>・HPだけでは当院の良さや特徴がうまく伝わってない気がする</li>
             </ul>
             <p className="mt-8 text-center text-lg font-semibold text-gray-800">
-              ひとつでも当てはまるなら、この仕組みが役立ちます。
+              ひとつでも当てはまるなら、Review Maker Pro がお役に立てます！
             </p>
           </div>
         </section>
 
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
-            患者さんはこうやってクリニックを選んでいます
+            患者さんはこうやって歯医者さんを選んでいます
           </h2>
           <ol className="space-y-4 text-base sm:text-lg text-gray-700 list-decimal list-inside">
-            <li>「地域名＋歯医者／痛くない／矯正」で検索</li>
-            <li>Googleマップを開く</li>
-            <li>口コミ数と星を見る</li>
-            <li>返信の丁寧さを見る</li>
-            <li>「ここにしよう」と決める</li>
+            <li>Googleマップで「歯医者」と検索し、近所にある歯医者を探す</li>
+            <li>出てきた一覧の中から「星の数」と「口コミの数」を見る</li>
+            <li>口コミの内容を読み込む</li>
+            <li>良い口コミ評価が多く、また丁寧に返信のある歯医者を見つけたら、ホームページや行き方を調べる</li>
+            <li>安心できる良い雰囲気を感じたらはじめて「ここにしよう」と決める</li>
           </ol>
-          <p className="mt-10 text-center text-xl font-bold text-primary">
+          <p className="mt-10 text-center text-xl font-bold text-green-800">
             選ばれるかどうかは
             <br />
             &quot;口コミの見え方&quot;で決まります。
@@ -134,7 +137,7 @@ export default function IndustryLandingPage({
         <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
           <div className="max-w-3xl mx-auto">
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-10 pb-3 border-b-2 border-primary">
-              このツールでできること
+              Review Maker Pro でできること
             </h2>
             <ul className="space-y-8">
               <li>
@@ -144,7 +147,7 @@ export default function IndustryLandingPage({
                 </p>
               </li>
               <li>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">② いただいた口コミへの返信文を、かんたんに整えられる</h3>
+                <h3 className="text-lg font-bold text-gray-900 mb-2">② もらった口コミへの返信文もあっという間に作成！</h3>
                 <p className="text-gray-700">
                   クチコミ返信ヘルプAIなら、いただいた口コミの内容に合わせた返信文のたたき台を短時間で用意できます。口コミを読み比べて医院を選ぶ患者さんの多くは、本文だけでなく返信の内容やトーンもしっかり確認します。丁寧で誠実な返信は「ちゃんと向き合っている医院」という安心感につながり、医院の強みを自然にアピールできます。
                 </p>
@@ -190,13 +193,13 @@ export default function IndustryLandingPage({
 
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
-            先生・医院にとっての本当のメリット
+            院長先生・スタッフの皆さまにとっての本当のメリット
           </h2>
           <ul className="space-y-3 text-base sm:text-lg text-gray-700">
-            <li>・口コミを集める手間と時間が圧倒的に少なくなる</li>
-            <li>・口コミは広告よりも低コスト</li>
-            <li>・口コミは消えない&quot;資産&quot;</li>
-            <li>・「ちゃんと患者さんに向き合っている医院」という印象づけに効果抜群</li>
+            <li>✅ 口コミを集める手間と時間が圧倒的に減る！（QRコードのカードを渡すだけ）</li>
+            <li>✅ 口コミは広告よりも低コスト！（月額料金のみ）</li>
+            <li>✅ 良質な口コミは大きな資産に！（未来の患者さんに語りかけ続けます）</li>
+            <li>✅ 「ちゃんと患者さんに向き合っている医院」という印象づけに効果抜群！（AI を使えば面倒な口コミへの返信も一瞬で作れます）</li>
           </ul>
         </section>
 
@@ -208,21 +211,22 @@ export default function IndustryLandingPage({
             <p className="text-lg font-semibold text-gray-800 mb-6">
               まずは1ヶ月、無料で体験してください。
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link
-                href={`/trial?industry=${trialId}`}
-                className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
-              >
-                無料でデモを試す
-              </Link>
+            <div className="flex flex-col gap-4 justify-center items-center">
               <a
                 href={TRIAL_FORM_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block py-4 px-6 rounded-xl bg-white border-2 border-primary text-primary hover:bg-primary/10 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
+                className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
               >
-                1ヶ月無料トライアル
+                30日間無料ではじめてみる！
               </a>
+              <Link
+                href={`/trial?industry=${trialId}`}
+                className="inline-block py-2.5 px-8 rounded-xl bg-white border-2 border-gray-900 text-gray-900 font-bold text-base text-center shadow-md hover:shadow-lg transition-all hover:bg-gray-50"
+              >
+                ためしに口コミを作ってみる
+                <span className="block text-xs font-semibold mt-0.5 text-gray-900">（5回まで・登録なし・無料）</span>
+              </Link>
             </div>
           </div>
         </section>

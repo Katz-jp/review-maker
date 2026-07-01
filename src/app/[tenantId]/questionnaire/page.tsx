@@ -221,7 +221,7 @@ export default function TenantQuestionnairePage() {
           <AlertCircle className="w-12 h-12 text-amber-500 mb-4" />
           <h2 className="text-lg font-semibold text-gray-800 mb-2">この店舗は現在ご利用いただけません</h2>
           <p className="text-sm text-gray-600 mb-6">
-            お客様アンケートは、店舗の契約が有効な場合のみご利用いただけます。
+            患者様アンケートは、店舗の契約が有効な場合のみご利用いただけます。
           </p>
           <Link
             href={`/${tenantId}`}
@@ -245,7 +245,7 @@ export default function TenantQuestionnairePage() {
           <ArrowLeft className="w-4 h-4" />
           戻る
         </button>
-        <span className="text-sm text-gray-500">お客様アンケート</span>
+        <span className="text-sm text-gray-500">患者様アンケート</span>
       </header>
 
       <div className="mb-6">

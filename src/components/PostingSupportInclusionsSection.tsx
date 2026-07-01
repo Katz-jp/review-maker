@@ -21,7 +21,7 @@ export default function PostingSupportInclusionsSection({
           {POSTING_SUPPORT_INCLUSIONS_TITLE}
         </h2>
         <p className="text-center text-sm sm:text-base text-gray-600 mb-8">
-          月額プランに、次の内容が含まれるサービスです。
+          月額プランに含まれるサービス
         </p>
         <ul className="space-y-3 text-base sm:text-lg text-gray-700">
           {POSTING_SUPPORT_INCLUSION_ITEMS.map((text) => (

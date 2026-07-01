@@ -296,7 +296,7 @@ export default function ReplyHelperPage() {
               <textarea
                 value={review}
                 onChange={(e) => { setReview(e.target.value); setGenerateError(""); }}
-                placeholder="Googleマップなどに投稿されたお客様の口コミをここにコピー＆ペーストしてください"
+                placeholder="Googleマップなどに投稿された患者様の口コミをここにコピー＆ペーストしてください"
                 rows={6}
                 className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50/50 text-sm text-gray-600 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-[rgba(31,41,55,1)] resize-y"
               />

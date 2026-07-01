@@ -26,7 +26,7 @@ function buildSystemPrompt(terms: ReplyIndustryTerms): string {
     : "";
 
   return `あなたは${terms.roleLabel}の口コミ返信を作成するAIです。
-以下のルールを厳守し、お客様の口コミに対する返信文を1つだけ出力してください。
+以下のルールを厳守し、患者様の口コミに対する返信文を1つだけ出力してください。
 
 ■ 自店舗の呼び方（厳守）
 
@@ -36,7 +36,7 @@ function buildSystemPrompt(terms: ReplyIndustryTerms): string {
 
 必ず最初に感謝の気持ちを伝える
 
-お客様の具体的なコメント内容に必ず言及する
+患者様の具体的なコメント内容に必ず言及する
 
 口コミに書かれていない事実を追加しない
 
@@ -155,7 +155,7 @@ ${medicalNoticeBlock}
 ■ 名前のパーソナライズ
 
 投稿者名が指定されている場合、生成される返信の冒頭を必ず「{投稿者名} 様」から始める。
-未指定の場合は「お客様」で始める。
+未指定の場合は「患者様」で始める。
 
 ■ 投稿者に伝えるメッセージ
 
@@ -184,7 +184,7 @@ function buildUserPrompt(
   if (authorName) {
     text += `## 投稿者名\n${authorName}\n\n`;
   }
-  text += `## お客様の口コミ\n${review}`;
+  text += `## 患者様の口コミ\n${review}`;
   if (memo) {
     text += `\n\n## 投稿者に伝えたいメッセージ（返信に組み込む）\n${memo}`;
   }

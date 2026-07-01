@@ -321,7 +321,7 @@ export default function OwnerPage() {
               クチコミ返信ヘルプAI
             </h2>
             <p className="text-[15px] text-gray-800">
-              お客様の口コミに合わせた返信文をAIで生成できます。
+              患者様の口コミに合わせた返信文をAIで生成できます。
             </p>
             <span className="mt-2 inline-block text-base text-green-700 font-bold">
               使ってみる →
@@ -334,7 +334,7 @@ export default function OwnerPage() {
               クチコミ返信ヘルプAI
             </h2>
             <p className="text-sm text-gray-600">
-              お客様の口コミに合わせた返信文をAIで生成できます。
+              患者様の口コミに合わせた返信文をAIで生成できます。
             </p>
             <p className="mt-2 text-sm text-gray-500">
               ご利用には有効な月額プランが必要です。
@@ -345,10 +345,10 @@ export default function OwnerPage() {
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
           <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
             <QrCode className="w-5 h-5 text-primary" />
-            お客様用URL
+            患者様用URL
           </h2>
           <p className="text-sm text-gray-600 mb-3">
-            QRコードやリンクでお客様に共有してください。
+            QRコードやリンクで患者様に共有してください。
           </p>
           <div className="p-3 rounded-xl bg-gray-50 text-sm text-gray-700 font-mono break-all">
             {customerUrl}
@@ -374,7 +374,7 @@ export default function OwnerPage() {
           </h2>
           <div className="text-sm text-gray-600 mb-4">
             <p className="text-base font-medium">
-              各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。お客様アンケートに表示されます。
+              各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。患者様アンケートに表示されます。
             </p>
             <div className="text-red-600 mt-2">
               <span className="text-[15px] block font-bold">※追加・削除するときの注意点</span>

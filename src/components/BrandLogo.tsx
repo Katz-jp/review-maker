@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
+import { BRAND_NAME, BRAND_BYLINE, BRAND_TAGLINE } from "@/lib/brand";
 
 type BrandLogoProps = {
   href?: string;
@@ -12,6 +12,7 @@ export default function BrandLogo({ href = "/", className = "" }: BrandLogoProps
       <span className="text-base sm:text-lg font-bold text-gray-800 group-hover:text-primary-dark transition-colors truncate">
         {BRAND_NAME}
       </span>
+      <span className="text-[10px] sm:text-xs font-medium text-gray-500 truncate">{BRAND_BYLINE}</span>
       <span className="text-[10px] sm:text-xs font-medium text-gray-500 truncate">{BRAND_TAGLINE}</span>
     </span>
   );

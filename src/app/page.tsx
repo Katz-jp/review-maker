@@ -19,13 +19,13 @@ const navItems = [
 const features = [
   {
     icon: "📝",
-    title: "お客様は短いアンケートに答えるだけ",
+    title: "患者様は短いアンケートに答えるだけ",
     description: "「書くのが面倒」「何を書けばいいか分からない」を解消。回答内容をもとに、口コミ投稿用の文章を整えて下書きします。",
   },
   {
     icon: "🤖",
     title: "最新AIが口コミ文をその場で下書き",
-    description: "自然な日本語生成に特化した最新AIが自動生成した文章は、投稿前にお客様が確認・編集できます。",
+    description: "自然な日本語生成に特化した最新AIが自動生成した文章は、投稿前に患者様が確認・編集できます。",
   },
   {
     icon: "💬",
@@ -150,24 +150,83 @@ export default function LandingPage() {
         {/* ヒーローセクション */}
         <section className="px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto text-center">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight">
-            口コミを、集客の武器に。
+            口コミは、資産です。
           </h1>
-          <p className="mt-4 sm:mt-6 text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-            口コミ投稿数2.5倍、作成時間わずか30秒。
+          <p className="mt-4 sm:mt-6 text-base sm:text-lg font-bold text-gray-900 max-w-2xl mx-auto">
+            作業時間はわずか30秒。
             <br />
-            <span className="font-bold">忙しいオーナーのためのMEO、SEO、AEO対策AIツール</span>
-          </p>
-          <p className="mt-4 text-sm text-gray-500 max-w-2xl mx-auto">
-            当アプリは、インセンティブなし・実体験ベースの
+            インセンティブ不要で実体験ベースの口コミ投稿がどんどん増える。
             <br />
-            口コミづくりを前提にしています。
+            Googleマップの口コミ対策は、
+            <br />
+            くーままAIラボの Review Maker Pro にお任せください。
           </p>
-          <Link
-            href="/industries/dentist"
-            className="inline-block mt-8 sm:mt-10 px-10 py-4 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-semibold text-lg shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          >
-            歯医者・クリニック向けのサービス内容
-          </Link>
+          <div className="flex justify-center mt-6 sm:mt-8">
+            <a
+              href="https://docs.google.com/forms/d/e/1FAIpQLSfilsWAERsNkC6Z_761_i-XPR9wVUAbKE7uByouR5iNng4y_w/viewform"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block px-10 py-4 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-xl shadow-md hover:shadow-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+            >
+              30日間無料ではじめてみる！
+            </a>
+          </div>
+          <div className="max-w-3xl mx-auto mt-8 sm:mt-10">
+              {/* 残り回数表示（開発環境では非表示） */}
+              {!isDev && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+                <div className="mb-4 text-center">
+                  <p className="text-sm font-semibold text-gray-700">
+                    <span className="text-primary text-lg">無料お試し：残り{remainingGenerations}回</span>
+                  </p>
+                </div>
+              )}
+
+              {/* 制限に達した場合の案内（開発環境では非表示） */}
+              {!isDev && remainingGenerations === 0 ? (
+                <div className="space-y-4">
+                  <div className="bg-white rounded-xl p-5 border border-green-200">
+                    <p className="text-base font-bold text-gray-900 mb-3 text-center">
+                      5回のお試し、いかがでしたか？
+                    </p>
+                    <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
+                      実際のクチコミの質を実感いただけたでしょうか？
+                    </p>
+                    <div className="space-y-2 mb-4">
+                      <p className="text-sm text-gray-700">
+                        「もっと多くのメニューで試したい」
+                      </p>
+                      <p className="text-sm text-gray-700">
+                        「実際に店舗で運用してみたい」
+                      </p>
+                    </div>
+                    <p className="text-sm text-gray-700 mb-4 leading-relaxed">
+                      そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
+                    </p>
+                    <a
+                      href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
+                    >
+                      1ヶ月無料トライアルに申し込む
+                    </a>
+                    <p className="text-xs text-gray-600 text-center">
+                      ※トライアル期間中に解約すれば費用は一切かかりません。
+                    </p>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-center">
+                  <Link
+                    href="/trial?industry=haisha"
+                    className="inline-block py-2.5 px-8 rounded-xl bg-white border-2 border-gray-900 text-gray-900 font-bold text-base text-center shadow-md hover:shadow-lg transition-all hover:bg-gray-50"
+                  >
+                    ためしに口コミを作ってみる
+                    <span className="block text-xs font-semibold mt-0.5 text-gray-900">（5回まで・登録なし・無料）</span>
+                  </Link>
+                </div>
+              )}
+          </div>
           <div className="mt-8 sm:mt-10 flex justify-center overflow-hidden">
             <Image
               src="/hero-review.png"
@@ -191,7 +250,7 @@ export default function LandingPage() {
             <br />
             でも口コミは、検索結果に残り続け、
             <br />
-            未来のお客さまに読まれ続けます。
+            未来の患者様に読まれ続けます。
           </p>
         </section>
 
@@ -269,7 +328,7 @@ export default function LandingPage() {
               口コミ運用を自動化し、止まらなくする
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
-              お客様は短いアンケートに答えるだけ。
+              患者様は短いアンケートに答えるだけ。
               <br />
               オーナーは返信をワンクリックで作成。
               <br />
@@ -310,7 +369,7 @@ export default function LandingPage() {
             <div className="mt-8 flex justify-center overflow-hidden">
               <Image
                 src="/questionnaire-screen.png"
-                alt="お客様アンケートの画面。受けたメニューなどを複数選択できます。"
+                alt="患者様アンケートの画面。受けたメニューなどを複数選択できます。"
                 width={220}
                 height={330}
                 className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md object-contain"
@@ -361,7 +420,7 @@ export default function LandingPage() {
                   <span className="text-primary">QR</span>を置く
                 </div>
                 <div className="text-sm text-gray-600 leading-relaxed mb-3.5">
-                  専用QRを印刷して<br />お店に置くだけ。<br />設定は一切不要！
+                  専用QRを印刷して<br />院内に置くだけ。<br />設定は一切不要！
                 </div>
                 <div className="inline-block bg-green-50 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full border border-primary/25">
                   30秒で完了
@@ -387,7 +446,7 @@ export default function LandingPage() {
                   <span className="text-primary">答える</span>
                 </div>
                 <div className="text-sm text-gray-600 leading-relaxed mb-3.5">
-                  お客さまがスマホで<br />ポチポチ回答するだけ。<br />文章入力は不要！
+                  患者様がスマホで<br />ポチポチ回答するだけ。<br />文章入力は不要！
                 </div>
                 <div className="inline-block bg-green-50 text-primary text-xs font-bold px-2.5 py-0.5 rounded-full border border-primary/25">
                   タップで選ぶだけ
@@ -423,84 +482,6 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 無料お試しセクション */}
-        <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
-          <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-8">
-              <div className="inline-block bg-primary text-white text-xs font-bold tracking-wider px-3.5 py-1 rounded-full mb-3.5">
-                Try it now!
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-                実際にアプリを触ってご体感ください！
-              </h2>
-              <p className="text-base text-gray-600 max-w-2xl mx-auto">
-                実際にアンケートに答えて、AIが生成する口コミ文を体験できます。
-                <br />
-                登録不要で、すぐに試せます。
-              </p>
-            </div>
-
-            <div className="bg-green-50 rounded-2xl p-6 sm:p-8 border-2 border-green-200 shadow-sm">
-              {/* 残り回数表示（開発環境では非表示） */}
-              {!isDev && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
-                <div className="mb-4 text-center">
-                  <p className="text-sm font-semibold text-gray-700">
-                    <span className="text-primary text-lg">無料お試し：残り{remainingGenerations}回</span>
-                  </p>
-                </div>
-              )}
-
-              {/* 制限に達した場合の案内（開発環境では非表示） */}
-              {!isDev && remainingGenerations === 0 ? (
-                <div className="space-y-4">
-                  <div className="bg-white rounded-xl p-5 border border-green-200">
-                    <p className="text-base font-bold text-gray-900 mb-3 text-center">
-                      5回のお試し、いかがでしたか？
-                    </p>
-                    <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
-                      実際のクチコミの質を実感いただけたでしょうか？
-                    </p>
-                    <div className="space-y-2 mb-4">
-                      <p className="text-sm text-gray-700">
-                        「もっと多くのメニューで試したい」
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        「実際に店舗で運用してみたい」
-                      </p>
-                    </div>
-                    <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                      そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
-                    </p>
-                    <a
-                      href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
-                    >
-                      1ヶ月無料トライアルに申し込む
-                    </a>
-                    <p className="text-xs text-gray-600 text-center">
-                      ※トライアル期間中に解約すれば費用は一切かかりません。
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <Link
-                    href="/industries/dentist"
-                    className="block w-full py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
-                  >
-                    無料デモを試す（歯科・クリニック向け） →
-                  </Link>
-                  <p className="text-xs text-gray-600 text-center">
-                    ※ 無料お試しは最大5回までです
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
         {/* 料金プラン（先行導入・成長支援プラン）— 非表示 */}
         {/* <PricingSection /> */}
 
@@ -513,7 +494,7 @@ export default function LandingPage() {
             ご質問・ご要望はお気軽にどうぞ！
           </h2>
           <p className="text-center text-sm sm:text-base text-gray-600 mb-8 max-w-xl mx-auto">
-            歯医者・クリニック向けのご利用についてのご質問やご要望は、こちらからお寄せください。
+            その他気になることがございましたら、お気軽にお問合せください。
           </p>
           <div className="max-w-lg mx-auto flex justify-center">
             <Link
