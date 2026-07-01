@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
 import { getRemainingGenerations, canGenerate, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
+import { DemoLimitPreviewBanner } from "@/components/DemoLimitPreview";
 import { clientTenantAllowsPaidFeatures } from "@/lib/tenant-subscription";
 
 type Tone = "friendly" | "polite" | "professional";
@@ -236,6 +237,7 @@ export default function ReplyHelperPage() {
 
   return (
     <main className="min-h-screen flex flex-col px-4 sm:px-5 pt-8 pb-12 max-w-4xl mx-auto">
+      <DemoLimitPreviewBanner />
       <header className="mb-6">
         <Link
           href={backHref}
@@ -472,22 +474,22 @@ export default function ReplyHelperPage() {
                 実際の口コミの質を実感いただけたでしょうか？
               </p>
               <div className="space-y-1 mb-4 text-sm text-gray-700">
-                <p>「もっと多くのメニューで試したい」</p>
-                <p>「実際に店舗で運用してみたい」</p>
+                <p>「もっと院内のシナリオで試したい」</p>
+                <p>「実際にクリニックで運用してみたい」</p>
               </div>
               <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
+                そんなオーナー様のために、今なら全ての機能を30日間無料でお試しいただけるトライアルをご用意しています。
               </p>
               <a
                 href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
+                className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-black font-semibold text-base text-center transition-colors mb-2"
               >
-                1ヶ月無料トライアルに申し込む
+                30日間無料で使ってみる
               </a>
-              <p className="text-xs text-gray-600 text-center">
-                ※トライアル期間中に解約すれば費用は一切かかりません。
+              <p className="text-xs text-gray-800 text-center font-medium">
+                ※無料期間中に解約すれば費用は一切かかりません。
               </p>
             </div>
           )}

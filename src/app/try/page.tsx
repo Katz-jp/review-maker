@@ -3,17 +3,18 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
-import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDevelopment } from "@/lib/demo-limit";
+import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDemoLimitUiActive } from "@/lib/demo-limit";
+import { DemoLimitPreviewBanner } from "@/components/DemoLimitPreview";
 
 export default function TryPage() {
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
-  const [isDev, setIsDev] = useState(false);
+  const [showDemoLimitUi, setShowDemoLimitUi] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const dev = isDevelopment();
-      setIsDev(dev);
-      if (!dev) {
+      const active = isDemoLimitUiActive("generate");
+      setShowDemoLimitUi(active);
+      if (active) {
         const remaining = getRemainingGenerations("trial", "generate");
         setRemainingGenerations(remaining);
       }
@@ -29,6 +30,7 @@ export default function TryPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-green-50 text-gray-800 antialiased">
+      <DemoLimitPreviewBanner />
       {/* シンプルヘッダー */}
       <header className="bg-white border-b border-green-100 shadow-sm">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
@@ -64,7 +66,7 @@ export default function TryPage() {
           {/* お試しエリア */}
           <div className="bg-white rounded-2xl p-6 sm:p-8 border-2 border-green-200 shadow-sm">
             {/* 残り回数 */}
-            {!isDev && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+            {showDemoLimitUi && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
               <div className="mb-4 text-center">
                 <p className="text-sm font-semibold text-gray-700">
                   <span className="text-primary text-lg">無料お試し：残り{remainingGenerations}回</span>
@@ -73,7 +75,7 @@ export default function TryPage() {
             )}
 
             {/* 制限に達した場合 */}
-            {!isDev && remainingGenerations === 0 ? (
+            {showDemoLimitUi && remainingGenerations === 0 ? (
               <div className="space-y-4">
                 <p className="text-base font-bold text-gray-900 text-center mb-2">
                   5回のお試し、いかがでしたか？
@@ -114,18 +116,23 @@ export default function TryPage() {
                   口コミ文を生成してみる →
                 </Link>
                 <p className="text-xs text-gray-500 text-center">
-                  ※ 無料お試しは最大5回まで
+                  5回お試しいただけます
                 </p>
               </div>
             )}
           </div>
 
-          {/* トップへのリンク */}
-          <p className="text-center mt-6 text-sm text-gray-500">
-            サービス詳細は
-            <Link href="/" className="text-primary hover:underline ml-1">
+          {/* サービス詳細へのリンク */}
+          <p className="text-center mt-6 text-lg font-semibold text-gray-700">
+            Review Maker Pro の詳細は
+            <a
+              href="https://review-maker-sable.vercel.app/industries/dentist"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary font-semibold hover:underline ml-1"
+            >
               こちら
-            </Link>
+            </a>
           </p>
         </div>
       </main>

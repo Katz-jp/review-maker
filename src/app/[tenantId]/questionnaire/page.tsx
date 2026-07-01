@@ -7,7 +7,7 @@ import { ArrowLeft, ChevronRight, AlertCircle } from "lucide-react";
 import { getIndustryConfig } from "@/lib/industries";
 import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
 import { useTenant } from "@/components/TenantProvider";
-import { getRemainingGenerations, canGenerate, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
+import { getRemainingGenerations, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
 import { TRIAL_INDUSTRY_KEY } from "@/lib/demo-limit";
 import { TRIAL_POSTING_SESSION_INDUSTRY_ID } from "@/lib/posting-support-constants";
 import { MultiSelectBadge } from "@/components/MultiSelectBadge";
@@ -182,10 +182,6 @@ export default function TenantQuestionnairePage() {
     if (currentStep < TOTAL_STEPS - 1) {
       setCurrentStep((s) => s + 1);
     } else {
-      // デモ制限チェック（trialのみ）
-      if (tenantId === "trial" && !canGenerate(tenantId, "generate")) {
-        return; // ボタンは無効化されているのでここには来ないはずだが念のため
-      }
       if (satisfaction === null) return;
       const payload = {
         answers,
@@ -381,40 +377,6 @@ export default function TenantQuestionnairePage() {
           </div>
         )}
         
-        {/* 制限に達した場合の案内（trialのみ） */}
-        {tenantId === "trial" && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1 && (
-          <div className="bg-green-50 rounded-xl p-5 border border-green-200 mb-3">
-            <p className="text-base font-bold text-gray-900 mb-3 text-center">
-              5回のお試し、いかがでしたか？
-            </p>
-            <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
-              実際のクチコミの質を実感いただけたでしょうか？
-            </p>
-            <div className="space-y-2 mb-4">
-              <p className="text-sm text-gray-700">
-                「もっと院内のシナリオで試したい」
-              </p>
-              <p className="text-sm text-gray-700">
-                「実際にクリニックで運用してみたい」
-              </p>
-            </div>
-            <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-              そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
-            </p>
-            <a
-              href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
-            >
-              1ヶ月無料トライアルに申し込む
-            </a>
-            <p className="text-xs text-gray-600 text-center">
-              ※トライアル期間中に解約すれば費用は一切かかりません。
-            </p>
-          </div>
-        )}
-
         {stepError && (
           <p className="text-sm text-red-600 text-center" role="alert">
             {stepError}
@@ -424,10 +386,7 @@ export default function TenantQuestionnairePage() {
         <button
           type="button"
           onClick={goNext}
-          disabled={
-            (tenantId === "trial" && remainingGenerations === 0 && currentStep === TOTAL_STEPS - 1) ||
-            (isRatingStep && satisfaction === null)
-          }
+          disabled={isRatingStep && satisfaction === null}
           className="block w-full py-5 px-6 rounded-2xl bg-primary hover:bg-primary-dark text-white font-bold text-[2rem] leading-tight text-center shadow-md active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-primary"
         >
           {currentStep === TOTAL_STEPS - 1
@@ -440,9 +399,9 @@ export default function TenantQuestionnairePage() {
           <div className="pt-2 text-left">
             <Link
               href="/industries/dentist"
-              className="text-sm text-gray-500 hover:text-primary-dark transition-colors"
+              className="text-sm font-semibold text-gray-800 hover:text-primary-dark transition-colors"
             >
-              サービス紹介ページに戻る
+              Review Maker Pro を詳しく見てみる
             </Link>
           </div>
         )}

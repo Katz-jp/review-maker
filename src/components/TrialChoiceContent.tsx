@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { MessageCircle, Sparkles, Home } from "lucide-react";
+import { DemoLimitPreviewBanner, DemoLimitPreviewDevLinks } from "@/components/DemoLimitPreview";
 
 interface TrialChoiceContentProps {
   industry?: string;
@@ -11,6 +12,7 @@ export function TrialChoiceContent(_props: TrialChoiceContentProps) {
   const questionnaireHref = "/trial/questionnaire";
   return (
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
+      <DemoLimitPreviewBanner />
       <header className="text-center mb-8">
         <h1 className="text-4xl font-extrabold text-gray-800 mb-2 leading-snug">
           無料でデモを試す
@@ -31,7 +33,7 @@ export function TrialChoiceContent(_props: TrialChoiceContentProps) {
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold text-gray-800 mb-1">
-                クチコミ作成支援AI
+                口コミ作成AI（患者様用）
               </h2>
               <p className="text-sm text-gray-600 mb-3">
                 歯医者・クリニック向けに最適化したアンケートで、診療の感想をお聞きし、AIが口コミの下書きを作成します。
@@ -53,10 +55,10 @@ export function TrialChoiceContent(_props: TrialChoiceContentProps) {
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-bold text-gray-800 mb-1">
-                クチコミ返信ヘルプAI
+                口コミ返信ヘルプAI（医院様用）
               </h2>
               <p className="text-sm text-gray-600 mb-3">
-                患者様の口コミに合わせた返信文をAIで生成できます。
+                患者様からの口コミに合わせた返信文をAIで生成できます。
               </p>
               <span className="text-sm font-semibold text-primary">
                 5回までお試し可能 →
@@ -66,13 +68,15 @@ export function TrialChoiceContent(_props: TrialChoiceContentProps) {
         </Link>
       </section>
 
+      <DemoLimitPreviewDevLinks />
+
       <div className="mt-auto pt-8 border-t border-gray-200">
         <Link
-          href="/"
+          href="/industries/dentist"
           className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl border-2 border-gray-200 text-gray-700 hover:bg-gray-50 font-medium text-sm transition-colors"
         >
           <Home className="w-4 h-4" />
-          トップページに戻る
+          トップページにいく
         </Link>
       </div>
     </main>

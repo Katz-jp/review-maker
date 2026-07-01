@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import PricingSection from "@/components/PricingSection";
+import FaqSection from "@/components/FaqSection";
 import PostingSupportInclusionsSection from "@/components/PostingSupportInclusionsSection";
 import BrandLogo from "@/components/BrandLogo";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
@@ -215,6 +216,8 @@ export default function IndustryLandingPage({
 
         <PostingSupportInclusionsSection />
         <PricingSection />
+
+        <FaqSection />
 
       </main>
       <footer className="bg-white border-t border-green-100 mt-auto">

@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { ArrowLeft, Copy, Loader2, RotateCcw, Undo2 } from "lucide-react";
 import { useTenant } from "@/components/TenantProvider";
-import { getRemainingGenerations, incrementGenerationCount, MAX_DEMO_GENERATIONS } from "@/lib/demo-limit";
+import { getRemainingGenerations, incrementGenerationCount, MAX_DEMO_GENERATIONS, isPreviewingLimitReached } from "@/lib/demo-limit";
+import { DemoLimitPreviewBanner } from "@/components/DemoLimitPreview";
 import { getReviewOrMapUrl } from "@/lib/review-link";
 import { clientTenantAllowsPaidFeatures } from "@/lib/tenant-subscription";
 
@@ -124,6 +125,15 @@ export default function TenantGeneratePage() {
       return;
     }
 
+    if (tenantId === "trial" && isPreviewingLimitReached("generate")) {
+      setSatisfaction(5);
+      setGeneratedText(
+        "（プレビュー）とても丁寧に説明していただき、安心して治療を受けられました。スタッフの方も皆さん笑顔で迎えてくれて、通院が楽しみになりました。"
+      );
+      setLoading(false);
+      return;
+    }
+
     // アンケート回答から満足度を取得
     const raw = sessionStorage.getItem("questionnaireAnswers");
     if (raw) {
@@ -228,6 +238,7 @@ export default function TenantGeneratePage() {
 
   return (
     <main className="min-h-screen flex flex-col px-5 pt-6 pb-12 max-w-lg mx-auto">
+      <DemoLimitPreviewBanner />
       <header className="flex items-center justify-between mb-6">
         <Link
           href={`/${tenantId}`}
@@ -361,25 +372,25 @@ export default function TenantGeneratePage() {
               </p>
               <div className="space-y-2 mb-4">
                 <p className="text-sm text-gray-700">
-                  「もっと多くのメニューで試したい」
+                  「もっと院内のシナリオで試したい」
                 </p>
                 <p className="text-sm text-gray-700">
-                  「実際に店舗で運用してみたい」
+                  「実際にクリニックで運用してみたい」
                 </p>
               </div>
               <p className="text-sm text-gray-700 mb-4 leading-relaxed">
-                そんなオーナー様のために、今なら全ての機能を1ヶ月間無料でお試しいただけるトライアルをご用意しています。
+                そんなオーナー様のために、今なら全ての機能を30日間無料でお試しいただけるトライアルをご用意しています。
               </p>
               <a
                 href="https://docs.google.com/forms/d/11ikD7LepY89LQ3pCg28Ahk3BEgXR3cGLzf7FDNGn82k/viewform"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold text-sm text-center transition-colors mb-2"
+                className="block w-full py-3 px-6 rounded-xl bg-primary hover:bg-primary-dark text-black font-semibold text-base text-center transition-colors mb-2"
               >
-                1ヶ月無料トライアルに申し込む
+                30日間無料で使ってみる
               </a>
-              <p className="text-xs text-gray-600 text-center">
-                ※トライアル期間中に解約すれば費用は一切かかりません。
+              <p className="text-xs text-gray-800 text-center font-medium">
+                ※無料期間中に解約すれば費用は一切かかりません。
               </p>
             </div>
           )}
@@ -400,20 +411,31 @@ export default function TenantGeneratePage() {
               </>
             )}
           </button>
-          <div className="mt-14 text-center text-sm text-gray-600">
-            他のサイトに使う場合はこちら
-            <br />
-            →{" "}
-            <button
-              type="button"
-              onClick={handleCopyTextOnly}
-              disabled={!generatedText}
-              className="font-bold text-gray-700 hover:text-primary underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              文章だけコピーする
-            </button>
-            {copiedTextOnly && <span className="ml-1.5 text-primary text-xs">コピーしました</span>}
-          </div>
+          {tenantId === "trial" ? (
+            <div className="mt-14 text-center text-base text-gray-600">
+              <Link
+                href="/trial/questionnaire"
+                className="font-bold text-gray-700 hover:text-primary underline underline-offset-2 text-lg"
+              >
+                もう一度最初から口コミを作る
+              </Link>
+            </div>
+          ) : (
+            <div className="mt-14 text-center text-sm text-gray-600">
+              他のサイトに使う場合はこちら
+              <br />
+              →{" "}
+              <button
+                type="button"
+                onClick={handleCopyTextOnly}
+                disabled={!generatedText}
+                className="font-bold text-gray-700 hover:text-primary underline underline-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                文章だけコピーする
+              </button>
+              {copiedTextOnly && <span className="ml-1.5 text-primary text-xs">コピーしました</span>}
+            </div>
+          )}
         </div>
     </main>
   );

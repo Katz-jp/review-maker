@@ -8,7 +8,7 @@ import PostingSupportInclusionsSection from "@/components/PostingSupportInclusio
 import FaqSection from "@/components/FaqSection";
 import BrandLogo from "@/components/BrandLogo";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
-import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDevelopment } from "@/lib/demo-limit";
+import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDemoLimitUiActive } from "@/lib/demo-limit";
 
 const navItems = [
   { label: "歯科医院TOP", href: "/industries/dentist" },
@@ -42,15 +42,14 @@ const footerLinks = [
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [remainingGenerations, setRemainingGenerations] = useState<number | null>(null);
-  const [isDev, setIsDev] = useState(false);
+  const [showDemoLimitUi, setShowDemoLimitUi] = useState(false);
 
   useEffect(() => {
     // クライアントサイドでのみLocalStorageにアクセス
     if (typeof window !== "undefined") {
-      const dev = isDevelopment();
-      setIsDev(dev);
-      // 開発環境でない場合のみ残り回数を取得（trial用）
-      if (!dev) {
+      const active = isDemoLimitUiActive("generate");
+      setShowDemoLimitUi(active);
+      if (active) {
         const remaining = getRemainingGenerations("trial", "generate");
         setRemainingGenerations(remaining);
       }
@@ -174,7 +173,7 @@ export default function LandingPage() {
           </div>
           <div className="max-w-3xl mx-auto mt-8 sm:mt-10">
               {/* 残り回数表示（開発環境では非表示） */}
-              {!isDev && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
+              {showDemoLimitUi && remainingGenerations !== null && remainingGenerations < MAX_DEMO_GENERATIONS && (
                 <div className="mb-4 text-center">
                   <p className="text-sm font-semibold text-gray-700">
                     <span className="text-primary text-lg">無料お試し：残り{remainingGenerations}回</span>
@@ -183,7 +182,7 @@ export default function LandingPage() {
               )}
 
               {/* 制限に達した場合の案内（開発環境では非表示） */}
-              {!isDev && remainingGenerations === 0 ? (
+              {showDemoLimitUi && remainingGenerations === 0 ? (
                 <div className="space-y-4">
                   <div className="bg-white rounded-xl p-5 border border-green-200">
                     <p className="text-base font-bold text-gray-900 mb-3 text-center">
