@@ -14,6 +14,12 @@ import { TRIAL_POSTING_SESSION_INDUSTRY_ID } from "@/lib/posting-support-constan
 const TRIAL_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSfilsWAERsNkC6Z_761_i-XPR9wVUAbKE7uByouR5iNng4y_w/viewform?usp=header";
 
+const footerLinks = [
+  { label: "特定商取引法に基づく表記", href: "/tokusho" },
+  { label: "プライバシーポリシー", href: "/privacy" },
+  { label: "利用規約", href: "/terms" },
+];
+
 export default function IndustryLandingPage({
   params,
 }: {
@@ -100,7 +106,7 @@ export default function IndustryLandingPage({
 
         <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8 pb-3 border-b-2 border-primary/50">
               Googleマップの口コミ、こんなお悩みありませんか？
             </h2>
             <ul className="space-y-3 text-base sm:text-lg text-gray-700">
@@ -110,7 +116,7 @@ export default function IndustryLandingPage({
               <li>・もらった口コミへの返信が面倒で後回しになってる</li>
               <li>・HPだけでは当院の良さや特徴がうまく伝わってない気がする</li>
             </ul>
-            <p className="mt-8 text-center text-lg font-semibold text-gray-800">
+            <p className="mt-8 text-center text-lg font-semibold text-green-800">
               １つでも当てはまるなら、
               <br />
               Review Maker Pro がお役に立てます！
@@ -119,10 +125,8 @@ export default function IndustryLandingPage({
         </section>
 
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
-            患者さんはこうやって
-            <br />
-            歯医者を選んでいます
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8 pb-3 border-b-2 border-primary/50">
+            患者さんはこうやって歯医者を選んでいます
           </h2>
           <ol className="space-y-4 text-base sm:text-lg text-gray-700 list-decimal list-inside">
             <li>Googleマップで「歯医者」と検索し、近所にある歯医者を探す</li>
@@ -212,33 +216,33 @@ export default function IndustryLandingPage({
         <PostingSupportInclusionsSection />
         <PricingSection />
 
-        <section className="px-4 sm:px-6 py-12 sm:py-16 bg-green-50 border-t border-green-100">
-          <div className="max-w-2xl mx-auto text-center">
-            <p className="text-lg font-semibold text-gray-800 mb-6">
-              まずは1ヶ月、無料で体験してください。
-            </p>
-            <div className="flex flex-col gap-4 justify-center items-center">
-              <a
-                href={TRIAL_FORM_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block py-4 px-6 rounded-xl bg-primary hover:bg-primary-dark text-gray-900 font-bold text-lg text-center shadow-md hover:shadow-lg transition-all"
-              >
-                30日間無料ではじめてみる！
-              </a>
-              <Link
-                href={`/trial?industry=${trialId}`}
-                className="inline-block py-2.5 px-8 rounded-xl bg-white border-2 border-gray-900 text-gray-900 font-bold text-base text-center shadow-md hover:shadow-lg transition-all hover:bg-gray-50"
-              >
-                ためしに口コミを作ってみる
-                <span className="block text-xs font-semibold mt-0.5 text-gray-900">（5回まで・登録なし・無料）</span>
-              </Link>
-            </div>
-          </div>
-        </section>
       </main>
-      <footer className="py-6 text-center text-sm text-gray-500 border-t border-green-100">
-        ©2026 くーままAIラボ
+      <footer className="bg-white border-t border-green-100 mt-auto">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+          <div className="flex flex-wrap justify-center gap-4 sm:gap-6 text-sm">
+            {footerLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="text-gray-600 hover:text-primary-dark transition-colors"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </div>
+          <div className="mt-6 text-center text-sm text-gray-500 space-y-1">
+            <p>
+              お問い合わせ:{" "}
+              <a
+                href="mailto:info@kuhmom-ailabo.com"
+                className="text-primary-dark hover:underline"
+              >
+                info@kuhmom-ailabo.com
+              </a>
+            </p>
+            <p>©2026 くーままAIラボ</p>
+          </div>
+        </div>
       </footer>
       <ScrollToTopButton />
     </div>

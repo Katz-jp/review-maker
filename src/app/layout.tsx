@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import AppFooter from "@/components/AppFooter";
 import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
 import "./globals.css";
 
@@ -29,7 +28,6 @@ export default function RootLayout({
       <body className="min-h-screen bg-green-50 text-gray-800 antialiased">
         <div className="flex min-h-screen flex-col">
           <div className="flex-1">{children}</div>
-          <AppFooter />
         </div>
         {process.env.NODE_ENV === "production" && gaId ? (
           <GoogleAnalytics gaId={gaId} />
