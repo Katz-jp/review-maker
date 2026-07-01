@@ -11,8 +11,7 @@ import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDevelopment } from "@/lib/demo-limit";
 
 const navItems = [
-  { label: "ホーム", href: "#" },
-  { label: "料金", href: "#pricing" },
+  { label: "歯科医院TOP", href: "/industries/dentist" },
   { label: "お問い合わせ", href: "/contact" },
 ];
 
@@ -155,11 +154,13 @@ export default function LandingPage() {
           <p className="mt-4 sm:mt-6 text-base sm:text-lg font-bold text-gray-900 max-w-2xl mx-auto">
             作業時間はわずか30秒。
             <br />
-            インセンティブ不要で実体験ベースの口コミ投稿がどんどん増える。
+            インセンティブ不要で、実体験ベースの口コミが
             <br />
-            Googleマップの口コミ対策は、
+            どんどん増えます。
             <br />
-            くーままAIラボの Review Maker Pro にお任せください。
+            Googleマップの口コミ対策は
+            <br />
+            くーままAIラボの Review Maker Pro にお任せください！
           </p>
           <div className="flex justify-center mt-6 sm:mt-8">
             <a
@@ -254,41 +255,6 @@ export default function LandingPage() {
           </p>
         </section>
 
-        {/* 特徴セクション（3カラム） */}
-        <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
-          <div className="max-w-5xl mx-auto">
-            <div className="text-center mb-8 pb-3 border-b-2 border-primary/50">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                口コミが&quot;武器&quot;になる3つの理由
-              </h2>
-              <p className="mt-2 text-base sm:text-lg font-semibold text-primary">
-                簡単・時短・続けられる！
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
-              {features.map((f, index) => (
-                <div
-                  key={f.title}
-                  className="bg-green-50/80 rounded-2xl p-6 sm:p-8 border border-green-100 shadow-sm hover:border-primary/30 transition-colors"
-                >
-                  <div className="flex items-start gap-3 sm:gap-4 mb-3">
-                    <span className="text-3xl sm:text-4xl shrink-0">{f.icon}</span>
-                    <h3 className="font-semibold text-gray-800 text-lg pt-0.5">
-                      {index === 0 && <span className="text-primary">簡単！</span>}
-                      {index === 1 && <span className="text-primary">時短！</span>}
-                      {index === 2 && <span className="text-primary">続けやすい！</span>}
-                      {f.title}
-                    </h3>
-                  </div>
-                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{f.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <PostingSupportInclusionsSection />
-
         {/* Review Maker Proを使う理由 */}
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-5xl mx-auto space-y-12 sm:space-y-16">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-2 pb-3 border-b-2 border-primary/50">
@@ -298,7 +264,7 @@ export default function LandingPage() {
           <div>
             <h3 className="text-xl sm:text-2xl font-bold text-gray-800 text-center mb-4">
               <span aria-hidden>✅ </span>
-              口コミが増えると、来店率が上がる
+              口コミが増えると、来院率が上がる
             </h3>
             <p className="text-center text-base sm:text-lg text-gray-600 max-w-2xl mx-auto">
               口コミで比較される時代。
@@ -362,7 +328,7 @@ export default function LandingPage() {
               </span>
               など、
               <br className="sm:hidden" />
-              お店の強みを自然に含んだ口コミが増えることで、
+              自分の強みを自然に含んだ口コミが増えることで、
               <br />
               地域検索で比較されたときに強くなります。
             </p>
@@ -378,6 +344,40 @@ export default function LandingPage() {
             </div>
           </div>
 
+        </section>
+
+
+        {/* 特徴セクション（3カラム） */}
+        <section className="px-4 sm:px-6 py-12 sm:py-16 bg-white border-y border-green-100">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-8 pb-3 border-b-2 border-primary/50">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Review Maker Pro を使う理由
+              </h2>
+              <p className="mt-2 text-base sm:text-lg font-semibold text-primary">
+                簡単・時短・続けられる！
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+              {features.map((f, index) => (
+                <div
+                  key={f.title}
+                  className="bg-green-50/80 rounded-2xl p-6 sm:p-8 border border-green-100 shadow-sm hover:border-primary/30 transition-colors"
+                >
+                  <div className="flex items-start gap-3 sm:gap-4 mb-3">
+                    <span className="text-3xl sm:text-4xl shrink-0">{f.icon}</span>
+                    <h3 className="font-semibold text-gray-800 text-lg pt-0.5">
+                      {index === 0 && <span className="text-primary">簡単！</span>}
+                      {index === 1 && <span className="text-primary">時短！</span>}
+                      {index === 2 && <span className="text-primary">続けやすい！</span>}
+                      {f.title}
+                    </h3>
+                  </div>
+                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{f.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </section>
 
         {/* 導入はかんたん3ステップ */}
@@ -482,8 +482,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* 料金プラン（先行導入・成長支援プラン）— 非表示 */}
-        {/* <PricingSection /> */}
+
+        <PostingSupportInclusionsSection />
+
+        <PricingSection />
 
         {/* よくある質問 */}
         <FaqSection />

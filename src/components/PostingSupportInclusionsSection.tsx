@@ -1,7 +1,5 @@
-import {
-  POSTING_SUPPORT_INCLUSIONS_TITLE,
-  POSTING_SUPPORT_INCLUSION_ITEMS,
-} from "@/lib/posting-support-inclusions";
+import { BRAND_NAME } from "@/lib/brand";
+import { POSTING_SUPPORT_INCLUSION_ITEMS } from "@/lib/posting-support-inclusions";
 
 type PostingSupportInclusionsSectionProps = {
   /** セクションラッパーに付与するクラス（背景・余白など） */
@@ -16,13 +14,12 @@ export default function PostingSupportInclusionsSection({
       <div className="max-w-3xl mx-auto">
         <h2
           id="posting-support-inclusions-heading"
-          className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-3 pb-3 border-b-2 border-primary/50"
+          className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8 pb-3 border-b-2 border-primary/50"
         >
-          {POSTING_SUPPORT_INCLUSIONS_TITLE}
+          {BRAND_NAME} 月額プラン
+          <br />
+          含まれるサービス一覧
         </h2>
-        <p className="text-center text-sm sm:text-base text-gray-600 mb-8">
-          月額プランに含まれるサービス
-        </p>
         <ul className="space-y-3 text-base sm:text-lg text-gray-700">
           {POSTING_SUPPORT_INCLUSION_ITEMS.map((text) => (
             <li key={text}>・{text}</li>

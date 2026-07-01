@@ -94,7 +94,7 @@ export default function IndustryLandingPage({
           <p className="mt-6 text-center text-base sm:text-lg font-semibold text-gray-700">
             操作時間はたったの30秒程度！
             <br />
-            診察室での待ち時間、移動の車の中や家でのリラックス時間にさくっと口コミ投稿ができます。
+            診察室での待ち時間、移動中の車や家でのリラックス時間に、さくっとクチコミ投稿ができます。
           </p>
         </section>
 
@@ -111,14 +111,18 @@ export default function IndustryLandingPage({
               <li>・HPだけでは当院の良さや特徴がうまく伝わってない気がする</li>
             </ul>
             <p className="mt-8 text-center text-lg font-semibold text-gray-800">
-              ひとつでも当てはまるなら、Review Maker Pro がお役に立てます！
+              １つでも当てはまるなら、
+              <br />
+              Review Maker Pro がお役に立てます！
             </p>
           </div>
         </section>
 
         <section className="px-4 sm:px-6 py-12 sm:py-16 max-w-3xl mx-auto">
           <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-8">
-            患者さんはこうやって歯医者さんを選んでいます
+            患者さんはこうやって
+            <br />
+            歯医者を選んでいます
           </h2>
           <ol className="space-y-4 text-base sm:text-lg text-gray-700 list-decimal list-inside">
             <li>Googleマップで「歯医者」と検索し、近所にある歯医者を探す</li>
@@ -149,7 +153,9 @@ export default function IndustryLandingPage({
               <li>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">② もらった口コミへの返信文もあっという間に作成！</h3>
                 <p className="text-gray-700">
-                  クチコミ返信ヘルプAIなら、いただいた口コミの内容に合わせた返信文のたたき台を短時間で用意できます。口コミを読み比べて医院を選ぶ患者さんの多くは、本文だけでなく返信の内容やトーンもしっかり確認します。丁寧で誠実な返信は「ちゃんと向き合っている医院」という安心感につながり、医院の強みを自然にアピールできます。
+                  クチコミ返信ヘルプAIなら、いただいた口コミの内容に合わせた返信文のたたき台を短時間で用意できます。口コミを読み比べて医院を選ぶ患者さんの多くは、本文だけでなく返信の内容やトーンもしっかり確認します。
+                  <br />
+                  丁寧で誠実な返信は「ちゃんと向き合っている医院」という安心感につながり、医院の強みを自然にアピールできます。
                 </p>
               </li>
               <li>
