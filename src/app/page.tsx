@@ -532,6 +532,11 @@ export default function LandingPage() {
                 info@kuhmom-ailabo.com
               </a>
             </p>
+            <p className="text-xs text-gray-500">
+              電話: 050-1784-8350
+              <br />
+              （自動音声にて対応しております。お急ぎの場合もお問い合わせフォームからのご連絡がスムーズです）
+            </p>
             <p>©2026 くーままAIラボ</p>
           </div>
         </div>

@@ -16,7 +16,7 @@ const sections = [
   },
   {
     title: "連絡先",
-    content: "メールアドレス: info@kuhmom-ailabo.com",
+    content: "メールアドレス: info@kuhmom-ailabo.com\n電話番号: 050-1784-8350",
   },
   {
     title: "販売価格",
