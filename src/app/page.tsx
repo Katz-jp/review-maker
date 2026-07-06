@@ -29,7 +29,7 @@ const features = [
   {
     icon: "💬",
     title: "返信文もAIで作成できる",
-    description: "いただいた口コミへの返信もAIが作成。返信にかかる時間を8割削減し、キーワードを盛り込んだ戦略的な返信が10秒で完成！ネガティブな口コミにも適切な返信文を提案します。",
+    description: "いただいた口コミへの返信もAIが作成。返信にかかる時間を8割削減し、キーワードを盛り込んだ戦略的な返信も瞬時に完成！ネガティブな口コミにも適切な返信文を提案します。",
   },
 ];
 
@@ -151,7 +151,7 @@ export default function LandingPage() {
             口コミは、資産です。
           </h1>
           <p className="mt-4 sm:mt-6 text-base sm:text-lg font-bold text-gray-900 max-w-2xl mx-auto">
-            作業時間はわずか30秒。
+            患者さんの作業時間はわずか1分。
             <br />
             インセンティブ不要で、実体験ベースの口コミが
             <br />
