@@ -1,5 +1,3 @@
-import { appTrialEndMillis, toMillis } from "@/lib/tenant-subscription";
-
 export type Tenant = {
   id: string;
   name: string;
@@ -31,15 +29,16 @@ export async function getTenant(tenantId: string): Promise<Tenant | null> {
   if (typeof window === "undefined") return null;
 
   try {
-    const { db } = await import("./firebase");
-    if (!db) return null;
+    // Firestore の tenants コレクションはクライアントから直接読めない（本番のセキュリティルールで
+    // 拒否される）ため、Admin SDK 経由でテナント情報を返すサーバーAPIを使用する。
+    // 直接 getDoc() していた旧実装は本番で常に権限エラーとなり、フォールバック（〇〇歯科クリニック /
+    // ただの地図URL）が表示され続けるバグの原因だった。
+    const res = await fetch(`/api/tenant/${encodeURIComponent(tenantId)}`, {
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
 
-    const { doc, getDoc } = await import("firebase/firestore");
-    const snap = await getDoc(doc(db, "tenants", tenantId));
-    if (!snap.exists()) return null;
-
-    const data = snap.data();
-    const co = data?.customOptions as { name?: string; googleMapsUrl?: string; placeId?: string; industry?: string } | undefined;
+    const data = await res.json();
     const rawStatus = data?.subscriptionStatus ?? "inactive";
     const subscriptionStatus: Tenant["subscriptionStatus"] =
       rawStatus === "active" ||
@@ -50,18 +49,18 @@ export async function getTenant(tenantId: string): Promise<Tenant | null> {
         ? rawStatus
         : "inactive";
 
-    const endMs = appTrialEndMillis(data);
-    const startMs = toMillis(data.appTrialStartedAt);
-
     return {
       id: tenantId,
-      name: data?.name ?? co?.name ?? DEFAULT_TENANT.name,
-      googleMapsUrl: data?.googleMapsUrl ?? co?.googleMapsUrl ?? DEFAULT_TENANT.googleMapsUrl,
-      placeId: data?.placeId ?? co?.placeId,
+      name: typeof data?.name === "string" && data.name ? data.name : DEFAULT_TENANT.name,
+      googleMapsUrl:
+        typeof data?.googleMapsUrl === "string" && data.googleMapsUrl
+          ? data.googleMapsUrl
+          : DEFAULT_TENANT.googleMapsUrl,
+      placeId: typeof data?.placeId === "string" && data.placeId ? data.placeId : undefined,
       subscriptionStatus,
-      ...(endMs != null ? { appTrialEndsAt: new Date(endMs).toISOString() } : {}),
-      ...(startMs != null ? { appTrialStartedAt: new Date(startMs).toISOString() } : {}),
-      industry: data?.industry ?? co?.industry ?? "dental",
+      ...(typeof data?.appTrialEndsAt === "string" ? { appTrialEndsAt: data.appTrialEndsAt } : {}),
+      ...(typeof data?.appTrialStartedAt === "string" ? { appTrialStartedAt: data.appTrialStartedAt } : {}),
+      industry: data?.industry ?? "dental",
     };
   } catch {
     return null;
