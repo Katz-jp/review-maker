@@ -516,13 +516,13 @@ export default function LandingPage() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-gray-600 hover:text-primary-dark transition-colors"
+                className="text-gray-500 hover:text-primary-dark transition-colors"
               >
                 {link.label}
               </Link>
             ))}
           </div>
-          <div className="mt-6 text-center text-sm text-gray-500 space-y-1">
+          <div className="mt-6 text-center text-sm text-gray-500 space-y-2">
             <p>
               お問い合わせ:{" "}
               <a
@@ -532,13 +532,17 @@ export default function LandingPage() {
                 info@kuhmom-ailabo.com
               </a>
             </p>
-            <p className="text-xs text-gray-500">
-              電話: 050-1784-8350
-              <br />
+            <p>電話: 050-1784-8350</p>
+            <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
               （自動音声にて対応しております。お急ぎの場合もお問い合わせフォームからのご連絡がスムーズです）
             </p>
-            <p>©2026 くーままAIラボ</p>
+            <p className="text-xs text-gray-500">
+              〒530-0001　大阪府大阪市北区梅田1丁目2番2号大阪駅前第2ビル12-12
+            </p>
           </div>
+          <p className="mt-6 pt-4 border-t border-green-100 text-center text-xs text-gray-500">
+            ©2026 くーままAIラボ
+          </p>
         </div>
       </footer>
       <ScrollToTopButton />
