@@ -145,6 +145,20 @@ export default function LandingPage() {
       </header>
 
       <main className="flex-1 overflow-x-hidden">
+        {/* 歯科医院TOPへの案内バナー */}
+        <div className="bg-primary/10 border-b border-primary/20">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-2.5 text-center">
+            <Link
+              href="/industries/dentist"
+              className="text-base font-bold text-green-800 hover:underline inline-flex items-center gap-1.5"
+            >
+              <span aria-hidden>🦷</span>
+              歯科医院さま向けのご案内はこちら
+              <span aria-hidden>→</span>
+            </Link>
+          </div>
+        </div>
+
         {/* ヒーローセクション */}
         <section className="px-4 sm:px-6 py-16 sm:py-24 max-w-5xl mx-auto text-center">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 leading-tight">

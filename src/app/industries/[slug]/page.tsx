@@ -99,7 +99,7 @@ export default function IndustryLandingPage({
             />
           </div>
           <p className="mt-6 text-center text-base sm:text-lg font-semibold text-gray-700">
-            操作時間はたったの30秒程度！
+            操作時間はたったの1分程度！
             <br />
             診察室での待ち時間、移動中の車や家でのリラックス時間に、さくっとクチコミ投稿ができます。
           </p>
@@ -111,7 +111,7 @@ export default function IndustryLandingPage({
               Googleマップの口コミ、こんなお悩みありませんか？
             </h2>
             <ul className="space-y-3 text-base sm:text-lg text-gray-700">
-              <li>・「痛いかも」「怖い先生かも」と敬遠されてしまう</li>
+              <li>・低評価の口コミが全体の足を引っぱっている</li>
               <li>・Google検索で他院に埋もれている</li>
               <li>・口コミの数が少なくて不満</li>
               <li>・もらった口コミへの返信が面倒で後回しになってる</li>
@@ -227,13 +227,13 @@ export default function IndustryLandingPage({
               <Link
                 key={link.href}
                 href={link.href}
-                className="text-gray-600 hover:text-primary-dark transition-colors"
+                className="text-gray-500 hover:text-primary-dark transition-colors"
               >
                 {link.label}
               </Link>
             ))}
           </div>
-          <div className="mt-6 text-center text-sm text-gray-500 space-y-1">
+          <div className="mt-6 text-center text-sm text-gray-500 space-y-2">
             <p>
               お問い合わせ:{" "}
               <a
@@ -243,13 +243,17 @@ export default function IndustryLandingPage({
                 info@kuhmom-ailabo.com
               </a>
             </p>
-            <p className="text-xs text-gray-500">
-              電話: 050-1784-8350
-              <br />
+            <p>電話: 050-1784-8350</p>
+            <p className="text-xs text-gray-500 max-w-md mx-auto leading-relaxed">
               （自動音声にて対応しております。お急ぎの場合もお問い合わせフォームからのご連絡がスムーズです）
             </p>
-            <p>©2026 くーままAIラボ</p>
+            <p className="text-xs text-gray-500">
+              〒530-0001　大阪府大阪市北区梅田1丁目2番2号大阪駅前第2ビル12-12
+            </p>
           </div>
+          <p className="mt-6 pt-4 border-t border-green-100 text-center text-xs text-gray-500">
+            ©2026 くーままAIラボ
+          </p>
         </div>
       </footer>
       <ScrollToTopButton />
