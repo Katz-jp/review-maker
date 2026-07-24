@@ -175,6 +175,17 @@ export default function LandingPage() {
             <br />
             くーままAIラボの Review Maker Pro にお任せください！
           </p>
+          <div className="mt-6 sm:mt-8 flex justify-center">
+            <video
+              src="/videos/review-maker.mp4"
+              className="w-full max-w-[240px] h-auto rounded-xl shadow-lg"
+              controls
+              playsInline
+              preload="metadata"
+            >
+              お使いのブラウザは動画タグに対応していません。
+            </video>
+          </div>
           <div className="flex justify-center mt-6 sm:mt-8">
             <a
               href="https://docs.google.com/forms/d/e/1FAIpQLSfilsWAERsNkC6Z_761_i-XPR9wVUAbKE7uByouR5iNng4y_w/viewform"
