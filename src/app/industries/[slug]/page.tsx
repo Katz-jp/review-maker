@@ -71,6 +71,17 @@ export default function IndustryLandingPage({
             <br />
             「選ばれるクリニック」の装置に変えませんか？
           </p>
+          <div className="mt-6 sm:mt-8 flex justify-center">
+            <video
+              src="/videos/review-maker.mp4"
+              className="w-full max-w-[240px] h-auto rounded-xl shadow-lg"
+              controls
+              playsInline
+              preload="metadata"
+            >
+              お使いのブラウザは動画タグに対応していません。
+            </video>
+          </div>
           <div className="mt-8 flex flex-col gap-4 justify-center items-center">
             <a
               href={TRIAL_FORM_URL}
