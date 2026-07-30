@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import {
   Loader2,
@@ -14,6 +14,7 @@ import {
   ChevronRight,
   Trash2,
   AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 /** sessionStorage に保存する際のキー（認証済みパスワードを保持） */
 const ADMIN_SESSION_KEY = "adminAuth";
@@ -33,6 +34,26 @@ function getAuthHeaders(): HeadersInit {
   const secret = sessionStorage.getItem(ADMIN_SESSION_KEY);
   return secret ? { "x-admin-secret": secret } : {};
 }
+
+type PlaceIdAutoStatus =
+  | "idle"
+  | "loading"
+  | "found"
+  | "found_unverified"
+  | "found_kept"
+  | "not_found"
+  | "error";
+
+const PLACE_ID_AUTO_MESSAGES: Record<Exclude<PlaceIdAutoStatus, "idle">, string> = {
+  loading: "Place IDを自動取得中…",
+  found: "正式なPlace IDを自動取得しました（口コミ投稿リンクで動作確認済みの形式）",
+  found_unverified:
+    "Place IDらしき値を検出しましたが、口コミ投稿リンクとして動作するか確認できていません。実際にボタンを押して開くか確認してください",
+  found_kept:
+    "GoogleマップURLからPlace IDが見つかりましたが、既に入力済みのため上書きしていません。更新する場合は「再取得」を押してください",
+  not_found: "自動取得できませんでした。お手数ですがPlace IDを手動で入力してください",
+  error: "自動取得中にエラーが発生しました。手動で入力してください",
+};
 
 const STATUS_LABELS: Record<string, string> = {
   active: "有効",
@@ -55,6 +76,8 @@ export default function AdminPage() {
   const [newName, setNewName] = useState("");
   const [newGoogleMapsUrl, setNewGoogleMapsUrl] = useState("https://www.google.com/maps");
   const [newPlaceId, setNewPlaceId] = useState("");
+  const [newPlaceIdAutoStatus, setNewPlaceIdAutoStatus] = useState<PlaceIdAutoStatus>("idle");
+  const lastAutoFilledNewUrlRef = useRef("");
   const [newStatus, setNewStatus] = useState("inactive");
   const [newAccessPin, setNewAccessPin] = useState("");
   const [addError, setAddError] = useState("");
@@ -62,6 +85,8 @@ export default function AdminPage() {
   const [editName, setEditName] = useState("");
   const [editGoogleMapsUrl, setEditGoogleMapsUrl] = useState("");
   const [editPlaceId, setEditPlaceId] = useState("");
+  const [editPlaceIdAutoStatus, setEditPlaceIdAutoStatus] = useState<PlaceIdAutoStatus>("idle");
+  const lastAutoFilledEditUrlRef = useRef("");
   const [editStatus, setEditStatus] = useState("");
   const [editAccessPin, setEditAccessPin] = useState("");
   const [editClearAccessPin, setEditClearAccessPin] = useState(false);
@@ -169,6 +194,117 @@ export default function AdminPage() {
     setSecret("");
   };
 
+  /** GoogleマップURLからPlace IDをサーバー経由で解決する（短縮URLのリダイレクト追跡も含む） */
+  const resolvePlaceIdFromUrl = async (
+    url: string
+  ): Promise<{ placeId: string | null; verified: boolean } | { error: string }> => {
+    try {
+      const res = await fetch("/api/admin/resolve-place-id", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        return { error: typeof data.error === "string" ? data.error : "取得に失敗しました" };
+      }
+      return {
+        placeId: typeof data.placeId === "string" ? data.placeId : null,
+        verified: data.verified === true,
+      };
+    } catch {
+      return { error: "取得に失敗しました" };
+    }
+  };
+
+  const handleNewMapsUrlBlur = async () => {
+    const url = newGoogleMapsUrl.trim();
+    if (!url || url === "https://www.google.com/maps" || url === lastAutoFilledNewUrlRef.current) {
+      return;
+    }
+    lastAutoFilledNewUrlRef.current = url;
+    setNewPlaceIdAutoStatus("loading");
+    const result = await resolvePlaceIdFromUrl(url);
+    if ("error" in result) {
+      setNewPlaceIdAutoStatus("error");
+      return;
+    }
+    if (result.placeId) {
+      const placeId = result.placeId;
+      let wasEmpty = false;
+      setNewPlaceId((prev) => {
+        wasEmpty = !prev.trim();
+        return wasEmpty ? placeId : prev;
+      });
+      setNewPlaceIdAutoStatus(wasEmpty ? (result.verified ? "found" : "found_unverified") : "found_kept");
+    } else {
+      setNewPlaceIdAutoStatus("not_found");
+    }
+  };
+
+  const handleEditMapsUrlBlur = async () => {
+    const url = editGoogleMapsUrl.trim();
+    if (!url || url === "https://www.google.com/maps" || url === lastAutoFilledEditUrlRef.current) {
+      return;
+    }
+    lastAutoFilledEditUrlRef.current = url;
+    setEditPlaceIdAutoStatus("loading");
+    const result = await resolvePlaceIdFromUrl(url);
+    if ("error" in result) {
+      setEditPlaceIdAutoStatus("error");
+      return;
+    }
+    if (result.placeId) {
+      const placeId = result.placeId;
+      let wasEmpty = false;
+      setEditPlaceId((prev) => {
+        wasEmpty = !prev.trim();
+        return wasEmpty ? placeId : prev;
+      });
+      setEditPlaceIdAutoStatus(wasEmpty ? (result.verified ? "found" : "found_unverified") : "found_kept");
+    } else {
+      setEditPlaceIdAutoStatus("not_found");
+    }
+  };
+
+  /** 「再取得」ボタン用: 既存のPlace IDがあっても明示的な操作なので常に上書きする */
+  const handleNewPlaceIdRefetch = async () => {
+    const url = newGoogleMapsUrl.trim();
+    if (!url || url === "https://www.google.com/maps") return;
+    lastAutoFilledNewUrlRef.current = url;
+    setNewPlaceIdAutoStatus("loading");
+    const result = await resolvePlaceIdFromUrl(url);
+    if ("error" in result) {
+      setNewPlaceIdAutoStatus("error");
+      return;
+    }
+    if (result.placeId) {
+      setNewPlaceId(result.placeId);
+      setNewPlaceIdAutoStatus(result.verified ? "found" : "found_unverified");
+    } else {
+      setNewPlaceIdAutoStatus("not_found");
+    }
+  };
+
+  /** 「再取得」ボタン用: 既存のPlace IDがあっても明示的な操作なので常に上書きする */
+  const handleEditPlaceIdRefetch = async () => {
+    const url = editGoogleMapsUrl.trim();
+    if (!url || url === "https://www.google.com/maps") return;
+    lastAutoFilledEditUrlRef.current = url;
+    setEditPlaceIdAutoStatus("loading");
+    const result = await resolvePlaceIdFromUrl(url);
+    if ("error" in result) {
+      setEditPlaceIdAutoStatus("error");
+      return;
+    }
+    if (result.placeId) {
+      setEditPlaceId(result.placeId);
+      setEditPlaceIdAutoStatus(result.verified ? "found" : "found_unverified");
+    } else {
+      setEditPlaceIdAutoStatus("not_found");
+    }
+  };
+
   const handleAddTenant = async (e: React.FormEvent) => {
     e.preventDefault();
     setAddError("");
@@ -208,6 +344,8 @@ export default function AdminPage() {
       setNewName("");
       setNewGoogleMapsUrl("https://www.google.com/maps");
       setNewPlaceId("");
+      setNewPlaceIdAutoStatus("idle");
+      lastAutoFilledNewUrlRef.current = "";
       setNewStatus("inactive");
       setNewAccessPin("");
     } finally {
@@ -221,6 +359,8 @@ export default function AdminPage() {
     setEditName(t.name);
     setEditGoogleMapsUrl(t.googleMapsUrl);
     setEditPlaceId(t.placeId ?? "");
+    setEditPlaceIdAutoStatus("idle");
+    lastAutoFilledEditUrlRef.current = t.googleMapsUrl.trim();
     setEditStatus(t.subscriptionStatus);
     setEditAccessPin("");
     setEditClearAccessPin(false);
@@ -456,19 +596,60 @@ export default function AdminPage() {
             <input
               type="url"
               value={newGoogleMapsUrl}
-              onChange={(e) => setNewGoogleMapsUrl(e.target.value)}
+              onChange={(e) => {
+                setNewGoogleMapsUrl(e.target.value);
+                setNewPlaceIdAutoStatus("idle");
+              }}
+              onBlur={handleNewMapsUrlBlur}
               className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
+            <p className="text-xs text-gray-500 mt-0.5">入力欄を離れると下のPlace IDを自動取得します</p>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Place ID（任意・口コミ投稿リンク用）</label>
-            <input
-              type="text"
-              value={newPlaceId}
-              onChange={(e) => setNewPlaceId(e.target.value)}
-              placeholder="例: ChIJ..."
-              className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
-            />
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={newPlaceId}
+                  onChange={(e) => setNewPlaceId(e.target.value)}
+                  placeholder="例: ChIJ...（右の「再取得」で自動入力できます）"
+                  className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                />
+                {newPlaceIdAutoStatus === "loading" && (
+                  <Loader2 className="w-4 h-4 text-gray-400 animate-spin absolute right-3 top-1/2 -translate-y-1/2" />
+                )}
+              </div>
+              <button
+                type="button"
+                onClick={handleNewPlaceIdRefetch}
+                disabled={
+                  newPlaceIdAutoStatus === "loading" ||
+                  !newGoogleMapsUrl.trim() ||
+                  newGoogleMapsUrl.trim() === "https://www.google.com/maps"
+                }
+                title="GoogleマップURLからPlace IDを再取得し、上書きします"
+                className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <RefreshCw className={`w-4 h-4 ${newPlaceIdAutoStatus === "loading" ? "animate-spin" : ""}`} />
+                再取得
+              </button>
+            </div>
+            {newPlaceIdAutoStatus !== "idle" && (
+              <p
+                className={`text-xs mt-0.5 ${
+                  newPlaceIdAutoStatus === "found"
+                    ? "text-green-600"
+                    : newPlaceIdAutoStatus === "loading"
+                    ? "text-gray-500"
+                    : newPlaceIdAutoStatus === "found_kept"
+                    ? "text-blue-600"
+                    : "text-amber-600"
+                }`}
+              >
+                {PLACE_ID_AUTO_MESSAGES[newPlaceIdAutoStatus]}
+              </p>
+            )}
             <p className="text-xs text-gray-500 mt-0.5">設定時は「Googleに口コミを投稿する」が口コミ投稿ページへ直リンクします</p>
           </div>
           <div>
@@ -567,19 +748,59 @@ export default function AdminPage() {
                                 <input
                                   type="url"
                                   value={editGoogleMapsUrl}
-                                  onChange={(e) => setEditGoogleMapsUrl(e.target.value)}
+                                  onChange={(e) => {
+                                    setEditGoogleMapsUrl(e.target.value);
+                                    setEditPlaceIdAutoStatus("idle");
+                                  }}
+                                  onBlur={handleEditMapsUrlBlur}
                                   className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
                                 />
                               </div>
                               <div>
                                 <label className="block text-xs text-gray-500 mb-1">Place ID（口コミ投稿リンク用）</label>
-                                <input
-                                  type="text"
-                                  value={editPlaceId}
-                                  onChange={(e) => setEditPlaceId(e.target.value)}
-                                  placeholder="例: ChIJ..."
-                                  className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
-                                />
+                                <div className="flex gap-2">
+                                  <div className="relative flex-1">
+                                    <input
+                                      type="text"
+                                      value={editPlaceId}
+                                      onChange={(e) => setEditPlaceId(e.target.value)}
+                                      placeholder="例: ChIJ...（右の「再取得」で自動入力できます）"
+                                      className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm"
+                                    />
+                                    {editPlaceIdAutoStatus === "loading" && (
+                                      <Loader2 className="w-4 h-4 text-gray-400 animate-spin absolute right-3 top-1/2 -translate-y-1/2" />
+                                    )}
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={handleEditPlaceIdRefetch}
+                                    disabled={
+                                      editPlaceIdAutoStatus === "loading" ||
+                                      !editGoogleMapsUrl.trim() ||
+                                      editGoogleMapsUrl.trim() === "https://www.google.com/maps"
+                                    }
+                                    title="GoogleマップURLからPlace IDを再取得し、上書きします"
+                                    className="shrink-0 flex items-center gap-1 px-3 py-2 rounded-lg border border-gray-200 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                  >
+                                    <RefreshCw className={`w-4 h-4 ${editPlaceIdAutoStatus === "loading" ? "animate-spin" : ""}`} />
+                                    再取得
+                                  </button>
+                                </div>
+                                {editPlaceIdAutoStatus !== "idle" && (
+                                  <p
+                                    className={`text-xs mt-0.5 ${
+                                      editPlaceIdAutoStatus === "found"
+                                        ? "text-green-600"
+                                        : editPlaceIdAutoStatus === "loading"
+                                        ? "text-gray-500"
+                                        : editPlaceIdAutoStatus === "found_kept"
+                                        ? "text-blue-600"
+                                        : "text-amber-600"
+                                    }`}
+                                  >
+                                    {PLACE_ID_AUTO_MESSAGES[editPlaceIdAutoStatus]}
+                                  </p>
+                                )}
                               </div>
                               <div>
                                 <label className="block text-xs text-gray-500 mb-1">契約状態</label>

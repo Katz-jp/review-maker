@@ -11,21 +11,33 @@ export const FIXED_PLACE_IDS: Record<string, string> = {
 };
 
 /**
- * Googleマップの place URL から Place ID を抽出する
+ * Googleマップの place URL から Place ID を抽出する。
+ * 対応パターン（優先順）:
+ *  1. `?placeid=` / `?place_id=` クエリパラメータ
+ *  2. `?q=place_id:XXXX` 形式
+ *  3. URL中に含まれる `ChIJ...` 形式の Place ID
+ *  4. `!16s/g/...` 形式（データURLの内部ID。writereviewリンクで利用可能）
  */
-function extractPlaceIdFromMapsUrl(url: string): string | null {
+export function extractPlaceIdFromMapsUrl(url: string): string | null {
   try {
     const u = new URL(url);
-    const fromQuery = u.searchParams.get("placeid")?.trim();
+    const fromQuery = (u.searchParams.get("placeid") ?? u.searchParams.get("place_id"))?.trim();
     if (fromQuery) return fromQuery;
 
-    const match = url.match(/!16s(?:%2F|\/)(g(?:%2F|\/)[^!&?]+)/i);
-    if (match) {
-      const raw = decodeURIComponent(match[1]);
-      if (raw.startsWith("g/")) return raw;
-    }
+    const q = u.searchParams.get("q");
+    const qMatch = q?.match(/place_id:([^&\s]+)/i);
+    if (qMatch?.[1]) return decodeURIComponent(qMatch[1]);
   } catch {
-    // ignore
+    // 不正なURLでも下の正規表現マッチは試す
+  }
+
+  const chijMatch = url.match(/(ChIJ[A-Za-z0-9_-]{10,})/);
+  if (chijMatch) return chijMatch[1];
+
+  const gPathMatch = url.match(/!16s(?:%2F|\/)(g(?:%2F|\/)[^!&?]+)/i);
+  if (gPathMatch) {
+    const raw = decodeURIComponent(gPathMatch[1]);
+    if (raw.startsWith("g/")) return raw;
   }
   return null;
 }
@@ -49,16 +61,8 @@ export function getReviewOrMapUrl(
   const explicit = tenant.placeId?.trim();
   if (explicit) return `${WRITEREVIEW_BASE}${encodeURIComponent(explicit)}`;
 
-  try {
-    const u = new URL(tenant.googleMapsUrl);
-    const fromQuery = u.searchParams.get("placeid")?.trim();
-    if (fromQuery) return `${WRITEREVIEW_BASE}${encodeURIComponent(fromQuery)}`;
-  } catch {
-    // ignore
-  }
-
-  const fromPath = extractPlaceIdFromMapsUrl(tenant.googleMapsUrl);
-  if (fromPath) return `${WRITEREVIEW_BASE}${encodeURIComponent(fromPath)}`;
+  const fromUrl = extractPlaceIdFromMapsUrl(tenant.googleMapsUrl);
+  if (fromUrl) return `${WRITEREVIEW_BASE}${encodeURIComponent(fromUrl)}`;
 
   return tenant.googleMapsUrl;
 }
