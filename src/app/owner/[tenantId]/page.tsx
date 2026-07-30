@@ -98,6 +98,7 @@ export default function OwnerPage() {
   const [tenantPaidAccess, setTenantPaidAccess] = useState(false);
   const [appTrialEndsAtIso, setAppTrialEndsAtIso] = useState<string | undefined>(undefined);
   const [tenantIndustry, setTenantIndustry] = useState<string | undefined>(undefined);
+  const [tenantName, setTenantName] = useState<string | undefined>(undefined);
   const [usageStats, setUsageStats] = useState<{
     mapsClickCount: number;
     mapsSatisfactionAvg: number | null;
@@ -139,6 +140,7 @@ export default function OwnerPage() {
         setTenantPaidAccess(data.paidAccess === true);
         setAppTrialEndsAtIso(typeof data.appTrialEndsAt === "string" ? data.appTrialEndsAt : undefined);
         setTenantIndustry(data.industry);
+        setTenantName(typeof data.name === "string" ? data.name : undefined);
       })
       .catch(() => {
         setTenantStatus("inactive");
@@ -265,6 +267,9 @@ export default function OwnerPage() {
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
       <header className="text-center mb-8">
         <h1 className="text-xl font-bold text-gray-800">{BRAND_NAME} - 店舗管理画面</h1>
+        {tenantName && (
+          <p className="text-base font-semibold text-gray-700 mt-1">{tenantName}</p>
+        )}
         <p className="text-sm text-gray-500 mt-1">テナントID: {tenantId}</p>
       </header>
 
@@ -289,6 +294,108 @@ export default function OwnerPage() {
             </p>
           </div>
         </div>
+      </div>
+
+      <div className="mb-6 bg-white rounded-2xl p-5 shadow-sm border border-green-100">
+        <h2 className="font-semibold text-gray-800 text-lg mb-4 flex items-center gap-2">
+          <CreditCard className="w-5 h-5 text-primary" />
+          ご契約状況
+        </h2>
+        {stripeSubscribed ? (
+          <>
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <p className="text-green-700 font-semibold">✅ 月額プラン利用中</p>
+              <p className="text-sm text-gray-600 mt-2">
+                ご利用ありがとうございます。
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handlePortal}
+              disabled={loading}
+              className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  処理中…
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5" />
+                  プランを管理
+                </>
+              )}
+            </button>
+          </>
+        ) : appTrialLive ? (
+          <>
+            <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
+              <p className="text-teal-800 font-semibold">🎁 アプリ無料体験中（Stripe 登録前）</p>
+              <p className="text-sm text-gray-700 mt-2">
+                お店用 URL と PIN で体験中です。気に入ったら下から正式に Stripe でお手続きください（初回は Stripe 側でも無料トライアルが付きます）。
+              </p>
+              {appTrialEndsAtIso && (
+                <p className="text-xs text-gray-600 mt-2">
+                  体験終了予定:{" "}
+                  <time dateTime={appTrialEndsAtIso}>
+                    {new Date(appTrialEndsAtIso).toLocaleString("ja-JP", {
+                      dateStyle: "medium",
+                      timeStyle: "short",
+                    })}
+                  </time>
+                </p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  処理中…
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5" />
+                  Stripe で正式登録する
+                </>
+              )}
+            </button>
+          </>
+        ) : (
+          <>
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <p className="text-blue-800 font-semibold">🎉 先行特別キャンペーン実施中！</p>
+              <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                <li>✨ 初月完全無料（＊ただしクレジットカードの登録が必要です。無料期間内に解約すれば費用は一切かかりません。）</li>
+                <li>💰 2〜3ヶ月目は半額の4,990円</li>
+                <li>🚀 4ヶ月目から月額9,980円</li>
+              </ul>
+            </div>
+            <button
+              type="button"
+              onClick={handleCheckout}
+              disabled={loading}
+              className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  処理中…
+                </>
+              ) : (
+                <>
+                  <CreditCard className="w-5 h-5" />
+                  １ヶ月無料で始める
+                </>
+              )}
+            </button>
+          </>
+        )}
       </div>
 
       {success && (
@@ -318,7 +425,7 @@ export default function OwnerPage() {
           >
             <h2 className="font-bold text-gray-800 text-lg mb-3 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-primary" />
-              クチコミ返信ヘルプAI
+              （医院様用）口コミ返信AI
             </h2>
             <p className="text-[15px] text-gray-800">
               患者様の口コミに合わせた返信文をAIで生成できます。
@@ -331,7 +438,7 @@ export default function OwnerPage() {
           <div className="block bg-white rounded-2xl p-5 shadow-sm border border-gray-200 bg-gray-50/50 opacity-90">
             <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
               <MessageSquare className="w-5 h-5 text-gray-400" />
-              クチコミ返信ヘルプAI
+              （医院様が利用）口コミ返信AI
             </h2>
             <p className="text-sm text-gray-600">
               患者様の口コミに合わせた返信文をAIで生成できます。
@@ -345,10 +452,10 @@ export default function OwnerPage() {
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
           <h2 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
             <QrCode className="w-5 h-5 text-primary" />
-            患者様用URL
+            （患者様が利用）口コミ作成AI
           </h2>
           <p className="text-sm text-gray-600 mb-3">
-            QRコードやリンクで患者様に共有してください。
+            QRコードやリンクで患者様に共有できます。
           </p>
           <div className="p-3 rounded-xl bg-gray-50 text-sm text-gray-700 font-mono break-all">
             {customerUrl}
@@ -374,7 +481,7 @@ export default function OwnerPage() {
           </h2>
           <div className="text-sm text-gray-600 mb-4">
             <p className="text-base font-medium">
-              各質問に、最大3つまで店舗オリジナルの選択肢を追加できます。患者様アンケートに表示されます。
+              各質問に、最大3つまで貴院オリジナルの選択肢を追加できます。
             </p>
             <div className="text-red-600 mt-2">
               <span className="text-[15px] block font-bold">※追加・削除するときの注意点</span>
@@ -425,111 +532,6 @@ export default function OwnerPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
-          <h2 className="font-semibold text-gray-800 text-lg mb-4 flex items-center gap-2">
-            <CreditCard className="w-5 h-5 text-primary" />
-            💰 サブスクリプション
-          </h2>
-          {stripeSubscribed ? (
-            <>
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                <p className="text-green-700 font-semibold">✅ 月額プラン利用中</p>
-                <p className="text-sm text-gray-600 mt-2">
-                  ご利用ありがとうございます。
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handlePortal}
-                disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    処理中…
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    プランを管理
-                  </>
-                )}
-              </button>
-            </>
-          ) : appTrialLive ? (
-            <>
-              <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
-                <p className="text-teal-800 font-semibold">🎁 アプリ無料体験中（Stripe 登録前）</p>
-                <p className="text-sm text-gray-700 mt-2">
-                  お店用 URL と PIN で体験中です。気に入ったら下から正式に Stripe でお手続きください（初回は Stripe 側でも無料トライアルが付きます）。
-                </p>
-                {appTrialEndsAtIso && (
-                  <p className="text-xs text-gray-600 mt-2">
-                    体験終了予定:{" "}
-                    <time dateTime={appTrialEndsAtIso}>
-                      {new Date(appTrialEndsAtIso).toLocaleString("ja-JP", {
-                        dateStyle: "medium",
-                        timeStyle: "short",
-                      })}
-                    </time>
-                  </p>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={handleCheckout}
-                disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    処理中…
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    Stripe で正式登録する
-                  </>
-                )}
-              </button>
-            </>
-          ) : (
-            <>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                <p className="text-blue-800 font-semibold">🎉 先行特別キャンペーン実施中！</p>
-                <ul className="mt-2 space-y-1 text-sm text-gray-700">
-                  <li>✨ 初月完全無料</li>
-                  <li>💰 2〜3ヶ月目は半額の4,990円</li>
-                  <li>🚀 4ヶ月目から月額9,980円</li>
-                </ul>
-                <p className="mt-2 text-xs text-gray-600">
-                  初月無料に加え、2〜3ヶ月目は月額9,980円の50%OFF（各4,990円）。4ヶ月目以降は月額9,980円（税込）です。
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCheckout}
-                disabled={loading}
-                className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    処理中…
-                  </>
-                ) : (
-                  <>
-                    <CreditCard className="w-5 h-5" />
-                    月額プランに加入する
-                  </>
-                )}
-              </button>
-            </>
-          )}
-        </div>
-
         {/* 操作方法動画 */}
         <div className="bg-white rounded-2xl p-5 shadow-sm border border-green-100">
           <h2 className="font-semibold text-gray-800 mb-4">
@@ -540,11 +542,11 @@ export default function OwnerPage() {
           </p>
           <div className="space-y-6">
             <div>
-              <h3 className="font-medium text-gray-800 text-base mb-2">クチコミ作成AIの流れを説明した動画</h3>
+              <h3 className="font-medium text-gray-800 text-base mb-2">口コミ作成AIの流れを説明した動画</h3>
               <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
                 <iframe
                   src="https://www.youtube.com/embed/nb5kaQUmy4Q"
-                  title="クチコミ作成AIの流れを説明した動画"
+                  title="口コミ作成AIの流れを説明した動画"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="absolute inset-0 w-full h-full"
@@ -564,11 +566,11 @@ export default function OwnerPage() {
               </div>
             </div>
             <div>
-              <h3 className="font-medium text-gray-800 text-base mb-2">クチコミ返信ヘルプ AI の使い方</h3>
+              <h3 className="font-medium text-gray-800 text-base mb-2">口コミ返信ヘルプ AI の使い方</h3>
               <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100">
                 <iframe
                   src="https://www.youtube.com/embed/SSW514dPT70"
-                  title="クチコミ返信ヘルプ AI の使い方"
+                  title="口コミ返信ヘルプ AI の使い方"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   className="absolute inset-0 w-full h-full"
@@ -588,7 +590,7 @@ export default function OwnerPage() {
             className="inline-flex items-center gap-2 text-base text-gray-600 hover:text-gray-800 transition-colors"
           >
             <MessageSquare className="w-4 h-4" />
-            要望や不具合を報告する
+            要望や不具合を報告する（Googleフォームが開きます）
             <ExternalLink className="w-3 h-3" />
           </a>
           <p className="text-sm text-gray-500 font-medium mt-1 ml-6">
@@ -596,7 +598,7 @@ export default function OwnerPage() {
           </p>
         </div>
         <Link href="/" className="block mt-8 text-lg text-gray-500 hover:text-gray-700">
-          ← アプリのトップ画面へ
+          ← {BRAND_NAME}のトップページへ
         </Link>
       </div>
     </main>

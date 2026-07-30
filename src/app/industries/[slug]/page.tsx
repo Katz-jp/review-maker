@@ -112,7 +112,7 @@ export default function IndustryLandingPage({
           <p className="mt-6 text-center text-base sm:text-lg font-semibold text-gray-700">
             操作時間はたったの1分程度！
             <br />
-            診察室での待ち時間、移動中の車や家でのリラックス時間に、さくっとクチコミ投稿ができます。
+            診察室での待ち時間、移動中の車や家でのリラックス時間に、さくっと口コミ投稿ができます。
           </p>
         </section>
 
@@ -169,7 +169,7 @@ export default function IndustryLandingPage({
               <li>
                 <h3 className="text-lg font-bold text-gray-900 mb-2">② もらった口コミへの返信文もあっという間に作成！</h3>
                 <p className="text-gray-700">
-                  クチコミ返信ヘルプAIなら、いただいた口コミの内容に合わせた返信文のたたき台を短時間で用意できます。口コミを読み比べて医院を選ぶ患者さんの多くは、本文だけでなく返信の内容やトーンもしっかり確認します。
+                  口コミ返信ヘルプAIなら、いただいた口コミの内容に合わせた返信文のたたき台を短時間で用意できます。口コミを読み比べて医院を選ぶ患者さんの多くは、本文だけでなく返信の内容やトーンもしっかり確認します。
                   <br />
                   丁寧で誠実な返信は「ちゃんと向き合っている医院」という安心感につながり、医院の強みを自然にアピールできます。
                 </p>

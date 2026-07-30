@@ -214,7 +214,7 @@ export default function LandingPage() {
                       5回のお試し、いかがでしたか？
                     </p>
                     <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
-                      実際のクチコミの質を実感いただけたでしょうか？
+                      実際の口コミの質を実感いただけたでしょうか？
                     </p>
                     <div className="space-y-2 mb-4">
                       <p className="text-sm text-gray-700">
@@ -329,7 +329,7 @@ export default function LandingPage() {
             <div className="mt-8 flex justify-center overflow-hidden">
               <Image
                 src="/reply-helper-screen.png"
-                alt="クチコミ返信ヘルプAIの画面。口コミ入力に合わせた返信文をAIで生成できます。"
+                alt="口コミ返信ヘルプAIの画面。口コミ入力に合わせた返信文をAIで生成できます。"
                 width={220}
                 height={330}
                 className="w-full max-w-[220px] h-auto rounded-xl drop-shadow-md object-contain"

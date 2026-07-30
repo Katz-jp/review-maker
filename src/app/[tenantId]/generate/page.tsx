@@ -368,7 +368,7 @@ export default function TenantGeneratePage() {
                 5回のお試し、いかがでしたか？
               </p>
               <p className="text-sm text-gray-700 mb-4 text-center leading-relaxed">
-                実際のクチコミの質を実感いただけたでしょうか？
+                実際の口コミの質を実感いただけたでしょうか？
               </p>
               <div className="space-y-2 mb-4">
                 <p className="text-sm text-gray-700">
