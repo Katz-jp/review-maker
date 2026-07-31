@@ -3,8 +3,20 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import Script from "next/script";
 import { QRCodeSVG } from "qrcode.react";
-import { CreditCard, QrCode, ExternalLink, Loader2, Plus, Trash2, Settings2, MessageSquare } from "lucide-react";
+import {
+  CreditCard,
+  QrCode,
+  ExternalLink,
+  Loader2,
+  Plus,
+  Trash2,
+  Settings2,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { getIndustryConfig } from "@/lib/industries";
 import { BRAND_NAME } from "@/lib/brand";
 
@@ -110,6 +122,8 @@ export default function OwnerPage() {
   const [customOptionsSaving, setCustomOptionsSaving] = useState(false);
   const [customOptionsSaved, setCustomOptionsSaved] = useState(false);
   const [customerUrl, setCustomerUrl] = useState(`/${tenantId}`);
+  const [showUrgentQrOrder, setShowUrgentQrOrder] = useState(false);
+  const [showBulkQrOrder, setShowBulkQrOrder] = useState(false);
 
   const canUsePaidFeatures = tenantPaidAccess;
   const stripeSubscribed = tenantStatus === "active" || tenantStatus === "trialing";
@@ -265,6 +279,7 @@ export default function OwnerPage() {
 
   return (
     <main className="min-h-screen flex flex-col px-5 pt-10 pb-12 max-w-lg mx-auto">
+      <Script src="https://js.stripe.com/v3/buy-button.js" strategy="afterInteractive" />
       <header className="text-center mb-8">
         <h1 className="text-xl font-bold text-gray-800">{BRAND_NAME} - 店舗管理画面</h1>
         {tenantName && (
@@ -327,6 +342,70 @@ export default function OwnerPage() {
                 </>
               )}
             </button>
+
+            <div className="mt-6 pt-6 border-t border-green-100 space-y-5">
+              <div>
+                <a
+                  href="https://docs.google.com/forms/d/e/1FAIpQLSfcrw-MRiHglYXzwnCmygMiYcxrQY0hJ71yJLilPlSKRdijxQ/viewform?usp=dialog"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full py-3 px-4 rounded-xl bg-white border-2 border-primary text-primary-dark font-semibold flex items-center justify-center gap-2 hover:bg-primary/5 transition-colors"
+                >
+                  <QrCode className="w-5 h-5" />
+                  （無料）QRカードを追加注文する
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+                <p className="text-sm font-semibold text-gray-800 mt-2">
+                  無料でお届けする名刺サイズのQRカード100枚配送（お届けまで7日〜10日程度）の注文フォームです。
+                </p>
+              </div>
+
+              <div className="rounded-xl border border-gray-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowUrgentQrOrder((v) => !v)}
+                  className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-gray-50/50 text-sm font-medium text-gray-700"
+                >
+                  <span>【有料】QRカード追加：お急ぎで100枚（お届けまで3日程度）</span>
+                  {showUrgentQrOrder ? (
+                    <ChevronUp className="w-4 h-4 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                  )}
+                </button>
+                {showUrgentQrOrder && (
+                  <div className="p-4 border-t border-gray-200">
+                    <stripe-buy-button
+                      buy-button-id="buy_btn_1Tz8QvCxmSrOKVkzVmute8Kx"
+                      publishable-key="pk_live_51Szq9lCxmSrOKVkzULx9ndiZ6jwT6NtEzLXLRo1sWmEKRDgzRe25idRgmN6vpXKmES6pkxPdX7aSs16R3UjjbYXB00NgoxsURW"
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="rounded-xl border border-gray-200 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkQrOrder((v) => !v)}
+                  className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-gray-50/50 text-sm font-medium text-gray-700"
+                >
+                  <span>【有料】QRカード追加：まとめて注文500枚（お届けまで5〜7日程度）</span>
+                  {showBulkQrOrder ? (
+                    <ChevronUp className="w-4 h-4 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                  )}
+                </button>
+                {showBulkQrOrder && (
+                  <div className="p-4 border-t border-gray-200">
+                    <stripe-buy-button
+                      buy-button-id="buy_btn_1Tz8S5CxmSrOKVkzgDpUwlsn"
+                      publishable-key="pk_live_51Szq9lCxmSrOKVkzULx9ndiZ6jwT6NtEzLXLRo1sWmEKRDgzRe25idRgmN6vpXKmES6pkxPdX7aSs16R3UjjbYXB00NgoxsURW"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
           </>
         ) : appTrialLive ? (
           <>
