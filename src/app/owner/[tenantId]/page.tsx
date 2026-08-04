@@ -128,6 +128,8 @@ export default function OwnerPage() {
   const canUsePaidFeatures = tenantPaidAccess;
   const stripeSubscribed = tenantStatus === "active" || tenantStatus === "trialing";
   const appTrialLive = tenantStatus === "app_trial" && tenantPaidAccess;
+  // アプリ体験（Stripe前）は月額プラン未加入でもオリジナル選択肢の設定を許可する
+  const canUseCustomOptions = canUsePaidFeatures || tenantStatus === "app_trial";
   const isRestricted = tenantStatus === "canceled" || tenantStatus === "past_due";
   const effectiveIndustry = tenantIndustry ?? "dental";
   const isDental = effectiveIndustry === "dental" || effectiveIndustry === "";
@@ -593,7 +595,7 @@ export default function OwnerPage() {
               <button
                 type="button"
                 onClick={handleSaveCustomOptions}
-                disabled={customOptionsSaving || !canUsePaidFeatures}
+                disabled={customOptionsSaving || !canUseCustomOptions}
                 className="w-full py-3 px-4 rounded-xl bg-primary hover:bg-primary-dark text-white text-lg font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {customOptionsSaving ? (
@@ -603,7 +605,7 @@ export default function OwnerPage() {
                   </>
                 ) : customOptionsSaved ? (
                   "✓ 保存しました"
-                ) : !canUsePaidFeatures ? (
+                ) : !canUseCustomOptions ? (
                   "契約が有効な場合のみ保存できます"
                 ) : (
                   "選択肢を保存する"
