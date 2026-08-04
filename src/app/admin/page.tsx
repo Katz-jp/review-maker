@@ -78,7 +78,7 @@ export default function AdminPage() {
   const [newPlaceId, setNewPlaceId] = useState("");
   const [newPlaceIdAutoStatus, setNewPlaceIdAutoStatus] = useState<PlaceIdAutoStatus>("idle");
   const lastAutoFilledNewUrlRef = useRef("");
-  const [newStatus, setNewStatus] = useState("inactive");
+  const [newStatus, setNewStatus] = useState("app_trial");
   const [newAccessPin, setNewAccessPin] = useState("");
   const [addError, setAddError] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -346,7 +346,7 @@ export default function AdminPage() {
       setNewPlaceId("");
       setNewPlaceIdAutoStatus("idle");
       lastAutoFilledNewUrlRef.current = "";
-      setNewStatus("inactive");
+      setNewStatus("app_trial");
       setNewAccessPin("");
     } finally {
       setAdding(false);

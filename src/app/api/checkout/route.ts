@@ -66,8 +66,9 @@ export async function POST(req: NextRequest) {
       metadata: {
         tenantId,
       },
+      // 無料期間は app_trial（Stripe登録前のアプリ側トライアル）で提供済みのため、
+      // ここでは Stripe 側のトライアルは付与しない（登録＝即時課金開始）
       subscription_data: {
-        trial_period_days: 30,
         metadata: {
           tenantId,
         },

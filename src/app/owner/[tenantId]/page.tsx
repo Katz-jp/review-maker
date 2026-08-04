@@ -412,7 +412,7 @@ export default function OwnerPage() {
             <div className="bg-teal-50 border border-teal-200 rounded-lg p-4 mb-4">
               <p className="text-teal-800 font-semibold">🎁 アプリ無料体験中（Stripe 登録前）</p>
               <p className="text-sm text-gray-700 mt-2">
-                お店用 URL と PIN で体験中です。気に入ったら下から正式に Stripe でお手続きください（初回は Stripe 側でも無料トライアルが付きます）。
+                お店用 URL と PIN で体験中です。気に入ったら下から正式に Stripe でお手続きください（カード登録と同時にご利用料金の請求が始まります）。
               </p>
               {appTrialEndsAtIso && (
                 <p className="text-xs text-gray-600 mt-2">
@@ -450,10 +450,12 @@ export default function OwnerPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
               <p className="text-blue-800 font-semibold">🎉 先行特別キャンペーン実施中！</p>
               <ul className="mt-2 space-y-1 text-sm text-gray-700">
-                <li>✨ 初月完全無料（＊ただしクレジットカードの登録が必要です。無料期間内に解約すれば費用は一切かかりません。）</li>
-                <li>💰 2〜3ヶ月目は半額の4,990円</li>
-                <li>🚀 4ヶ月目から月額9,980円</li>
+                <li>💰 ご契約から2ヶ月間は半額の4,990円</li>
+                <li>🚀 3ヶ月目から月額9,980円</li>
               </ul>
+              <p className="text-xs text-gray-600 mt-2">
+                ＊無料体験（アプリ体験期間）をまだご利用でない場合は、お問い合わせより担当者にご連絡ください。
+              </p>
             </div>
             <button
               type="button"
@@ -469,7 +471,7 @@ export default function OwnerPage() {
               ) : (
                 <>
                   <CreditCard className="w-5 h-5" />
-                  １ヶ月無料で始める
+                  今すぐ契約する
                 </>
               )}
             </button>
