@@ -14,6 +14,8 @@ import {
   Trash2,
   Settings2,
   MessageSquare,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { getIndustryConfig } from "@/lib/industries";
 import { BRAND_NAME } from "@/lib/brand";
@@ -120,6 +122,7 @@ export default function OwnerPage() {
   const [customOptionsSaving, setCustomOptionsSaving] = useState(false);
   const [customOptionsSaved, setCustomOptionsSaved] = useState(false);
   const [customerUrl, setCustomerUrl] = useState(`/${tenantId}`);
+  const [showBulkQrOrder, setShowBulkQrOrder] = useState(false);
   const canUsePaidFeatures = tenantPaidAccess;
   const stripeSubscribed = tenantStatus === "active" || tenantStatus === "trialing";
   const appTrialLive = tenantStatus === "app_trial" && tenantPaidAccess;
@@ -341,19 +344,34 @@ export default function OwnerPage() {
             </button>
 
             <div className="mt-6 pt-6 border-t border-green-100 space-y-5">
-              <div className="rounded-xl border border-gray-200 overflow-hidden">
-                <div className="px-4 py-3 bg-gray-50/50">
+              <div className="rounded-xl border border-green-300 overflow-hidden">
+                <button
+                  type="button"
+                  onClick={() => setShowBulkQrOrder((v) => !v)}
+                  className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-gray-50/50 text-left"
+                >
                   <h2 className="font-semibold text-gray-800 text-lg flex items-center gap-2">
-                    <QrCode className="w-5 h-5 text-primary" />
-                    QRカード追加注文（お届けまでに５〜7日ほど）
+                    <QrCode className="w-5 h-5 text-primary flex-shrink-0" />
+                    <span>
+                      名刺サイズQRカード追加注文
+                      <br />
+                      <span className="text-sm font-medium">（2,500円／500枚）お届けまで5〜7日程度</span>
+                    </span>
                   </h2>
-                </div>
-                <div className="p-4 border-t border-gray-200">
-                  <stripe-buy-button
-                    buy-button-id="buy_btn_1Tz8S5CxmSrOKVkzgDpUwlsn"
-                    publishable-key="pk_live_51Szq9lCxmSrOKVkzULx9ndiZ6jwT6NtEzLXLRo1sWmEKRDgzRe25idRgmN6vpXKmES6pkxPdX7aSs16R3UjjbYXB00NgoxsURW"
-                  />
-                </div>
+                  {showBulkQrOrder ? (
+                    <ChevronUp className="w-4 h-4 flex-shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 flex-shrink-0" />
+                  )}
+                </button>
+                {showBulkQrOrder && (
+                  <div className="p-4 border-t border-green-300">
+                    <stripe-buy-button
+                      buy-button-id="buy_btn_1Tz8S5CxmSrOKVkzgDpUwlsn"
+                      publishable-key="pk_live_51Szq9lCxmSrOKVkzULx9ndiZ6jwT6NtEzLXLRo1sWmEKRDgzRe25idRgmN6vpXKmES6pkxPdX7aSs16R3UjjbYXB00NgoxsURW"
+                    />
+                  </div>
+                )}
               </div>
             </div>
           </>
