@@ -9,6 +9,7 @@ import FaqSection from "@/components/FaqSection";
 import BrandLogo from "@/components/BrandLogo";
 import ScrollToTopButton from "@/components/ScrollToTopButton";
 import { getRemainingGenerations, MAX_DEMO_GENERATIONS, isDemoLimitUiActive } from "@/lib/demo-limit";
+import { BRAND_WEBSITE_URL } from "@/lib/brand";
 
 const navItems = [
   { label: "歯科医院TOP", href: "/industries/dentist" },
@@ -568,7 +569,7 @@ export default function LandingPage() {
           <p className="mt-6 pt-4 border-t border-green-100 text-center text-xs text-gray-500">
             ©2026{" "}
             <a
-              href="https://www.kuhmom-ailabo.com/"
+              href={BRAND_WEBSITE_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-primary-dark hover:underline transition-colors"

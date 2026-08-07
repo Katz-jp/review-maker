@@ -1,11 +1,12 @@
 import Link from "next/link";
 import BrandLogo from "@/components/BrandLogo";
+import { BRAND_WEBSITE_URL } from "@/lib/brand";
 
 const sections = [
   {
     title: "事業者名",
     content: "くーままAI labo",
-    href: "https://www.kuhmom-ailabo.com/",
+    href: BRAND_WEBSITE_URL,
   },
   {
     title: "運営責任者",
@@ -96,7 +97,7 @@ export default function TokushoPage() {
             <p className="text-sm text-gray-500">
               ©2026{" "}
               <a
-                href="https://www.kuhmom-ailabo.com/"
+                href={BRAND_WEBSITE_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-primary-dark hover:underline transition-colors"
