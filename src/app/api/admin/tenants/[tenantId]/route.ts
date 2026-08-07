@@ -102,6 +102,15 @@ export async function PATCH(
       );
     }
 
+    // app_trial は開始日時が無いと期限判定ができず機能が使えないままになるため、
+    // まだ設定されていなければここで補完する（既存の開始日時は上書きしない）
+    if (updates.subscriptionStatus === "app_trial") {
+      const existingData = existing.data();
+      if (!existingData?.appTrialStartedAt && !existingData?.appTrialEndsAt) {
+        updates.appTrialStartedAt = new Date().toISOString();
+      }
+    }
+
     await ref.set(updates, { merge: true });
 
     const snap = await ref.get();

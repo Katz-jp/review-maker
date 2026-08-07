@@ -149,6 +149,8 @@ export async function POST(req: NextRequest) {
         industry: nextIndustry,
         retailPreset: null,
         ...(accessPinHash !== undefined && { accessPinHash }),
+        // app_trial は開始日時が無いと期限判定できず機能が使えないままになるため、新規作成時に必ず設定する
+        ...(status === "app_trial" && { appTrialStartedAt: new Date().toISOString() }),
         updatedAt: new Date().toISOString(),
       },
       { merge: true }
