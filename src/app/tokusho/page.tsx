@@ -5,6 +5,7 @@ const sections = [
   {
     title: "事業者名",
     content: "くーままAI labo",
+    href: "https://www.kuhmom-ailabo.com/",
   },
   {
     title: "運営責任者",
@@ -67,7 +68,18 @@ export default function TokushoPage() {
                     {section.title}
                   </dt>
                   <dd className="text-sm text-gray-800 whitespace-pre-line leading-relaxed">
-                    {section.content}
+                    {section.href ? (
+                      <a
+                        href={section.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary-dark hover:underline"
+                      >
+                        {section.content}
+                      </a>
+                    ) : (
+                      section.content
+                    )}
                   </dd>
                 </div>
               ))}
@@ -81,7 +93,17 @@ export default function TokushoPage() {
             >
               トップに戻る
             </Link>
-            <p className="text-sm text-gray-500">©2026 くーままAIラボ</p>
+            <p className="text-sm text-gray-500">
+              ©2026{" "}
+              <a
+                href="https://www.kuhmom-ailabo.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-primary-dark hover:underline transition-colors"
+              >
+                くーままAIラボ
+              </a>
+            </p>
           </footer>
         </div>
       </main>

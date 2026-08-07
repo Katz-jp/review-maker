@@ -566,7 +566,15 @@ export default function LandingPage() {
             </p>
           </div>
           <p className="mt-6 pt-4 border-t border-green-100 text-center text-xs text-gray-500">
-            ©2026 くーままAIラボ
+            ©2026{" "}
+            <a
+              href="https://www.kuhmom-ailabo.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary-dark hover:underline transition-colors"
+            >
+              くーままAIラボ
+            </a>
           </p>
         </div>
       </footer>
