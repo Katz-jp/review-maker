@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { getIndustryConfig } from "@/lib/industries";
+import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
+import { findUnmentionedTopics } from "@/lib/topic-guard";
 
 /**
  * 使用モデル。Vercel の環境変数 OPENAI_MODEL で切り替え可能（未設定なら従来どおり gpt-4o-mini）。
@@ -135,10 +137,36 @@ export async function POST(req: NextRequest) {
 
     let text = await generate(prompt, satisfaction <= 3 ? 0.6 : 0.8);
 
-    // ルール違反があれば、具体的にどの表現がダメだったかを伝えて最大2回まで書き直す
+    // 「回答にない話題」の判定に使う、アンケート回答・補足の原文
+    const sourceText = [
+      ...Object.values(answers as Record<string, string[]>)
+        .flat()
+        .filter((v) => v !== OTHER_OPTION_LABEL),
+      ...Object.entries(otherInputs as Record<string, string>)
+        .filter(([k]) => k !== "__satisfaction")
+        .map(([, v]) => v),
+      freeText,
+    ].join(" ");
+
+    // ルール違反・回答にない話題があれば、具体的に伝えて最大2回まで書き直す
     for (let attempt = 0; attempt < 2; attempt++) {
       const violations = findViolations(text, satisfaction);
-      if (violations.length === 0) break;
+      const extraTopics = findUnmentionedTopics(text, sourceText);
+      if (violations.length === 0 && extraTopics.length === 0) break;
+
+      const problems: string[] = [];
+      if (violations.length) {
+        problems.push(
+          `* 次の表現はルールに合わないので使わない：${violations.map((v) => `「${v}」`).join("、")}`
+        );
+      }
+      if (extraTopics.length) {
+        problems.push(
+          `* 次の話題はアンケートに回答がないので、その部分を削除する：${extraTopics
+            .map((t) => `「${t}」`)
+            .join("、")}`
+        );
+      }
 
       const fixRequest = `${prompt}
 
@@ -146,10 +174,9 @@ export async function POST(req: NextRequest) {
 前回の下書き：
 ${text}
 
-次の表現がルールに合わないので、使わずに書き直してください：${violations
-        .map((v) => `「${v}」`)
-        .join("、")}
-内容は変えず、自然な日本語のまま直してください。口コミ本文だけを出力してください。`;
+次の点を直して書き直してください：
+${problems.join("\n")}
+それ以外の内容は変えず、自然な日本語のまま直してください。口コミ本文だけを出力してください。`;
 
       const retryText = await generate(fixRequest, 0.5);
       if (retryText) text = retryText;

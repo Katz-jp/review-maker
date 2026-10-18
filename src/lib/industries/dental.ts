@@ -7,6 +7,7 @@ import {
   parseSatisfactionFromOtherInputs,
 } from "@/lib/prompts/common";
 import { OTHER_OPTION_LABEL } from "@/lib/other-option-label";
+import { topicsNotInSource } from "@/lib/topic-guard";
 import type { IndustryConfig } from "./types";
 
 const DENTAL_ROLE =
@@ -218,6 +219,14 @@ export const dentalConfig: IndustryConfig = {
         ? "\n* 今回は「おすすめ」「人に勧めたい」などのおすすめ系の表現は使わない"
         : "";
 
+    // 回答にない話題を明示して、参考例文などからの付け足しを防ぐ
+    const missingTopics = topicsNotInSource(summary);
+    const doNotWriteBlock = missingTopics.length
+      ? `\n■ 今回は書かないこと（アンケートに回答がないため。参考例文にあっても書かない）\n${missingTopics
+          .map((t) => `* ${t}`)
+          .join("\n")}\n`
+      : "";
+
     const satisfactionLine =
       satisfaction !== null ? `■ 満足度\n星${satisfaction}（5段階）\n` : "";
 
@@ -233,7 +242,7 @@ ${FEW_SHOT_EXAMPLES}
 
 ${satisfactionLine}
 ■ アンケート回答（この内容だけを使う）
-${summary}
+${summary}${doNotWriteBlock}
 ${closingReminder}
 
 ${outputFormat}`;
