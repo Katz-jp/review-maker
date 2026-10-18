@@ -44,13 +44,28 @@ const NEGATIVE_PHRASES_FOR_HIGH_SCORE = [
   "また伺いたいとは思わない",
 ];
 
+/** 再来・継続通院の意思。補足に書かれていない限り、星に関係なく書かせない */
+const REVISIT_PHRASES = [
+  "また来たい",
+  "また行きたい",
+  "また伺いたい",
+  "通いたい",
+  "通おうと思",
+  "これからも通",
+  "今後も通",
+  "今後もお願い",
+  "これからもお願い",
+];
+
 /** 星に関係なく出てほしくない表現（総評テンプレ・書き言葉すぎる締め） */
 const BANNED_WORDS_ALWAYS = [
   "全体的に",
   "全体として",
   "総合的に",
-  "という印象",
+  "印象です",
+  "印象でした",
   "良い印象",
+  "安心感があり",
   "ことができ",
   "ほっとしています",
   "ホッとしています",
@@ -64,9 +79,14 @@ function containsEmoji(text: string): boolean {
 }
 
 /** ルール違反になっている表現を列挙する（空配列なら問題なし） */
-function findViolations(text: string, satisfaction: number): string[] {
+function findViolations(text: string, satisfaction: number, freeText = ""): string[] {
   const found = new Set<string>();
   for (const w of BANNED_WORDS_ALWAYS) if (text.includes(w)) found.add(w);
+  // 再来の意思は、お客さん自身が補足に書いた場合だけ許可
+  const freeTextHasRevisit = /また|通いたい|これからも|今後も/.test(freeText);
+  if (!freeTextHasRevisit) {
+    for (const w of REVISIT_PHRASES) if (text.includes(w)) found.add(w);
+  }
   if (satisfaction <= 3) {
     if (containsEmoji(text)) found.add("絵文字");
     for (const w of BANNED_WORDS_FOR_LOW_SCORE) if (text.includes(w)) found.add(w);
@@ -150,7 +170,7 @@ export async function POST(req: NextRequest) {
 
     // ルール違反・回答にない話題があれば、具体的に伝えて最大2回まで書き直す
     for (let attempt = 0; attempt < 2; attempt++) {
-      const violations = findViolations(text, satisfaction);
+      const violations = findViolations(text, satisfaction, freeText);
       const extraTopics = findUnmentionedTopics(text, sourceText);
       if (violations.length === 0 && extraTopics.length === 0) break;
 
