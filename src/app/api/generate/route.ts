@@ -2,78 +2,74 @@ import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 import { getIndustryConfig } from "@/lib/industries";
 
+/**
+ * 使用モデル。Vercel の環境変数 OPENAI_MODEL で切り替え可能（未設定なら従来どおり gpt-4o-mini）。
+ * → モデル比較・上位モデルへの切り替えをコード変更なしで行えるようにしている。
+ */
+const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+
+/** 星1〜3で使わせない表現（再来・強い褒め言葉・総評テンプレ） */
 const BANNED_WORDS_FOR_LOW_SCORE = [
   "また来たい",
   "また伺いたい",
   "また相談したい",
   "通いたい",
-  "また通いたい",
-  "これからも通いたい",
   "今後もお願いしたい",
   "また行こうと思う",
   "おすすめ",
   "最高",
   "大満足",
-  "！",
-  "!",
   "素晴らしい",
   "とても満足",
   "安心して通える",
-  // 低評価で出がちな“作文っぽい総評/改善提案”のテンプレ表現
   "全体的に",
   "全体として",
   "総合的に",
-  "もう少しスムーズ",
-  "と良いかなと思います",
-  "改善点もあると感じました",
-  "改善点もある",
-  "期待したいです",
-];
-
-const FORBIDDEN_SUMMARY_PHRASES_FOR_LOW_SCORE = [
-  "全体的に",
-  "全体として",
-  "総合的に",
-  "もう少しスムーズ",
   "と良いかなと思います",
   "改善点もある",
   "期待したいです",
+  "！",
+  "!",
 ];
 
+/** 星4〜5で混ざってはいけない否定表現 */
 const NEGATIVE_PHRASES_FOR_HIGH_SCORE = [
   "おすすめしない",
   "おすすめできない",
-  "あまりおすすめしない",
   "また行きたいとは思わない",
   "また行きたいと思わない",
   "また来たいとは思わない",
   "また伺いたいとは思わない",
 ];
 
-function pickOne<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+/** 星に関係なく出てほしくない総評テンプレ */
+const BANNED_WORDS_ALWAYS = ["全体的に", "全体として", "総合的に"];
 
 function containsEmoji(text: string): boolean {
-  // ES5互換の簡易判定（サロゲートペアを含む＝絵文字等の可能性が高い）
-  // 厳密なemoji判定ではないが、低評価時の「絵文字禁止」検知としては十分。
+  // サロゲートペアを含む＝絵文字の可能性が高い（低評価時の絵文字検知用の簡易判定）
   return /[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(text);
 }
 
-function containsBang(text: string): boolean {
-  return text.includes("!") || text.includes("！");
+/** ルール違反になっている表現を列挙する（空配列なら問題なし） */
+function findViolations(text: string, satisfaction: number): string[] {
+  const found = new Set<string>();
+  for (const w of BANNED_WORDS_ALWAYS) if (text.includes(w)) found.add(w);
+  if (satisfaction <= 3) {
+    if (containsEmoji(text)) found.add("絵文字");
+    for (const w of BANNED_WORDS_FOR_LOW_SCORE) if (text.includes(w)) found.add(w);
+  } else {
+    for (const w of NEGATIVE_PHRASES_FOR_HIGH_SCORE) if (text.includes(w)) found.add(w);
+  }
+  return Array.from(found);
 }
 
-function satisfiesHighScorePolicy(text: string, satisfaction: number): boolean {
-  if (satisfaction < 4) return true;
-  if (NEGATIVE_PHRASES_FOR_HIGH_SCORE.some((p) => text.includes(p))) return false;
-  return containsEmoji(text) || containsBang(text);
-}
-
-function violatesPolicy(text: string, satisfaction: number): boolean {
-  if (satisfaction >= 4) return false;
-  if (containsEmoji(text)) return true;
-  return BANNED_WORDS_FOR_LOW_SCORE.some((word) => text.includes(word));
+/** モデルが付けがちな前後のカギカッコ・引用符を外す */
+function cleanOutput(text: string): string {
+  return text
+    .trim()
+    .replace(/^[「『"“]+/, "")
+    .replace(/[」』"”]+$/, "")
+    .trim();
 }
 
 export async function POST(req: NextRequest) {
@@ -87,11 +83,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const {
-      answers = {},
-      otherInputs = {},
-      freeText = "",
-    } = body;
+    const { answers = {}, otherInputs = {}, freeText = "" } = body;
 
     const rawSatisfaction = body?.satisfaction;
     if (
@@ -108,101 +100,48 @@ export async function POST(req: NextRequest) {
     const satisfaction = rawSatisfaction;
 
     const config = getIndustryConfig();
-
     const openai = new OpenAI({ apiKey });
     const prompt = config.buildPrompt(
       answers,
-      {
-        ...otherInputs,
-        __satisfaction: String(satisfaction),
-      },
+      { ...otherInputs, __satisfaction: String(satisfaction) },
       freeText
     );
 
-    const firstTemperature = satisfaction <= 3 ? 0.45 : 0.75;
-
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: config.systemMessage },
-        { role: "user", content: prompt },
-      ],
-      temperature: firstTemperature,
-      presence_penalty: 0.5,
-      frequency_penalty: 0.45,
-      max_tokens: 500,
-    });
-
-    let text = completion.choices[0]?.message?.content?.trim() ?? "";
-
-    const needsRetry =
-      violatesPolicy(text, satisfaction) || !satisfiesHighScorePolicy(text, satisfaction);
-
-    if (needsRetry) {
-      const retry = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+    // ※ frequency_penalty / presence_penalty は使わない。
+    //   日本語では助詞や語尾（の・が・て・ました）まで避けようとして、言い回しが不自然になるため。
+    const generate = async (userContent: string, temperature: number) => {
+      const completion = await openai.chat.completions.create({
+        model: MODEL,
         messages: [
           { role: "system", content: config.systemMessage },
-          {
-            role: "user",
-            content: `${prompt}\n\n※ 上記ルールに違反している表現があれば修正したうえで、条件を満たすように書き直してください。\n※ 満足度が星4〜5のときは、絵文字（例：😊）または「！」を1つ以上含めること。\n※ 「おすすめ」「また行きたい」などはアンケートや【補足】にない限り入れないこと。\n最終的な口コミ本文のみを出力してください。`,
-          },
+          { role: "user", content: userContent },
         ],
-        temperature: 0.4,
-        presence_penalty: 0.5,
-        frequency_penalty: 0.45,
+        temperature,
         max_tokens: 500,
       });
-      const retryText = retry.choices[0]?.message?.content?.trim() ?? "";
-      if (
-        !violatesPolicy(retryText, satisfaction) &&
-        satisfiesHighScorePolicy(retryText, satisfaction)
-      ) {
-        text = retryText;
-      } else if (satisfaction <= 3) {
-        // 低評価でも、違反が残る場合はもう一段強めにリライトして“総評テンプレ”を潰す
-        const bannedList = FORBIDDEN_SUMMARY_PHRASES_FOR_LOW_SCORE.map((p) => `- ${p}`).join(
-          "\n"
-        );
-        const retryLow2 = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: config.systemMessage },
-            {
-              role: "user",
-              content: `${prompt}\n\n【重要】満足度が星1〜3です。次を必ず守って書き直してください。\n- トーンはニュートラル\n- 絵文字と「！」は禁止\n- 再来/通院継続に触れない\n- “総評っぽい締め”や“改善提案テンプレ”を入れない（以下の表現は禁止・類似表現も禁止）：\n${bannedList}\n※ 体験の事実だけを淡々と書き、最後は余韻で止めてください。\n最終的な口コミ本文のみを出力してください。`,
-            },
-          ],
-          temperature: 0.35,
-          presence_penalty: 0.3,
-          frequency_penalty: 0.3,
-          max_tokens: 500,
-        });
-        const retryLow2Text = retryLow2.choices[0]?.message?.content?.trim() ?? "";
-        if (!violatesPolicy(retryLow2Text, satisfaction)) {
-          text = retryLow2Text;
-        }
-      } else if (satisfaction >= 4) {
-        const emojiOrBang = pickOne(["😊", "！"]);
-        const retry2 = await openai.chat.completions.create({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: config.systemMessage },
-            {
-              role: "user",
-              content: `${prompt}\n\n【重要】満足度が星4〜5です。絵文字または「！」が足りない場合は「${emojiOrBang}」を自然に1つ含めて書き直してください。\n※ 「おすすめ」「また行きたい」などはアンケートや【補足】にない限り入れないこと。事実の追加・誇張は禁止。\n最終的な口コミ本文のみを出力してください。`,
-            },
-          ],
-          temperature: 0.3,
-          presence_penalty: 0.2,
-          frequency_penalty: 0.2,
-          max_tokens: 500,
-        });
-        const retry2Text = retry2.choices[0]?.message?.content?.trim() ?? "";
-        if (satisfiesHighScorePolicy(retry2Text, satisfaction)) {
-          text = retry2Text;
-        }
-      }
+      return cleanOutput(completion.choices[0]?.message?.content ?? "");
+    };
+
+    let text = await generate(prompt, satisfaction <= 3 ? 0.6 : 0.8);
+
+    // ルール違反があれば、具体的にどの表現がダメだったかを伝えて最大2回まで書き直す
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const violations = findViolations(text, satisfaction);
+      if (violations.length === 0) break;
+
+      const fixRequest = `${prompt}
+
+■ 書き直しのお願い
+前回の下書き：
+${text}
+
+次の表現がルールに合わないので、使わずに書き直してください：${violations
+        .map((v) => `「${v}」`)
+        .join("、")}
+内容は変えず、自然な日本語のまま直してください。口コミ本文だけを出力してください。`;
+
+      const retryText = await generate(fixRequest, 0.5);
+      if (retryText) text = retryText;
     }
 
     return NextResponse.json({ text });
@@ -214,4 +153,3 @@ export async function POST(req: NextRequest) {
     );
   }
 }
-
